@@ -1,0 +1,67 @@
+:root{--ink:#e8eee8;--paper:#0a1610;--panel:#111e17;--line:#26372b;--muted:#88968b;--lime:#b8e44e;--orange:#d4a75b;--blue:#183329}
+body{background:#0a1610;color:var(--ink)}
+.rail{background:#08120d;color:#eaf0e9;border-right:1px solid #203126}
+.logo i{background:transparent;border:1px solid #52734a;border-radius:50%;color:var(--lime);transform:none}
+.farm-choice{background:#101e16;border-color:#2b3d30}
+.rail-label,.logo small{color:#849389}
+.main-nav button.active{background:#18291d;color:#f0f5ee;border-left:3px solid var(--lime)}
+.main-nav button.active i{color:var(--lime)}
+.main-nav button:hover,.rail-bottom>button:hover{background:#17271c}
+.topbar{background:#0b1711ed;border-color:#203126;color:var(--ink)}
+.crumb{color:#97a398}.crumb b{color:#e8eee8}.icon-button{color:#e8eee8;border-color:#35463a}
+.avatar{background:#1d3427;color:var(--lime)}
+.welcome{align-items:center;margin-bottom:17px}
+.welcome h1{font-size:clamp(40px,4.2vw,57px);line-height:.95;letter-spacing:-1.8px;margin:10px 0}
+.welcome h1 em,.page-title h1 em{color:#bfe36a}
+.welcome>div>p,.page-title>p{color:#a5b1a6}
+.location-card{background:#111f17;border:1px solid #2c3e31}
+.location-card small{color:#97a597}.location-card span{color:#aab7aa}
+.location-card button{background:transparent;color:var(--lime);text-decoration:underline;padding:4px 0}
+.metric{background:#111f18;border-color:#293a2e;border-radius:8px;min-height:112px}
+.metric>b{font-size:30px}.metric>p{color:#e0e8df}
+.metric>div>small{color:#a5b2a5}.metric .muted{color:#91a095}
+.panel{background:#111f18;border-color:#2a3b2e;border-radius:8px}
+.panel-head h2{color:#e8eee8}.subtle{color:#a5d16e}
+#map{filter:saturate(.66) brightness(.72) hue-rotate(16deg)}
+.map-legend{color:#aab5aa;border-color:#293a2e}
+.map-location{color:#e4ebe3}.map-location span{color:#94a196}
+.map-tools form,.map-tools>#coordOpen{background:#122117;color:#e7eee7}
+.map-tools input{background:#122117;color:#fff}.map-tools input::placeholder{color:#9aa89c}
+.map-tools form button{background:#28402c}
+.results,.results button{background:#122117;color:#e6eee6;border-color:#2b3c30}
+.forecast-days>div{background:#17271d;border:1px solid #293b2e;border-radius:5px}
+.forecast-days small,.forecast-days span,.forecast-summary span,.chart-caption{color:#a5b2a6}
+.forecast-days b,.crop-step b{color:#e7eee6}
+.crop-step small,.crop-step i,.rotation-bottom p{color:#9aa89d}
+.rotation-bottom{border-color:#293a2e}.rotation-bottom button{background:#203724;color:#c5e892;border-radius:4px}
+.source-row{border-color:#293a2e}.source-row b{color:#e8eee8}.source-row small,.source-row em{color:#9eaca0}
+.assistant-nudge{background:#18291d;color:#e8eee8;border:1px solid #344731;border-radius:5px}
+.assistant-nudge small{color:#a5b1a6}
+.bottom-note{border-color:#293a2e;color:#a4b0a5}.bottom-note p{color:#cad4ca}
+.page-title>small,.eyebrow{color:#a8b69d}
+.wide-metric{background:#13251a;border:1px solid #304333;border-radius:8px}
+.wide-metric p,.weather-stats span{color:#b2bfb3}.weather-stats{border-color:#405246}.weather-stats b{color:#edf2ed}
+.large-forecast>div{background:#17271d;border:1px solid #293b2e;border-radius:5px}.large-forecast p{color:#aab6aa}
+.page-note,.water-stat p,.explainer p,.sample-card p,.crop-library p{color:#a5b2a6}
+.water-hero{background:#153a2c;border:1px solid #2b4935;border-radius:8px}
+.soil-profile{background:#30291e;border:1px solid #50442e;border-radius:8px}
+.sample-card input,.editable-path select,.assumptions select,.assumptions input,.settings-panel select{background:#0e1a13;border-color:#35463a;color:#e7eee7}
+.aims button{color:#bfcbbe;border-color:#405243}.aims button.selected{background:#273d2b;border-color:#92bc56;color:#d7efa4}
+.comparison{background:#19281d;color:#e7eee7}.local-check{color:#abb7ab}
+.crop-library article,.economics .panel{background:#111f18;border-color:#304232}.crop-library span{color:#a7b39f}
+.profit-result{background:#142b1e;border:1px solid #354a37;border-radius:8px}
+.report-meta{background:#17271d}.report-meta b{color:#e8eee8}
+.report-panel th,.report-panel td{border-color:#2c3d30}.report-limit{background:#242c1e;color:#e7e7d8}
+.assistant-chat{background:#111f18;border-color:#2b3d30}.chat-head,.assistant-chat form{border-color:#2b3d30}
+.assistant-msg{background:#1d3023;color:#e7eee7}.user-msg{background:#29472f}
+.chat-head small,.assistant-status{color:#a2aea3}.suggestions button{border-color:#3a4b3d;color:#bdc9be}
+.assistant-chat form input{background:#0b1711;color:#e7eee7;border-color:#354638}
+.evidence-box p,.evidence-box li{color:#b5c0b5}.settings-panel{background:#111f18}
+.settings-panel>label,.setting-line b{color:#e7eee7}.setting-line{border-color:#2b3d30}
+.setting-line small{color:#a2aea3}.setting-line button{color:#dae4da;border-color:#455648}
+.mobile-nav{background:#08120d;border-color:#293a2e}.mobile-nav button{color:#a5b1a5}
+.mobile-nav button.active{color:var(--lime)}
+dialog{background:#111f18;color:#e7eee7;border:1px solid #344638}
+dialog input{background:#0b1711;color:#e7eee7;border-color:#3b4c3e}
+.more-menu>button:not(.close){color:#e7eee7;border-color:#344438}
+@media(min-width:701px){.page#page-home{padding-top:25px}.dashboard-grid{grid-template-columns:1.08fr .92fr}}
