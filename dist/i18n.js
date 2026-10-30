@@ -59,7 +59,7 @@ export function initI18n({preferences, save, rerender}) {
   label.innerHTML = 'Language<select id="language"><option value="en">English</option><option value="fr">French</option><option value="ar">Arabic</option></select>';
   settings.prepend(label);
   const picker = label.querySelector('select'); picker.value = active;
-  picker.addEventListener('change', () => { active = picker.value; preferences.language = active; save(preferences); rerender?.(); apply(); });
+  picker.addEventListener('change', () => { active = picker.value; preferences.language = active; save(preferences); rerender?.(); apply(); window.dispatchEvent(new CustomEvent('fieldshift:language',{detail:active})); });
   const observer = new MutationObserver(records => { for (const record of records) for (const node of record.addedNodes) { if (node.nodeType === Node.TEXT_NODE) translateNode(node); else if (node.nodeType === Node.ELEMENT_NODE) apply(node); } });
   observer.observe(document.body, {childList:true,characterData:true,subtree:true});
   apply();

@@ -8,6 +8,7 @@ const { chromium } = playwright;
 const origin = process.env.FIELDSHIFT_PREVIEW || 'http://127.0.0.1:4173';
 const browser = await chromium.launch({ executablePath: '/usr/bin/chromium', headless: true, proxy: process.env.HTTPS_PROXY ? { server: process.env.HTTPS_PROXY, bypass: '127.0.0.1,localhost' } : undefined, args: ['--no-sandbox', '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
 const context = await browser.newContext({ viewport: { width: 1440, height: 1080 }, deviceScaleFactor: 1 });
+await context.addInitScript(() => sessionStorage.setItem('fieldshift.intro.seen', '1'));
 const errors = [];
 const page = await context.newPage();
 page.on('pageerror', error => errors.push(error.message));

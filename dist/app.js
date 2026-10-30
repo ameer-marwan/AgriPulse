@@ -3,6 +3,7 @@ import {createFieldMap, polygonAreaHa, validatePolygon, polygonReferencePoint} f
 import {initPlanning} from './planning.js';
 import {initScenes} from './scenes.js';
 import {initI18n} from './i18n.js';
+import {initIntro} from './intro.js';
 
 const $ = (q, root = document) => root.querySelector(q);
 const $$ = (q, root = document) => [...root.querySelectorAll(q)];
@@ -95,6 +96,7 @@ function init() {
   initPlanning({getState:()=>state,fieldKey,toast,crops});
   initScenes({getState:()=>state});
   initI18n({preferences:state.preferences,save:preferences => write('fieldshift.preferences',preferences),rerender:() => { renderLocation(); renderRotations(); renderReports(); }});
+  initIntro({language:state.preferences.language});
   loadWeather(); state.ready=true;
 }
 

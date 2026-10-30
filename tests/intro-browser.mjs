@@ -1,0 +1,44 @@
+import {createRequire} from 'node:module';
+import assert from 'node:assert/strict';
+import {mkdir} from 'node:fs/promises';
+const require=createRequire(import.meta.url);
+let playwright;
+try{playwright=require('playwright');}catch{playwright=require('/opt/codex/runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');}
+const origin=process.env.FIELDSHIFT_PREVIEW||'http://127.0.0.1:4173';
+const browser=await playwright.chromium.launch({executablePath:'/usr/bin/chromium',headless:true,args:['--no-sandbox','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+const context=await browser.newContext({viewport:{width:1440,height:1000}});
+const page=await context.newPage(),errors=[];
+page.on('pageerror',error=>errors.push(error.message));
+const day='2026-10-30';
+await page.route('https://api.open-meteo.com/**',route=>route.fulfill({json:{latitude:38,longitude:-98,elevation:400,timezone:'UTC',current:{time:day+'T12:00',temperature_2m:21,apparent_temperature:20,relative_humidity_2m:60,wind_speed_10m:8,weather_code:1,is_day:1},hourly:{time:Array.from({length:24},(_,i)=>day+'T'+String(i).padStart(2,'0')+':00'),temperature_2m:Array(24).fill(21),precipitation:Array(24).fill(0),soil_moisture_0_to_1cm:Array(24).fill(.25)},daily:{time:Array.from({length:7},(_,i)=>new Date(Date.UTC(2026,9,30+i)).toISOString().slice(0,10)),temperature_2m_max:Array(7).fill(23),temperature_2m_min:Array(7).fill(12),precipitation_sum:Array(7).fill(0),precipitation_probability_max:Array(7).fill(10),et0_fao_evapotranspiration:Array(7).fill(3)}}}));
+await mkdir('/workspace/scratch',{recursive:true});
+try{
+  await page.goto(origin,{waitUntil:'domcontentloaded'});
+  await page.locator('.fieldshift-intro').waitFor({state:'visible'});
+  assert.equal(await page.locator('body').evaluate(el=>el.classList.contains('intro-open')),true,'Opening locks the background');
+  assert.match(await page.locator('.fieldshift-intro h1').innerText(),/Every field begins/,'English opening copy is visible');
+  await page.screenshot({path:'/workspace/scratch/fieldshift-intro.png'});
+  await page.locator('.intro-enter').click();
+  await page.locator('.fieldshift-intro').waitFor({state:'hidden'});
+  assert.equal(await page.locator('body').evaluate(el=>el.classList.contains('intro-open')),false,'Entering restores the workspace');
+  await page.reload({waitUntil:'domcontentloaded'});
+  assert.equal(await page.locator('.fieldshift-intro').isHidden(),true,'Opening is not repeated in the same browser session');
+  await page.goto(origin+'/#/settings',{waitUntil:'domcontentloaded'});
+  await page.locator('#language').selectOption('fr');
+  await page.locator('.intro-replay-setting button').click();
+  await page.locator('.fieldshift-intro').waitFor({state:'visible'});
+  assert.match(await page.locator('.intro-enter').innerText(),/Entrer dans l’espace/,'Replay follows the selected French language');
+  await page.locator('.intro-skip').click();
+  await page.locator('#language').selectOption('ar');
+  await page.locator('.intro-replay-setting button').click();
+  assert.equal(await page.locator('html').getAttribute('dir'),'rtl','Arabic replay uses RTL layout');
+  assert.match(await page.locator('.fieldshift-intro h1').innerText(),/كل حقل يبدأ/,'Replay follows the selected Arabic language');
+  await page.setViewportSize({width:390,height:844});
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,'Opening fits a phone');
+  await page.locator('.intro-skip').click();
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await page.locator('.intro-replay-setting button').click();
+  assert.equal(await page.locator('.intro-orbit').first().evaluate(el=>getComputedStyle(el).animationName),'none','Reduced-motion disables orbit animation');
+  assert.deepEqual(errors,[],'No uncaught opening errors');
+  console.log('PASS: cinematic intro, session skip, replay, French/Arabic copy, phone layout, reduced motion.');
+}finally{await browser.close();}

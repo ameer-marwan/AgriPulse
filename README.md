@@ -10,6 +10,8 @@ The editable project is also included. Run `npm run dev` with Node 20+ to open i
 
 ## What is new in this edition
 
+- A cinematic, skippable FieldShift opening sequence with orbiting Earth-data lines, growing field geometry, and a responsive mobile layout. It appears once per browser session and can be replayed from Settings; its copy follows English, French, and Arabic selections and honors reduced-motion preferences.
+
 - Section-specific scenic backgrounds: selected-field weather controls the sky, sun/moon, cloud, rain and snow overlays; Water has ocean imagery and Soil has a forest backdrop. These decorative scenes stay inside their sections, retain contrast in both appearances, and respect reduced-motion preferences. An unavailable forecast clears the previous weather scene.
 
 - Every selected coordinate has its own economics, crop-planner inputs, season schedule, scenario settings, soil records and observations. Returning to a field restores its records. A drawn/imported boundary supplies geometric area; changing land never transfers the previous field's yield or price assumptions.
