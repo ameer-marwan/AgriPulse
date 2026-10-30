@@ -1,0 +1,34 @@
+FIELDSHIFT 3.0 — FINAL WEBSITE
+
+QUICKEST WAY TO OPEN
+Open FieldShift-Final.html in a full desktop browser.
+All application code, design assets and the map library are embedded in this file.
+Live weather, place search, maps and NASA historical data need internet access.
+
+ON A PHONE
+Open the file in a full browser, not a document previewer. For reliable phone
+access, upload the dist folder to any static web host and visit its HTTPS link.
+
+EDITABLE WEBSITE
+The dist folder is the complete modular website. With Node 20 or newer installed,
+open a terminal in this folder, run npm run dev, then visit http://127.0.0.1:4173.
+No npm installation is needed to run it. Press Ctrl+C to stop the local server.
+
+START WITH YOUR OWN LAND
+1. Use the location selector to search a place or enter coordinates.
+2. Draw a boundary or import a GeoJSON Polygon if you know your field edges.
+3. Add dated soil records; use a sample's pH in the crop planner if appropriate.
+4. Compare rotations and enter local yield, price and cost assumptions.
+5. Save a path, plan your season, add observations, and export your report.
+
+Each field has its own budget, planning inputs, schedule, scenarios and records.
+Example values are identified. Weather and shallow soil moisture are modeled.
+Scheduling and climate what-if values are scenarios, not predictions of yield.
+The field assistant explains your visible evidence; OpenAI is not connected.
+
+KEEP YOUR WORK
+Your records live in the current browser. Export a full workspace from Settings,
+especially after adding observations or photos. Different browsers and file paths
+can have separate storage. The supplied website includes no personal field data.
+
+Read README.md for sources, limitations, source editing and verification commands.

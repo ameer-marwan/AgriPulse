@@ -1,16 +1,37 @@
-# FieldShift
+# FieldShift 3.0 — Final edition
 
 An interactive field operations workspace for the 2026 NASA Space Apps Challenge. The existing Site identity is preserved in `.openai/hosting.json`.
 
+## Open the final website
+
+Open **FieldShift-Final.html** in Chrome, Edge, or Firefox. This portable edition embeds the application, styles, logo, photo and map library in one file. Internet access is needed for live weather, satellite tiles, place search and NASA data. The file does not require a server, an API key, or a package installation. Mobile file previewers may not run JavaScript; open it in a full browser, or host the `dist` folder on a static web host.
+
+The editable project is also included. Run `npm run dev` with Node 20+ to open it at `http://127.0.0.1:4173`. No dependencies are required to run the application. `npm run package:final` recreates the portable HTML in `release/` from the current source.
+
+## What is new in this edition
+
+- Every selected coordinate has its own economics, crop-planner inputs, season schedule, scenario settings, soil records and observations. Returning to a field restores its records. A drawn/imported boundary supplies geometric area; changing land never transfers the previous field's yield or price assumptions.
+- Saved rotation plans can be restored and removed for the selected field, with the assumptions they were saved with.
+- Editable five-stage season timeline with planting date, stage durations and calendar dates. Durations are scheduling assumptions, not crop growth predictions.
+- Forecast screening for heat, frost, heavy rain and strong wind, with visible rule thresholds and missing-data behavior.
+- Temperature and rainfall sensitivity scenarios based on the selected point's forecast. Missing source values remain unavailable.
+- Dated field notes and resized photo attachments, saved locally by field, with backup export and removal.
+- Evidence completeness cards and a guided setup checklist. These distinguish user records, modeled values and planning assumptions.
+- Printable field report including the selected rotation, economics assumptions, soil records, schedule, scenario and observations.
+- Field selector accessible from every page; responsive phone and desktop layouts.
+
+Save a workspace backup from Settings and a season/photo backup after adding records. Browser data is device-local; files opened from a different path or a different browser may have a separate storage area. The portable file includes no personal field records.
+
 ## Run locally
 
-Requires Node 20+ and Python 3. The published application is buildless and needs no runtime package installation.
+Requires Node 20+. The application is buildless and needs no runtime package installation.
 
 ```sh
 npm run dev
 # Open http://127.0.0.1:4173
 npm run check
 npm test
+npm run test:final
 ```
 
 For browser checks, install development dependencies (`npm install`) and Chromium (`npx playwright install chromium`), or use `/usr/bin/chromium`. Run `npm run test:browser` while the preview server is running. `FIELDSHIFT_PREVIEW` can select a different preview origin. Browser fixtures are restricted to automated tests; they are never shipped as environmental values.
@@ -50,3 +71,5 @@ The static deployment directory is `dist`. Preserve the exact project ID and cur
 ## QA
 
 The unit suite covers missing versus zero data, economics arithmetic, losses, crop constraints, provider errors, cancellation, NASA missing months, and geographic validation. The browser suite covers startup, ten routes, saved records, economics, guide responses, themes, and phone/desktop overflow. Additional live checks verified Open-Meteo, satellite tiles, globe rendering, and location request races.
+
+The final browser suite additionally checks selected-field isolation/restoration for economics, crop planning, timelines, scenarios, notes and photo attachments, report content, unavailable source data, and desktop/mobile layouts. Provider fixtures are used only by tests, never by the shipped website.

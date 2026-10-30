@@ -70,6 +70,36 @@ test('malformed and failed weather responses reject instead of generating sample
   await assert.rejects(fetchWeather({ lat: '', lon: 0 }), /valid latitude/);
 });
 
+test('weather preserves source array alignment across invalid times and requests explicit units', async () => {
+  const original = globalThis.fetch;
+  let requestUrl;
+  globalThis.fetch = async url => {
+    requestUrl = new URL(url);
+    return { ok: true, json: async () => ({
+      current: { time: '2026-10-30T12:15' },
+      daily: { time: [null, '2026-10-30'], temperature_2m_max: [90, 23], temperature_2m_min: [80, 8], wind_speed_10m_max: [99, 35], precipitation_sum: [100, 0] },
+      hourly: { time: [null, '2026-10-30T12:00'], temperature_2m: [99, 21], wind_speed_10m: [99, 0], relative_humidity_2m: [100, null], weather_code: [99, 0] }
+    }) };
+  };
+  try {
+    const value = await fetchWeather({ lat: 4, lon: 5 });
+    assert.equal(value.daily.length, 1);
+    assert.equal(value.daily[0].high, 23);
+    assert.equal(value.daily[0].low, 8);
+    assert.equal(value.daily[0].windMax, 35);
+    assert.equal(value.daily[0].rain, 0);
+    assert.equal(value.hourly.length, 1);
+    assert.equal(value.hourly[0].temperature, 21);
+    assert.equal(value.hourly[0].wind, 0);
+    assert.equal(value.hourly[0].humidity, null);
+    assert.equal(value.hourly[0].weatherCode, 0);
+    assert.equal(requestUrl.searchParams.get('wind_speed_unit'), 'kmh');
+    assert.equal(requestUrl.searchParams.get('temperature_unit'), 'celsius');
+    assert.equal(requestUrl.searchParams.get('precipitation_unit'), 'mm');
+    assert.match(requestUrl.searchParams.get('daily'), /wind_speed_10m_max/);
+  } finally { globalThis.fetch = original; }
+});
+
 test('already cancelled requests never fetch even if cached', async () => {
   const controller = new AbortController(); controller.abort();
   await assert.rejects(fetchWeather({ lat: 1, lon: 2 }, { signal: controller.signal }), { name: 'AbortError' });

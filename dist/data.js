@@ -49,9 +49,9 @@ export async function fetchWeather(point, { signal } = {}) {
   const query = new URLSearchParams({
     latitude: lat, longitude: lon,
     current: 'temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code',
-    hourly: 'temperature_2m,precipitation,soil_moisture_0_to_1cm',
-    daily: 'temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,et0_fao_evapotranspiration',
-    timezone: 'auto', forecast_days: '7'
+    hourly: 'temperature_2m,precipitation,soil_moisture_0_to_1cm,wind_speed_10m,relative_humidity_2m,weather_code',
+    daily: 'temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,et0_fao_evapotranspiration,wind_speed_10m_max',
+    timezone: 'auto', forecast_days: '7', temperature_unit: 'celsius', wind_speed_unit: 'kmh', precipitation_unit: 'mm'
   });
   const data = await request(`https://api.open-meteo.com/v1/forecast?${query}`, { signal });
   if (!data || typeof data !== 'object' || data.error || !data.current ||
@@ -71,17 +71,21 @@ export async function fetchWeather(point, { signal } = {}) {
       soilMoisture: hourIndex >= 0 ? arrayValue(data.hourly, 'soil_moisture_0_to_1cm', hourIndex) : null,
       time: typeof current.time === 'string' ? current.time : null
     },
-    daily: data.daily.time.filter(time => typeof time === 'string').map((date, i) => ({
+    daily: data.daily.time.map((date, i) => ({
       date, high: arrayValue(data.daily, 'temperature_2m_max', i),
       low: arrayValue(data.daily, 'temperature_2m_min', i),
       rain: arrayValue(data.daily, 'precipitation_sum', i),
       rainProbability: arrayValue(data.daily, 'precipitation_probability_max', i),
-      et0: arrayValue(data.daily, 'et0_fao_evapotranspiration', i)
-    })),
-    hourly: times.filter(time => typeof time === 'string').map((time, i) => ({
+      et0: arrayValue(data.daily, 'et0_fao_evapotranspiration', i),
+      windMax: arrayValue(data.daily, 'wind_speed_10m_max', i)
+    })).filter(day => typeof day.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(day.date)),
+    hourly: times.map((time, i) => ({
       time, temperature: arrayValue(data.hourly, 'temperature_2m', i),
-      rain: arrayValue(data.hourly, 'precipitation', i)
-    })),
+      rain: arrayValue(data.hourly, 'precipitation', i),
+      wind: arrayValue(data.hourly, 'wind_speed_10m', i),
+      humidity: arrayValue(data.hourly, 'relative_humidity_2m', i),
+      weatherCode: arrayValue(data.hourly, 'weather_code', i)
+    })).filter(hour => typeof hour.time === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(hour.time)),
     timezone: typeof data.timezone === 'string' ? data.timezone : 'UTC',
     elevation: number(data.elevation), retrievedAt: new Date().toISOString(),
     source: 'Open-Meteo forecast API', sourceUrl: 'https://open-meteo.com/en/docs',

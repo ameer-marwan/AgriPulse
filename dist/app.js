@@ -1,5 +1,6 @@
 import {fetchWeather, searchPlaces, fetchNasa, crops, recommendRotations, calculateEconomics, formatWeatherCode} from './data.js';
 import {createFieldMap, polygonAreaHa, validatePolygon, polygonReferencePoint} from './geo.js';
+import {initPlanning} from './planning.js';
 
 const $ = (q, root = document) => root.querySelector(q);
 const $$ = (q, root = document) => [...root.querySelectorAll(q)];
@@ -11,15 +12,18 @@ function write(key, value) { try { localStorage.setItem(key, JSON.stringify(valu
 const example = {lat:38.46,lon:-98.25,name:'Central Kansas',method:'Example location',id:'example-kansas',boundary:null};
 const validPoint = loc => loc && number(loc.lat) && number(loc.lon) && Math.abs(loc.lat) <= 90 && Math.abs(loc.lon) <= 180;
 const savedLocation = read('fieldshift.location', null);
+const defaultEconomics = {currency:'USD',areaHa:1,yieldTonnesHa:3,pricePerTonne:350,seedCostHa:120,fertilizerCostHa:180,waterCostHa:80,operationsCostHa:220};
 const state = {
   location:validPoint(savedLocation) ? savedLocation : {...example},
   preferences:read('fieldshift.preferences',{theme:'dark',units:'metric'}),
   fields:read('fieldshift.fields',[]),samples:read('fieldshift.samples',[]),journal:read('fieldshift.journal',[]),
   plans:read('fieldshift.plans',[]),weather:null,nasa:null,economics:null,rotationOptions:[],selectedPlan:'soil',
   weatherController:null,nasaController:null,searchController:null,requestId:0,route:'overview',map:null,ready:false,
-  economicsInputs:read('fieldshift.economics',{currency:'USD',areaHa:1,yieldTonnesHa:3,pricePerTonne:350,seedCostHa:120,fertilizerCostHa:180,waterCostHa:80,operationsCostHa:220})
+  fieldSettings:read('fieldshift.fieldSettings',{}),
+  economicsInputs:{...defaultEconomics}
 };
 let toastTimer;
+let assistantFieldKey;
 function toast(message) { text('#toast',message); $('#toast').classList.add('visible'); clearTimeout(toastTimer); toastTimer = setTimeout(() => $('#toast').classList.remove('visible'),3400); }
 const icon = name => '<svg aria-hidden="true"><use href="#i-'+name+'"/></svg>';
 const temperatureValue = n => state.preferences.units === 'imperial' ? n * 9 / 5 + 32 : n;
@@ -32,9 +36,28 @@ const dateShort = date => new Date(date+'T12:00:00').toLocaleDateString('en',{we
 const today = () => new Date().toISOString().slice(0,10);
 const fieldKey = () => state.location.lat.toFixed(5)+','+state.location.lon.toFixed(5);
 const total = (days,key) => days.length && days.every(d => number(d[key])) ? days.reduce((n,d) => n+d[key],0) : null;
+const notifyFieldUpdate = () => window.dispatchEvent(new CustomEvent('fieldshift:updated'));
+function persistFieldSettings(){
+  state.fieldSettings[fieldKey()]={...state.fieldSettings[fieldKey()],economics:{...state.economicsInputs},planner:{crop:$('#current-crop').value,priority:$('#planning-priority').value,irrigation:$('#irrigation').value,ph:$('#planner-ph').value,selectedPlan:state.selectedPlan}};
+  write('fieldshift.fieldSettings',state.fieldSettings);
+}
+function restoreFieldSettings(){
+  const settings=state.fieldSettings[fieldKey()];
+  state.economicsInputs={...defaultEconomics,...settings?.economics};
+  if(state.location.boundary)state.economicsInputs.areaHa=Number(polygonAreaHa(state.location.boundary).toFixed(4));
+  Object.entries(state.economicsInputs).forEach(([key,value])=>{if($('#economics-form').elements[key])$('#economics-form').elements[key].value=value;});
+  const planner=settings?.planner??{};
+  $('#current-crop').value=crops.some(c=>c.id===planner.crop)?planner.crop:'wheat';
+  $('#planning-priority').value=planner.priority||'soil';$('#irrigation').value=planner.irrigation||'rainfed';$('#planner-ph').value=planner.ph??'';
+  state.selectedPlan=planner.selectedPlan||'soil';state.weather=null;state.economics=null;
+  renderEconomics();renderRotations();
+}
 
 function init() {
   replaceArrowGlyphs();
+  const savedPlansPanel=document.createElement('article');savedPlansPanel.className='panel';
+  savedPlansPanel.innerHTML='<div class="panel-heading"><div><span class="eyebrow">SAVED FOR THIS LAND</span><h2>Your rotation library</h2></div></div><div id="saved-plans-list"></div>';
+  $('#view-crops').append(savedPlansPanel);
   $('[data-map-layer="terrain"]').textContent='Street map';
   state.map = createFieldMap($('#field-map'),{
     onSelect:point => selectLocation({...point,id:crypto.randomUUID(),name:'Selected point'},false),
@@ -45,9 +68,7 @@ function init() {
         state.location.lat = boundary.centroid.lat; state.location.lon = boundary.centroid.lon;
         state.location.method = 'Drawn boundary'; state.location.id = crypto.randomUUID();
         state.location.name = $('#field-name-input').value.trim() || 'Mapped field';
-        state.economicsInputs.areaHa = Number(boundary.areaHa.toFixed(4));
-        $('#economics-form').elements.areaHa.value = state.economicsInputs.areaHa;
-        renderEconomics(); loadWeather();
+        clearNasa();restoreFieldSettings();loadWeather();
         addJournal('Field boundary drawn',boundary.areaHa.toFixed(2)+' ha · entered geometry');
       }
       write('fieldshift.location',state.location); renderLocation(); toast(boundary?'Boundary drawn. Name and save your field.':'Boundary cleared');
@@ -59,11 +80,13 @@ function init() {
   bindEvents(); applyPreferences(); renderLocation(); renderSamples(); renderFields(); renderJournal();
   const cropOptions = crops.filter(c => c.type !== 'cover').map(c => '<option value="'+c.id+'">'+escapeHTML(c.name)+'</option>').join('');
   $('#current-crop').innerHTML = cropOptions;
-  const form = $('#economics-form');
-  Object.entries(state.economicsInputs).forEach(([key,value]) => {if(form.elements[key])form.elements[key].value=value;});
+  // Migrate earlier browser-local economics only to the field selected at upgrade.
+  if(!Object.keys(state.fieldSettings).length){const legacy=read('fieldshift.economics',null);if(legacy)state.fieldSettings[fieldKey()]={economics:legacy};}
+  restoreFieldSettings();
   $('#water-record-form').elements.date.value=today(); $('#soil-sample-form').elements.date.value=today();
   renderEconomics(); renderRotations(); renderCropLibrary(); renderReports(); renderAssistantEvidence();
   navigate(); window.addEventListener('hashchange',navigate);
+  initPlanning({getState:()=>state,fieldKey,toast,crops});
   loadWeather(); state.ready=true;
 }
 
@@ -105,7 +128,7 @@ function bindEvents() {
       print:() => window.print(),
       nasa:loadNasa,
       'reset-location':() => {selectLocation({...example});toast('Example location restored');},
-      backup:() => download('fieldshift-workspace.json',JSON.stringify({fields:state.fields,samples:state.samples,journal:state.journal,plans:state.plans,economics:state.economicsInputs},null,2),'application/json')
+      backup:() => download('fieldshift-workspace.json',JSON.stringify({schemaVersion:3,fields:state.fields,location:state.location,samples:state.samples,journal:state.journal,plans:state.plans,fieldSettings:state.fieldSettings,seasons:read('fieldshift.seasons.v1',{})},null,2),'application/json')
     };
     try {actions[action.dataset.action]?.();} catch(error){toast(error.message);console.error(error);}
   });
@@ -113,7 +136,7 @@ function bindEvents() {
   $$('[data-map-layer]').forEach(button => button.addEventListener('click',() => {state.map.setLayer(button.dataset.mapLayer);$$('[data-map-layer]').forEach(b => b.classList.toggle('selected',b===button));}));
   $('#place-search-form').addEventListener('submit',searchLocation);
   $('#geojson-import').addEventListener('change',importBoundary);
-  $('#economics-form').addEventListener('submit',event => {event.preventDefault();renderEconomics();toast('Economics scenario updated');});
+  $('#economics-form').addEventListener('submit',event => {event.preventDefault();state.fieldSettings[fieldKey()]={...state.fieldSettings[fieldKey()],economicsReviewed:true};renderEconomics();toast('Economics scenario updated');});
   $('#soil-sample-form').addEventListener('submit',saveSample);
   $('#water-record-form').addEventListener('submit',saveWater);
   $('#crop-filter').addEventListener('input',event => renderCropLibrary(event.target.value));
@@ -136,6 +159,12 @@ function applyPreferences() {
 }
 function renderLocation() {
   const l=state.location;
+  if(assistantFieldKey&&assistantFieldKey!==fieldKey()){
+    const message=document.createElement('div');message.className='chat-message assistant-message';
+    message.textContent='The active land has changed to '+l.name+'. Ask about the weather, soil records, crop paths, or economics for this location.';
+    $('#chat-messages').replaceChildren(message);
+  }
+  assistantFieldKey=fieldKey();
   text('.field-picker>.eyebrow',l.method==='Example location'?'EXAMPLE LOCATION':'ACTIVE LOCATION');
   text('[data-field-name]',l.name);
   text('[data-coordinates]',Math.abs(l.lat).toFixed(4)+'° '+(l.lat>=0?'N':'S')+' · '+Math.abs(l.lon).toFixed(4)+'° '+(l.lon>=0?'E':'W'));
@@ -145,22 +174,20 @@ function renderLocation() {
   text('#mapped-area',area?area.toFixed(2)+' ha / '+(area*2.47105).toFixed(2)+' acres':'No boundary drawn');
   text('#report-area',area?area.toFixed(2)+' hectares':'Point selection');
   $('#field-name-input').value=l.method==='Example location'?'':l.name;
-  renderAssistantEvidence();renderReports();renderSamples();renderJournal();
+  renderAssistantEvidence();renderReports();renderSamples();renderJournal();renderSavedPlans();notifyFieldUpdate();
+}
+function clearNasa(){
+  state.nasaController?.abort();state.nasa=null;
+  $('#nasa-result').innerHTML='<span class="empty">Load historical NASA context for the current selected location.</span>';
 }
 function selectLocation(point,move=true) {
   if(!validPoint(point))throw new Error('Please enter valid coordinates.');
   state.location={...point,boundary:point.boundary??null,id:point.id??crypto.randomUUID()};
-  state.nasaController?.abort();state.nasa=null;
-  $('#nasa-result').innerHTML='<span class="empty">Historical data is requested for the current selected location when you load this analysis.</span>';
+  clearNasa();
   // A new point does not inherit a previous field’s geometry.
   state.map.clearBoundary();
   if(point.boundary) {state.location.boundary=point.boundary;state.map.setBoundary(point.boundary);}
-  if(point.boundary) {
-    const area=Number(polygonAreaHa(point.boundary).toFixed(4));
-    state.economicsInputs.areaHa=area;
-    $('#economics-form').elements.areaHa.value=area;
-    renderEconomics();
-  }
+  restoreFieldSettings();
   if(move)state.map.setLocation(point);
   write('fieldshift.location',state.location);renderLocation();loadWeather();
 }
@@ -208,7 +235,7 @@ function resetWeather(status){
   $('#full-forecast').innerHTML='<p class="empty">'+(status==='loading'?'Loading seven-day outlook…':'Forecast unavailable.')+'</p>';
   $('#hourly-chart').innerHTML='<p class="empty">'+(status==='loading'?'Loading hourly data…':'Hourly data unavailable.')+'</p>';
   $('#water-chart').innerHTML='<p class="empty">'+(status==='loading'?'Loading water signals…':'Water signals unavailable.')+'</p>';
-  renderReports();renderAssistantEvidence();
+  renderReports();renderAssistantEvidence();notifyFieldUpdate();
 }
 function renderWeather(){
   const w=state.weather;if(!w)return;const c=w.current;
@@ -224,7 +251,7 @@ function renderWeather(){
   $('.weather-glyph').textContent=c.weatherCode===0?'☀':c.weatherCode>=51?'☂':'☁';
   $('#home-forecast').innerHTML=w.daily.slice(0,4).map((d,i)=>'<div class="forecast-item"><span class="forecast-date">'+(i===0?'Today':dateShort(d.date))+'</span><span>'+glyph(d)+'</span><span class="forecast-temp">'+temp(d.high)+'</span><span class="forecast-rain">'+rain(d.rain)+'</span></div>').join('');
   $('#full-forecast').innerHTML=w.daily.map((d,i)=>'<div class="day-card"><span class="day">'+(i===0?'Today':dateShort(d.date))+'</span><span class="wx">'+glyph(d)+'</span><strong>'+temp(d.high)+'<small>'+temp(d.low)+'</small></strong><span class="rain">'+rain(d.rain)+'</span></div>').join('');
-  renderHourlyChart();renderWaterChart();renderReports();renderAssistantEvidence();
+  renderHourlyChart();renderWaterChart();renderReports();renderAssistantEvidence();notifyFieldUpdate();
 }
 function renderHourlyChart(){
   const w=state.weather;if(!w)return;
@@ -258,11 +285,27 @@ function renderRotations(){
   const current=crops.find(c=>c.id===$('#current-crop').value)??crops[0];
   const steps=[{name:current.name,label:'CURRENT CROP',kind:current.family},...plan.sequence.slice(0,2).map((id,i)=>({name:crops.find(c=>c.id===id)?.name??id,label:'SEASON '+(i+1),kind:crops.find(c=>c.id===id)?.type??''}))];
   $('#rotation-preview').innerHTML=steps.map((c,i)=>(i?'<span class="rotation-arrow">→</span>':'')+'<div class="rotation-step"><span class="crop-symbol">'+(i?'♧':'♧')+'</span><span class="eyebrow">'+c.label+'</span><strong>'+escapeHTML(c.name)+'</strong><small>'+escapeHTML(c.kind)+'</small></div>').join('');
+  persistFieldSettings();renderAssistantEvidence();notifyFieldUpdate();
 }
-function renderCropLibrary(filter=''){$('#crop-library').innerHTML=crops.filter(c=>(c.name+' '+c.family+' '+c.type).toLowerCase().includes(filter.toLowerCase())).map(c=>'<article class="crop-library-card"><span class="eyebrow">'+escapeHTML(c.family.toUpperCase())+'</span><h3>'+escapeHTML(c.name)+'</h3><p>'+escapeHTML(c.notes)+'</p><div class="crop-traits"><span>'+escapeHTML(c.season)+'</span><span>pH '+c.phMin+'–'+c.phMax+'</span><span>'+escapeHTML(c.waterDemand)+' demand</span></div><a href="'+escapeHTML(c.reference)+'" target="_blank" rel="noreferrer">FAO crop reference ↗</a></article>').join('')||'<p class="empty">No matching crops.</p>';}
-function savePlan(){const plan=state.rotationOptions.find(p=>p.id===state.selectedPlan);if(!plan)return;state.plans.push({...plan,field:fieldKey(),location:{...state.location},savedAt:new Date().toISOString(),economics:state.economicsInputs});write('fieldshift.plans',state.plans);addJournal('Rotation plan saved',plan.name);toast('Plan and assumptions saved in this browser');}
+function renderCropLibrary(filter=''){$('#crop-library').innerHTML=crops.filter(c=>(c.name+' '+c.family+' '+c.type).toLowerCase().includes(filter.toLowerCase())).map(c=>'<article class="crop-library-card"><span class="eyebrow">'+escapeHTML(c.family.toUpperCase())+'</span><h3>'+escapeHTML(c.name)+'</h3><p>'+escapeHTML(c.notes)+'</p><div class="crop-traits"><span>'+escapeHTML(c.season)+'</span><span>pH '+c.phMin+'–'+c.phMax+'</span><span>'+escapeHTML(c.waterDemand)+' demand</span></div><a href="'+escapeHTML(c.reference)+'" target="_blank" rel="noreferrer">FAO crop reference ↗</a></article>').join('')||'<p class="empty">No matching crops.</p>';replaceArrowGlyphs();}
+function savePlan(){const plan=state.rotationOptions.find(p=>p.id===state.selectedPlan);if(!plan)return;state.plans.push({...plan,id:crypto.randomUUID(),pathId:plan.id,field:fieldKey(),location:{...state.location},savedAt:new Date().toISOString(),economics:{...state.economicsInputs},planner:{...state.fieldSettings[fieldKey()]?.planner}});write('fieldshift.plans',state.plans);addJournal('Rotation plan saved',plan.name);renderSavedPlans();notifyFieldUpdate();toast('Plan and assumptions saved in this browser');}
+function renderSavedPlans(){
+  const container=$('#saved-plans-list');if(!container)return;
+  const entries=state.plans.filter(p=>p.field===fieldKey()).slice().reverse();container.replaceChildren();
+  if(!entries.length){container.innerHTML='<p class="empty">No saved paths for this land yet. Choose a path above and save it with its assumptions.</p>';return;}
+  for(const plan of entries){const row=document.createElement('div');row.className='sample-row';
+    const content=document.createElement('div');const title=document.createElement('h3');title.textContent=plan.name;
+    const details=document.createElement('p');details.textContent=(plan.sequence??[]).map(id=>crops.find(c=>c.id===id)?.name??id).join(' → ');
+    const date=document.createElement('small');date.textContent='Saved '+new Date(plan.savedAt).toLocaleString();content.append(title,details,date);
+    const actions=document.createElement('div');actions.className='button-row';const restore=document.createElement('button');restore.className='button secondary small';restore.textContent='Restore assumptions';
+    restore.onclick=()=>{if(plan.field!==fieldKey())return;state.fieldSettings[fieldKey()]={...state.fieldSettings[fieldKey()],economics:{...plan.economics},planner:{...(plan.planner??{}),selectedPlan:plan.pathId??plan.id}};const weather=state.weather;restoreFieldSettings();state.weather=weather;renderRotations();renderWeather();renderReports();toast('Saved path assumptions restored to this land');};
+    const remove=document.createElement('button');remove.className='button secondary small';remove.textContent='Remove';remove.onclick=()=>{if(plan.field!==fieldKey())return;state.plans=state.plans.filter(p=>p!==plan);write('fieldshift.plans',state.plans);renderSavedPlans();notifyFieldUpdate();toast('Saved path removed from this browser');};
+    actions.append(restore,remove);row.append(content,actions);container.append(row);
+  }
+}
 function renderEconomics(){
-  try {const data=Object.fromEntries(new FormData($('#economics-form')));const inputs=Object.fromEntries(Object.entries(data).map(([key,value])=>[key,key==='currency'?value:Number(value)]));state.economics=calculateEconomics(inputs);state.economicsInputs=inputs;write('fieldshift.economics',inputs);const e=state.economics;
+  text('#economics-status',state.fieldSettings[fieldKey()]?.economicsReviewed?'REVIEWED ASSUMPTIONS':'EXAMPLE ASSUMPTIONS · EDIT FOR YOUR LAND');
+  try {const data=Object.fromEntries(new FormData($('#economics-form')));const inputs=Object.fromEntries(Object.entries(data).map(([key,value])=>[key,key==='currency'?value:Number(value)]));state.economics=calculateEconomics(inputs);state.economicsInputs=inputs;persistFieldSettings();const e=state.economics;
     text('#profit-total',money(e.margin));text('#profit-per-ha',money(e.perHa.margin)+' per hectare · '+e.areaHa.toLocaleString()+' ha');text('[data-stat="margin"]',money(e.perHa.margin));text('#profit-revenue',money(e.revenue));text('#profit-cost',money(e.cost));text('#break-even-price',number(e.breakEvenPrice)?money(e.breakEvenPrice)+' / t':'Not defined at zero yield');text('#break-even-yield',number(e.breakEvenYield)?e.breakEvenYield.toFixed(2)+' t/ha':'Not defined at zero price');
     const max=Math.max(1,...e.scenarios.map(s=>Math.abs(s.margin)));
     $('#profit-scenarios').innerHTML=e.scenarios.map((s,i)=>'<div class="scenario-row"><span>'+escapeHTML(s.name)+'<small>'+(i===0?'Yield and price −10%':i===2?'Yield and price +10%':'Your entered yield and price')+'</small></span><div class="scenario-bar"><i style="width:'+Math.max(3,Math.abs(s.margin)/max*100)+'%"></i></div><strong>'+money(s.margin)+'</strong></div>').join('');renderReports();
@@ -271,7 +314,13 @@ function renderEconomics(){
 function addJournal(title,detail){state.journal.unshift({id:crypto.randomUUID(),title,detail,field:fieldKey(),time:new Date().toISOString()});state.journal=state.journal.slice(0,100);write('fieldshift.journal',state.journal);renderJournal();}
 function renderJournal(){const entries=state.journal.filter(e=>e.field===fieldKey()).slice(0,4);$('#journal-list').innerHTML=entries.length?entries.map(e=>'<div class="journal-entry"><i></i><div><b>'+escapeHTML(e.title)+'</b><small>'+escapeHTML(e.detail)+' · '+new Date(e.time).toLocaleDateString()+'</small></div><span>›</span></div>').join(''):'<div class="journal-empty">'+icon('leaf')+'<p>A new season starts with a first note. Save a field or add a soil sample to begin.</p><button class="button secondary small" data-action="soil-dialog">Add your first sample +</button></div>';}
 function saveSample(event){event.preventDefault();const data=Object.fromEntries(new FormData(event.target));if(data.ph===''&&data.carbon==='')return toast('Enter pH or organic carbon for this sample.');const record={...data,id:crypto.randomUUID(),field:fieldKey(),location:{lat:state.location.lat,lon:state.location.lon},ph:data.ph===''?null:Number(data.ph),carbon:data.carbon===''?null:Number(data.carbon),depth:Number(data.depth)};state.samples.push(record);write('fieldshift.samples',state.samples);addJournal('Soil sample added',record.name);renderSamples();$('#soil-dialog').close();event.target.reset();event.target.elements.date.value=today();toast('Sample saved to the selected field');}
-function renderSamples(){const samples=state.samples.filter(s=>s.field===fieldKey());$('#soil-samples').innerHTML=samples.length?samples.map(s=>'<div class="sample-row"><div><h3>'+escapeHTML(s.name)+'</h3><p>pH '+(number(s.ph)?s.ph:'—')+' · Organic carbon '+(number(s.carbon)?s.carbon+'%':'—')+' · Depth '+s.depth+' cm</p><small>'+escapeHTML(s.date)+' · '+escapeHTML(s.method)+'</small></div><button data-delete-sample="'+s.id+'">Remove</button></div>').join(''):'<div class="journal-empty">'+icon('layers')+'<p>No measurements for this field yet. Add a dated sample from your own laboratory or field records.</p><button class="button secondary small" data-action="soil-dialog">Add a sample +</button></div>';$$('[data-delete-sample]').forEach(b=>b.addEventListener('click',()=>{state.samples=state.samples.filter(s=>s.id!==b.dataset.deleteSample);write('fieldshift.samples',state.samples);renderSamples();toast('Sample removed from this device');}));}
+function renderSamples(){
+  const samples=state.samples.filter(s=>s.field===fieldKey());
+  $('#soil-samples').innerHTML=samples.length?samples.map(s=>'<div class="sample-row"><div><h3>'+escapeHTML(s.name)+'</h3><p>pH '+(number(s.ph)?s.ph:'—')+' · Organic carbon '+(number(s.carbon)?s.carbon+'%':'—')+' · Depth '+s.depth+' cm</p><small>'+escapeHTML(s.date)+' · '+escapeHTML(s.method)+'</small></div><div class="button-row">'+(number(s.ph)?'<button class="button secondary small" data-use-sample="'+escapeHTML(s.id)+'">Use pH in planner</button>':'')+'<button data-delete-sample="'+escapeHTML(s.id)+'">Remove</button></div></div>').join(''):'<div class="journal-empty">'+icon('layers')+'<p>No measurements for this field yet. Add a dated sample from your own laboratory or field records.</p><button class="button secondary small" data-action="soil-dialog">Add a sample +</button></div>';
+  $$('[data-use-sample]').forEach(button=>button.onclick=()=>{const sample=samples.find(s=>s.id===button.dataset.useSample);if(!sample||sample.field!==fieldKey())return;$('#planner-ph').value=sample.ph;renderRotations();location.hash='/crops';toast('Planner uses pH '+sample.ph+' from '+sample.name+' · '+sample.date);});
+  $$('[data-delete-sample]').forEach(b=>b.addEventListener('click',()=>{state.samples=state.samples.filter(s=>s.id!==b.dataset.deleteSample||s.field!==fieldKey());write('fieldshift.samples',state.samples);renderSamples();toast('Sample removed from this device');}));
+  renderAssistantEvidence();notifyFieldUpdate();
+}
 function saveWater(event){event.preventDefault();const data=Object.fromEntries(new FormData(event.target));addJournal('Irrigation applied',Number(data.amount).toFixed(1)+' mm · '+data.date);toast('Irrigation record saved');event.target.elements.amount.value='';}
 
 function evidenceRows(){const w=state.weather,c=w?.current;return [
@@ -281,10 +330,10 @@ function evidenceRows(){const w=state.weather,c=w?.current;return [
   ['Gross margin / ha',state.economics?money(state.economics.perHa.margin):'Not calculated','Entered assumptions','Farmer scenario'],
   ['Selected point',state.location.lat.toFixed(4)+', '+state.location.lon.toFixed(4),state.location.method,'Your selection']
 ];}
-function renderReports(){const body=$('#report-data');if(!body)return;body.innerHTML=evidenceRows().map(row=>'<tr>'+row.map(value=>'<td>'+escapeHTML(value)+'</td>').join('')+'</tr>').join('');}
+function renderReports(){const body=$('#report-data');if(!body)return;body.innerHTML=evidenceRows().map(row=>'<tr>'+row.map(value=>'<td>'+escapeHTML(value)+'</td>').join('')+'</tr>').join('');notifyFieldUpdate();}
 function download(name,content,type){const url=URL.createObjectURL(new Blob([content],{type}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 function exportCSV(){const rows=[['FieldShift field intelligence report'],['Location',state.location.name],['Retrieved',state.weather?.retrievedAt??'Unavailable'],['Signal','Value','Evidence type','Source'],...evidenceRows()];download('fieldshift-report.csv',rows.map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n'),'text/csv;charset=utf-8');toast('Report downloaded');}
-async function loadNasa(){state.nasaController?.abort();state.nasaController=new AbortController();const key=fieldKey();const container=$('#nasa-result');container.innerHTML='<p class="empty">Requesting historical NASA POWER data…</p>';try{const result=await fetchNasa(state.location,{signal:state.nasaController.signal});if(key!==fieldKey())return;state.nasa=result;const max=Math.max(1,...result.months.map(m=>m.rain??0));container.innerHTML='<span class="eyebrow">'+result.year+' MONTHLY RAINFALL · MM</span><div class="nasa-months">'+result.months.map(m=>'<div class="nasa-month" title="Month '+m.month+': '+(number(m.rain)?m.rain.toFixed(1)+' mm':'Unavailable')+'" style="height:'+(number(m.rain)?Math.max(2,m.rain/max*95):0)+'%"><span>'+m.month+'</span></div>').join('')+'</div><p class="fine-print">'+escapeHTML(result.limitations)+'</p><span class="eyebrow">NASA POWER · RETRIEVED '+new Date(result.retrievedAt).toLocaleDateString()+'</span>';}catch(error){if(error.name!=='AbortError')container.innerHTML='<p class="empty">'+escapeHTML(error.message)+' You can retry using the button.</p>';}}
+async function loadNasa(){state.nasaController?.abort();state.nasaController=new AbortController();const key=fieldKey();const container=$('#nasa-result');container.innerHTML='<p class="empty">Requesting historical NASA POWER data…</p>';try{const result=await fetchNasa(state.location,{signal:state.nasaController.signal});if(key!==fieldKey())return;state.nasa=result;const max=Math.max(1,...result.months.map(m=>m.rain??0));container.innerHTML='<span class="eyebrow">'+result.year+' MONTHLY RAINFALL · MM</span><div class="nasa-months">'+result.months.map(m=>'<div class="nasa-month" title="Month '+m.month+': '+(number(m.rain)?m.rain.toFixed(1)+' mm':'Unavailable')+'" style="height:'+(number(m.rain)?Math.max(2,m.rain/max*95):0)+'%"><span>'+m.month+'</span></div>').join('')+'</div><p class="fine-print">'+escapeHTML(result.limitations)+'</p><span class="eyebrow">NASA POWER · RETRIEVED '+new Date(result.retrievedAt).toLocaleDateString()+'</span>';notifyFieldUpdate();}catch(error){if(error.name!=='AbortError'&&key===fieldKey())container.innerHTML='<p class="empty">'+escapeHTML(error.message)+' You can retry using the button.</p>';}}
 function renderAssistantEvidence(){const target=$('#assistant-evidence');if(!target)return;const rows=[['SELECTED PLACE',state.location.name],['WEATHER',state.weather?temp(state.weather.current.temperature)+' · '+formatWeatherCode(state.weather.current.weatherCode):'Not currently available'],['SURFACE MOISTURE',state.weather?moisture(state.weather.current.soilMoisture)+' · 0–1 cm model layer':'Not currently available'],['LOCAL SOIL SAMPLES',String(state.samples.filter(s=>s.field===fieldKey()).length)+' user records'],['GROSS MARGIN',state.economics?money(state.economics.perHa.margin)+' / ha · assumptions':'Not calculated']];target.innerHTML=rows.map(([name,value])=>'<div class="evidence-row"><small>'+escapeHTML(name)+'</small><strong>'+escapeHTML(value)+'</strong></div>').join('');}
 function ask(question){question=question.trim();if(!question)return;const container=$('#chat-messages');const user=document.createElement('div');user.className='chat-message user-message';user.textContent=question;container.append(user);const answer=document.createElement('div');answer.className='chat-message assistant-message';answer.textContent=guidedAnswer(question);const source=document.createElement('small');source.textContent='Guided explanation from the visible field data. OpenAI is not connected.';answer.append(source);container.append(answer);container.scrollTop=container.scrollHeight;}
 function guidedAnswer(question){const q=question.toLowerCase(),w=state.weather;let answer='';
