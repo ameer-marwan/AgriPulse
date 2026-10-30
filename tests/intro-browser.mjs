@@ -15,6 +15,7 @@ await mkdir('/workspace/scratch',{recursive:true});
 try{
   await page.goto(origin,{waitUntil:'domcontentloaded'});
   await page.locator('.fieldshift-intro').waitFor({state:'visible'});
+  assert.equal(await page.locator('.intro-earth').count(),1,'The opening includes the rotating Earth focal point');
   assert.equal(await page.locator('body').evaluate(el=>el.classList.contains('intro-open')),true,'Opening locks the background');
   assert.match(await page.locator('.fieldshift-intro h1').innerText(),/Every field begins/,'English opening copy is visible');
   await page.screenshot({path:'/workspace/scratch/fieldshift-intro.png'});
