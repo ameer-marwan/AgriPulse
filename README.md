@@ -11,7 +11,7 @@ The editable project is also included. Run `npm run dev` with Node 20+ to open i
 ## What is new in this edition
 
 - A cinematic, skippable FieldShift opening sequence with orbiting Earth-data lines, growing field geometry, and a responsive mobile layout. It appears once per browser session and can be replayed from Settings; its copy follows English, French, and Arabic selections and honors reduced-motion preferences.
-- The opening is now an HD 8.5-second video, with a separate portrait render for phones. It accelerates from an Apollo 17 Earth photograph through an aerial farm view to a seedling, then reveals a concise explanation and the entry button. The farm and plant visuals are illustrative, not observations of a selected field. Earth photograph: NASA Apollo 17 crew, public domain, via Wikimedia Commons. Rebuild both videos with `npm run render:intro` (requires ffmpeg).
+- The opening is a short HD video, with a separate portrait render for phones. It accelerates directly from an Apollo 17 Earth photograph to a seedling, then reveals a concise explanation and the entry button. The plant visual is illustrative, not an observation of a selected field. Earth photograph: NASA Apollo 17 crew, public domain, via Wikimedia Commons. Rebuild both videos with `npm run render:intro` (requires ffmpeg).
 
 - Section-specific scenic backgrounds: selected-field weather controls the sky, sun/moon, cloud, rain and snow overlays; Water has ocean imagery and Soil has a forest backdrop. These decorative scenes stay inside their sections, retain contrast in both appearances, and respect reduced-motion preferences. An unavailable forecast clears the previous weather scene.
 

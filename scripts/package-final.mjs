@@ -35,7 +35,7 @@ js+='(()=>{\n'+app+'\n})();';
 const vendor=await read('dist/vendor/maplibre-gl.js');
 html=html.replace('<script src="vendor/maplibre-gl.js"></script>',()=>'<script>'+scriptSafe(vendor)+'</script>');
 html=html.replace('<script type="module" src="app.js"></script>',()=>'<script>'+scriptSafe(js)+'</script>');
-for (const name of ['intro-earth','intro-farm','intro-plant']) {
+for (const name of ['intro-earth','intro-plant']) {
   html=html.replaceAll('assets/'+name+'.jpg',await dataUri('dist/assets/'+name+'.jpg','image/jpeg'));
 }
 html=html.replaceAll('assets/intro-journey.mp4',await dataUri('dist/assets/intro-journey.mp4','video/mp4'));
