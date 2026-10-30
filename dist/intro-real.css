@@ -42,3 +42,6 @@
 .photographic .intro-enter:disabled{pointer-events:none}
 @media(max-width:600px){.photographic .intro-film{object-fit:cover}}
 @media(prefers-reduced-motion:reduce){.photographic .intro-film{display:none}.photographic .intro-cinematic{background:linear-gradient(#06160f8c,#06160fba),url('assets/intro-plant.jpg') center/cover}.photographic.story-complete .intro-core,.photographic.story-complete .intro-enter{animation:none!important;opacity:1;transform:none}}
+.photographic .intro-cinematic{background-color:#02080d;background-image:radial-gradient(circle,#d6ecff8a 1px,transparent 1.5px),radial-gradient(circle,#b9d6ff70 1px,transparent 1.4px);background-size:127px 139px,211px 229px}
+.photographic .intro-globe{position:absolute;left:50%;top:50%;width:min(72vmin,650px);height:min(72vmin,650px);border-radius:50%;filter:drop-shadow(0 0 28px #43a5d777);pointer-events:none;will-change:transform,opacity}
+@media(prefers-reduced-motion:reduce){.photographic .intro-globe{display:none}}
