@@ -11,7 +11,7 @@ const scriptSafe=s=>s.replace(/<\/script/gi,'<\\/script');
 let html=await read('dist/index.html');
 const logo=await dataUri('dist/assets/logo.svg','image/svg+xml');
 const landscape=await dataUri('dist/assets/field-landscape.jpg','image/jpeg');
-let css=(await Promise.all(['dist/vendor/maplibre-gl.css','dist/styles.css','dist/planning.css','dist/scenes.css'].map(read))).join('\n');
+let css=(await Promise.all(['dist/vendor/maplibre-gl.css','dist/styles.css','dist/planning.css','dist/scenes.css','dist/i18n.css'].map(read))).join('\n');
 css=css.replaceAll("url('assets/field-landscape.jpg')",'url("'+landscape+'")');
 for (const name of ['sea','forest','sky-clear','sky-clouds','sky-storm']) {
   const asset = await dataUri('dist/assets/'+name+'.jpg','image/jpeg');
@@ -20,7 +20,7 @@ for (const name of ['sea','forest','sky-clear','sky-clouds','sky-storm']) {
 html=html.replace(/<link rel="stylesheet" href="[^"]+">/g,'').replace('</head>',()=>'<style>'+css.replace(/<\/style/gi,'<\\/style')+'</style></head>');
 html=html.replaceAll('assets/logo.svg',logo);
 let js='const __fieldshiftModules = {};\n';
-for(const name of ['data','geo','planning','scenes']){
+for(const name of ['data','geo','planning','scenes','i18n']){
   let code=await read('dist/'+name+'.js');
   const names=[...code.matchAll(/^export\s+(?:async\s+)?(?:function|const|let|class)\s+(\w+)/gm)].map(m=>m[1]);
   if(!names.length)throw Error('No named exports in '+name);

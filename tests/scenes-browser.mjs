@@ -20,7 +20,7 @@ await mkdir('/workspace/scratch',{recursive:true});
 try{
   await page.goto(origin+'/#/weather',{waitUntil:'domcontentloaded'});await page.locator('#view-weather .weather-feature').waitFor();
   assert.equal(await page.locator('.section-scene').count(),3,'Only weather, water and soil get scenic layers');
-  for(const name of ['overview','map','crops','profit','reports','assistant','settings'])assert.equal(await page.locator('#view-'+name+' .section-scene').count(),0,name+' has no scenic background');
+  for(const name of ['overview','map','crops','profit','reports','settings'])assert.equal(await page.locator('#view-'+name+' .section-scene').count(),0,name+' has no scenic background');
   for(const [lat,[code,isDay,scene]] of cases){await select(lat);await page.waitForFunction(()=>document.querySelector('[data-weather-status]').textContent==='MODEL');await expectScene(scene);assert.match(await page.locator('[data-stat="conditions"]').first().innerText(),code===999?/Unknown|Unavailable|code/i:/\S/);if(scene==='clear'||scene==='cloudy')await page.screenshot({path:'/workspace/scratch/fieldshift-weather-'+scene+'.png'});}
   await select(10);await expectScene('clear');await select(19);assert.equal(await page.locator('#view-weather').getAttribute('data-weather-scene'),'unknown','Loading new land clears previous scene immediately');await page.waitForFunction(()=>document.querySelector('[data-weather-status]').textContent==='UNAVAILABLE');await expectScene('unknown');
   await select(14);await expectScene('rain');await page.locator('[data-action="refresh"]').click();await expectScene('rain');

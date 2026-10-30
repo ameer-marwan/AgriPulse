@@ -65,7 +65,7 @@ The application stores records on the current device. It has no account database
 
 Soil pH/carbon values come only from user-entered samples. Regional SoilGrids property maps are not connected. Economics uses entered assumptions, not a live commodity feed; it excludes costs that were not entered. Rotation results explain broad trait rules and do not predict yield or certify suitability.
 
-The companion is explicitly a guided evidence explainer. No OpenAI service or secret is configured, and it does not present canned guidance as a connected AI model. A future OpenAI integration must use a server-side secret through the supported Sites secrets workflow. No credentials are needed for the currently connected public data requests.
+FieldShift focuses on field records, weather, water, soil, rotations, scenarios, and reports. No OpenAI service or secret is configured. No credentials are needed for the currently connected public data requests.
 
 ## Deployment
 

@@ -25,7 +25,7 @@ try {
   await page.waitForTimeout(1500);
   assert.equal(errors.length, 0, 'No application startup errors: '+errors.join('; '));
   assert.match(await page.locator('[data-stat="temperature"]').first().innerText(), /21/, 'Live fixture is rendered');
-  for (const route of ['map','weather','soil','water','crops','profit','reports','assistant','settings','overview']) {
+  for (const route of ['map','weather','soil','water','crops','profit','reports','settings','overview']) {
     await page.goto(origin+'/#/'+route, {waitUntil:'domcontentloaded'});
     await page.waitForTimeout(250);
     assert.equal(await page.locator('#view-'+route).isVisible(), true, route+' route visible');
@@ -46,10 +46,6 @@ try {
   assert.match(await page.locator('#soil-samples').innerText(), /QA laboratory sample/);
   await page.reload();
   assert.match(await page.locator('#soil-samples').innerText(), /QA laboratory sample/, 'Sample persists');
-  await page.goto(origin+'/#/assistant');
-  await page.locator('#chat-form [name="message"]').fill('Explain my profit');
-  await page.locator('#chat-form button').click();
-  assert.ok(await page.locator('.assistant-message').count() > 1, 'Guide produces a contextual response');
   await page.goto(origin+'/#/settings');
   await page.locator('#appearance').selectOption('light');
   assert.equal(await page.locator('body').evaluate(el=>el.classList.contains('light')), true);
@@ -60,7 +56,7 @@ try {
   await page.waitForTimeout(400);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth), false, 'No mobile overflow');
   await page.screenshot({path:'/tmp/fieldshift-mobile.png',fullPage:true});
-  for (const route of ['map','weather','soil','water','crops','profit','reports','assistant','settings']) {
+  for (const route of ['map','weather','soil','water','crops','profit','reports','settings']) {
     await page.goto(origin+'/#/'+route, {waitUntil:'domcontentloaded'});
     await page.waitForTimeout(150);
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth), false, route+' has no mobile overflow');

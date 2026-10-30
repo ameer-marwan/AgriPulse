@@ -2,6 +2,7 @@ import {fetchWeather, searchPlaces, fetchNasa, crops, recommendRotations, calcul
 import {createFieldMap, polygonAreaHa, validatePolygon, polygonReferencePoint} from './geo.js';
 import {initPlanning} from './planning.js';
 import {initScenes} from './scenes.js';
+import {initI18n} from './i18n.js';
 
 const $ = (q, root = document) => root.querySelector(q);
 const $$ = (q, root = document) => [...root.querySelectorAll(q)];
@@ -16,7 +17,7 @@ const savedLocation = read('fieldshift.location', null);
 const defaultEconomics = {currency:'USD',areaHa:1,yieldTonnesHa:3,pricePerTonne:350,seedCostHa:120,fertilizerCostHa:180,waterCostHa:80,operationsCostHa:220};
 const state = {
   location:validPoint(savedLocation) ? savedLocation : {...example},
-  preferences:read('fieldshift.preferences',{theme:'dark',units:'metric'}),
+  preferences:read('fieldshift.preferences',{theme:'dark',units:'metric',language:'en'}),
   fields:read('fieldshift.fields',[]),samples:read('fieldshift.samples',[]),journal:read('fieldshift.journal',[]),
   plans:read('fieldshift.plans',[]),weather:null,nasa:null,economics:null,rotationOptions:[],selectedPlan:'soil',
   weatherController:null,nasaController:null,searchController:null,requestId:0,route:'overview',map:null,ready:false,
@@ -24,7 +25,6 @@ const state = {
   economicsInputs:{...defaultEconomics}
 };
 let toastTimer;
-let assistantFieldKey;
 function toast(message) { text('#toast',message); $('#toast').classList.add('visible'); clearTimeout(toastTimer); toastTimer = setTimeout(() => $('#toast').classList.remove('visible'),3400); }
 const icon = name => '<svg aria-hidden="true"><use href="#i-'+name+'"/></svg>';
 const temperatureValue = n => state.preferences.units === 'imperial' ? n * 9 / 5 + 32 : n;
@@ -55,6 +55,11 @@ function restoreFieldSettings(){
 }
 
 function init() {
+  // The guided assistant and the transient top-bar data badge were removed
+  // from the product interface by request.
+  $('#view-assistant')?.remove();
+  $('.advisor-link')?.remove();
+  $('.system-status')?.remove();
   replaceArrowGlyphs();
   const savedPlansPanel=document.createElement('article');savedPlansPanel.className='panel';
   savedPlansPanel.innerHTML='<div class="panel-heading"><div><span class="eyebrow">SAVED FOR THIS LAND</span><h2>Your rotation library</h2></div></div><div id="saved-plans-list"></div>';
@@ -85,19 +90,20 @@ function init() {
   if(!Object.keys(state.fieldSettings).length){const legacy=read('fieldshift.economics',null);if(legacy)state.fieldSettings[fieldKey()]={economics:legacy};}
   restoreFieldSettings();
   $('#water-record-form').elements.date.value=today(); $('#soil-sample-form').elements.date.value=today();
-  renderEconomics(); renderRotations(); renderCropLibrary(); renderReports(); renderAssistantEvidence();
+  renderEconomics(); renderRotations(); renderCropLibrary(); renderReports();
   navigate(); window.addEventListener('hashchange',navigate);
   initPlanning({getState:()=>state,fieldKey,toast,crops});
   initScenes({getState:()=>state});
+  initI18n({preferences:state.preferences,save:preferences => write('fieldshift.preferences',preferences),rerender:() => { renderLocation(); renderRotations(); renderReports(); }});
   loadWeather(); state.ready=true;
 }
 
 function navigate() {
   const candidate = location.hash.replace(/^#\/?/,'').split('?')[0] || 'overview';
-  state.route = ['overview','map','weather','soil','water','crops','profit','reports','assistant','settings'].includes(candidate) ? candidate : 'overview';
+  state.route = ['overview','map','weather','soil','water','crops','profit','reports','settings'].includes(candidate) ? candidate : 'overview';
   $$('.view').forEach(view => {view.hidden=view.id !== 'view-'+state.route;});
   $$('[data-route]').forEach(link => {const active=link.dataset.route===state.route;link.classList.toggle('active',active);if(active)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');});
-  text('#route-name',({overview:'Overview',map:'Field explorer',weather:'Weather',soil:'Soil intelligence',water:'Water',crops:'Crop planner',profit:'Profit & scenarios',reports:'Reports',assistant:'Field assistant',settings:'Settings'})[state.route]);
+  text('#route-name',({overview:'Overview',map:'Field explorer',weather:'Weather',soil:'Soil intelligence',water:'Water',crops:'Crop planner',profit:'Profit & scenarios',reports:'Reports',settings:'Settings'})[state.route]);
   const target = state.route==='map'?$('#explorer-map-host'):$('#home-map-host');
   target.append($('#map-dock'));
   document.body.classList.remove('menu-open');
@@ -148,8 +154,6 @@ function bindEvents() {
   $('#planner-ph').addEventListener('change',renderRotations);
   $('#weather-units').addEventListener('change',event => {state.preferences.units=event.target.value;applyPreferences();if(state.weather)renderWeather();});
   $('#appearance').addEventListener('change',event => {state.preferences.theme=event.target.value;applyPreferences();});
-  $('#chat-form').addEventListener('submit',event => {event.preventDefault();const input=event.target.elements.message;ask(input.value);input.value='';});
-  $$('[data-question]').forEach(button => button.addEventListener('click',() => ask(button.dataset.question)));
   $$('.location-dialog-content').forEach(form => form.addEventListener('keydown',event => {if(event.key==='Escape')form.closest('dialog').close();}));
 }
 function setMapModeButtons(mode) {$$('[data-map-mode]').forEach(b => b.classList.toggle('selected',b.dataset.mapMode===mode));}
@@ -161,12 +165,6 @@ function applyPreferences() {
 }
 function renderLocation() {
   const l=state.location;
-  if(assistantFieldKey&&assistantFieldKey!==fieldKey()){
-    const message=document.createElement('div');message.className='chat-message assistant-message';
-    message.textContent='The active land has changed to '+l.name+'. Ask about the weather, soil records, crop paths, or economics for this location.';
-    $('#chat-messages').replaceChildren(message);
-  }
-  assistantFieldKey=fieldKey();
   text('.field-picker>.eyebrow',l.method==='Example location'?'EXAMPLE LOCATION':'ACTIVE LOCATION');
   text('[data-field-name]',l.name);
   text('[data-coordinates]',Math.abs(l.lat).toFixed(4)+'° '+(l.lat>=0?'N':'S')+' · '+Math.abs(l.lon).toFixed(4)+'° '+(l.lon>=0?'E':'W'));
@@ -176,7 +174,7 @@ function renderLocation() {
   text('#mapped-area',area?area.toFixed(2)+' ha / '+(area*2.47105).toFixed(2)+' acres':'No boundary drawn');
   text('#report-area',area?area.toFixed(2)+' hectares':'Point selection');
   $('#field-name-input').value=l.method==='Example location'?'':l.name;
-  renderAssistantEvidence();renderReports();renderSamples();renderJournal();renderSavedPlans();notifyFieldUpdate();
+  renderReports();renderSamples();renderJournal();renderSavedPlans();notifyFieldUpdate();
 }
 function clearNasa(){
   state.nasaController?.abort();state.nasa=null;
@@ -227,7 +225,7 @@ async function loadWeather() {
   state.weather=null;resetWeather('loading');
   try {const weather=await fetchWeather(state.location,{signal:state.weatherController.signal});if(request!==state.requestId)return;state.weather=weather;renderWeather();renderRotations();}
   catch(error){if(error.name==='AbortError'||request!==state.requestId)return;resetWeather('error');text('[data-stat="conditions"]','Data unavailable');text('#connection-label','PROVIDER UNAVAILABLE');text('#home-forecast',error.message+' Use Refresh conditions on the Weather page to retry.');text('#full-forecast',error.message);text('[data-stat="provenance"]',error.message+' No sample values have been substituted.');}
-  renderAssistantEvidence();renderReports();
+  renderReports();
 }
 function resetWeather(status){
   ['temperature','rainWeek','moisture','etWeek','feelsLike','humidity','wind','timezone','weatherTime','elevation','retrievalShort','retrievedAt'].forEach(key=>text('[data-stat="'+key+'"]','—'));
@@ -237,7 +235,7 @@ function resetWeather(status){
   $('#full-forecast').innerHTML='<p class="empty">'+(status==='loading'?'Loading seven-day outlook…':'Forecast unavailable.')+'</p>';
   $('#hourly-chart').innerHTML='<p class="empty">'+(status==='loading'?'Loading hourly data…':'Hourly data unavailable.')+'</p>';
   $('#water-chart').innerHTML='<p class="empty">'+(status==='loading'?'Loading water signals…':'Water signals unavailable.')+'</p>';
-  renderReports();renderAssistantEvidence();notifyFieldUpdate();
+  renderReports();notifyFieldUpdate();
 }
 function renderWeather(){
   const w=state.weather;if(!w)return;const c=w.current;
@@ -253,7 +251,7 @@ function renderWeather(){
   $('.weather-glyph').textContent=c.weatherCode===0?'☀':c.weatherCode>=51?'☂':'☁';
   $('#home-forecast').innerHTML=w.daily.slice(0,4).map((d,i)=>'<div class="forecast-item"><span class="forecast-date">'+(i===0?'Today':dateShort(d.date))+'</span><span>'+glyph(d)+'</span><span class="forecast-temp">'+temp(d.high)+'</span><span class="forecast-rain">'+rain(d.rain)+'</span></div>').join('');
   $('#full-forecast').innerHTML=w.daily.map((d,i)=>'<div class="day-card"><span class="day">'+(i===0?'Today':dateShort(d.date))+'</span><span class="wx">'+glyph(d)+'</span><strong>'+temp(d.high)+'<small>'+temp(d.low)+'</small></strong><span class="rain">'+rain(d.rain)+'</span></div>').join('');
-  renderHourlyChart();renderWaterChart();renderReports();renderAssistantEvidence();notifyFieldUpdate();
+  renderHourlyChart();renderWaterChart();renderReports();notifyFieldUpdate();
 }
 function renderHourlyChart(){
   const w=state.weather;if(!w)return;
@@ -287,7 +285,7 @@ function renderRotations(){
   const current=crops.find(c=>c.id===$('#current-crop').value)??crops[0];
   const steps=[{name:current.name,label:'CURRENT CROP',kind:current.family},...plan.sequence.slice(0,2).map((id,i)=>({name:crops.find(c=>c.id===id)?.name??id,label:'SEASON '+(i+1),kind:crops.find(c=>c.id===id)?.type??''}))];
   $('#rotation-preview').innerHTML=steps.map((c,i)=>(i?'<span class="rotation-arrow">→</span>':'')+'<div class="rotation-step"><span class="crop-symbol">'+(i?'♧':'♧')+'</span><span class="eyebrow">'+c.label+'</span><strong>'+escapeHTML(c.name)+'</strong><small>'+escapeHTML(c.kind)+'</small></div>').join('');
-  persistFieldSettings();renderAssistantEvidence();notifyFieldUpdate();
+  persistFieldSettings();notifyFieldUpdate();
 }
 function renderCropLibrary(filter=''){$('#crop-library').innerHTML=crops.filter(c=>(c.name+' '+c.family+' '+c.type).toLowerCase().includes(filter.toLowerCase())).map(c=>'<article class="crop-library-card"><span class="eyebrow">'+escapeHTML(c.family.toUpperCase())+'</span><h3>'+escapeHTML(c.name)+'</h3><p>'+escapeHTML(c.notes)+'</p><div class="crop-traits"><span>'+escapeHTML(c.season)+'</span><span>pH '+c.phMin+'–'+c.phMax+'</span><span>'+escapeHTML(c.waterDemand)+' demand</span></div><a href="'+escapeHTML(c.reference)+'" target="_blank" rel="noreferrer">FAO crop reference ↗</a></article>').join('')||'<p class="empty">No matching crops.</p>';replaceArrowGlyphs();}
 function savePlan(){const plan=state.rotationOptions.find(p=>p.id===state.selectedPlan);if(!plan)return;state.plans.push({...plan,id:crypto.randomUUID(),pathId:plan.id,field:fieldKey(),location:{...state.location},savedAt:new Date().toISOString(),economics:{...state.economicsInputs},planner:{...state.fieldSettings[fieldKey()]?.planner}});write('fieldshift.plans',state.plans);addJournal('Rotation plan saved',plan.name);renderSavedPlans();notifyFieldUpdate();toast('Plan and assumptions saved in this browser');}
@@ -321,7 +319,7 @@ function renderSamples(){
   $('#soil-samples').innerHTML=samples.length?samples.map(s=>'<div class="sample-row"><div><h3>'+escapeHTML(s.name)+'</h3><p>pH '+(number(s.ph)?s.ph:'—')+' · Organic carbon '+(number(s.carbon)?s.carbon+'%':'—')+' · Depth '+s.depth+' cm</p><small>'+escapeHTML(s.date)+' · '+escapeHTML(s.method)+'</small></div><div class="button-row">'+(number(s.ph)?'<button class="button secondary small" data-use-sample="'+escapeHTML(s.id)+'">Use pH in planner</button>':'')+'<button data-delete-sample="'+escapeHTML(s.id)+'">Remove</button></div></div>').join(''):'<div class="journal-empty">'+icon('layers')+'<p>No measurements for this field yet. Add a dated sample from your own laboratory or field records.</p><button class="button secondary small" data-action="soil-dialog">Add a sample +</button></div>';
   $$('[data-use-sample]').forEach(button=>button.onclick=()=>{const sample=samples.find(s=>s.id===button.dataset.useSample);if(!sample||sample.field!==fieldKey())return;$('#planner-ph').value=sample.ph;renderRotations();location.hash='/crops';toast('Planner uses pH '+sample.ph+' from '+sample.name+' · '+sample.date);});
   $$('[data-delete-sample]').forEach(b=>b.addEventListener('click',()=>{state.samples=state.samples.filter(s=>s.id!==b.dataset.deleteSample||s.field!==fieldKey());write('fieldshift.samples',state.samples);renderSamples();toast('Sample removed from this device');}));
-  renderAssistantEvidence();notifyFieldUpdate();
+  notifyFieldUpdate();
 }
 function saveWater(event){event.preventDefault();const data=Object.fromEntries(new FormData(event.target));addJournal('Irrigation applied',Number(data.amount).toFixed(1)+' mm · '+data.date);toast('Irrigation record saved');event.target.elements.amount.value='';}
 
@@ -336,17 +334,6 @@ function renderReports(){const body=$('#report-data');if(!body)return;body.inner
 function download(name,content,type){const url=URL.createObjectURL(new Blob([content],{type}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 function exportCSV(){const rows=[['FieldShift field intelligence report'],['Location',state.location.name],['Retrieved',state.weather?.retrievedAt??'Unavailable'],['Signal','Value','Evidence type','Source'],...evidenceRows()];download('fieldshift-report.csv',rows.map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n'),'text/csv;charset=utf-8');toast('Report downloaded');}
 async function loadNasa(){state.nasaController?.abort();state.nasaController=new AbortController();const key=fieldKey();const container=$('#nasa-result');container.innerHTML='<p class="empty">Requesting historical NASA POWER data…</p>';try{const result=await fetchNasa(state.location,{signal:state.nasaController.signal});if(key!==fieldKey())return;state.nasa=result;const max=Math.max(1,...result.months.map(m=>m.rain??0));container.innerHTML='<span class="eyebrow">'+result.year+' MONTHLY RAINFALL · MM</span><div class="nasa-months">'+result.months.map(m=>'<div class="nasa-month" title="Month '+m.month+': '+(number(m.rain)?m.rain.toFixed(1)+' mm':'Unavailable')+'" style="height:'+(number(m.rain)?Math.max(2,m.rain/max*95):0)+'%"><span>'+m.month+'</span></div>').join('')+'</div><p class="fine-print">'+escapeHTML(result.limitations)+'</p><span class="eyebrow">NASA POWER · RETRIEVED '+new Date(result.retrievedAt).toLocaleDateString()+'</span>';notifyFieldUpdate();}catch(error){if(error.name!=='AbortError'&&key===fieldKey())container.innerHTML='<p class="empty">'+escapeHTML(error.message)+' You can retry using the button.</p>';}}
-function renderAssistantEvidence(){const target=$('#assistant-evidence');if(!target)return;const rows=[['SELECTED PLACE',state.location.name],['WEATHER',state.weather?temp(state.weather.current.temperature)+' · '+formatWeatherCode(state.weather.current.weatherCode):'Not currently available'],['SURFACE MOISTURE',state.weather?moisture(state.weather.current.soilMoisture)+' · 0–1 cm model layer':'Not currently available'],['LOCAL SOIL SAMPLES',String(state.samples.filter(s=>s.field===fieldKey()).length)+' user records'],['GROSS MARGIN',state.economics?money(state.economics.perHa.margin)+' / ha · assumptions':'Not calculated']];target.innerHTML=rows.map(([name,value])=>'<div class="evidence-row"><small>'+escapeHTML(name)+'</small><strong>'+escapeHTML(value)+'</strong></div>').join('');}
-function ask(question){question=question.trim();if(!question)return;const container=$('#chat-messages');const user=document.createElement('div');user.className='chat-message user-message';user.textContent=question;container.append(user);const answer=document.createElement('div');answer.className='chat-message assistant-message';answer.textContent=guidedAnswer(question);const source=document.createElement('small');source.textContent='Guided explanation from the visible field data. OpenAI is not connected.';answer.append(source);container.append(answer);container.scrollTop=container.scrollHeight;}
-function guidedAnswer(question){const q=question.toLowerCase(),w=state.weather;let answer='';
-  if(/soil|moisture|carbon|ph\b/.test(q)){const samples=state.samples.filter(s=>s.field===fieldKey());answer='For '+state.location.name+', '+(w?'the current shallow moisture estimate is '+moisture(w.current.soilMoisture)+'.':'a current soil-moisture estimate is unavailable. ')+ ' This describes a modeled 0–1 cm layer. It cannot establish deeper root-zone water, pH, texture, or nutrients. '+(samples.length?'You have '+samples.length+' dated soil record(s) for this field.':'A dated laboratory sample with depth and method would add useful evidence.');}
-  else if(/profit|margin|price|cost|money|yield/.test(q)){const e=state.economics;answer=e?'The entered scenario has revenue of '+money(e.revenue)+' and costs of '+money(e.cost)+', leaving a gross margin of '+money(e.margin)+' over '+e.areaHa+' hectare(s). The break-even sale price is '+money(e.breakEvenPrice)+' per tonne. Land rent, tax, finance, and unentered costs are excluded. Compare the conservative price-and-yield case before relying on this estimate.':'Enter a yield, local sale price, area, and itemized costs in Profit & scenarios to calculate a transparent gross margin.';}
-  else if(/rain|weather|water|irrigat|heat/.test(q)){answer=w?'At '+state.location.name+', the current model temperature is '+temp(w.current.temperature)+' and the seven-day forecast rain is '+rain(total(w.daily,'rain'))+'. Reference ET₀ is '+rain(total(w.daily,'et0'))+'. These figures help frame water questions, but irrigation decisions also need crop stage, rooting depth, soil storage, efficiency, and actual water access. Valid time: '+w.current.time+' ('+w.timezone+').':'Weather is unavailable for the current selection. Open the Weather page and refresh the provider before interpreting field conditions.';}
-  else if(/crop|rotation|plant|season/.test(q)){const plan=state.rotationOptions.find(p=>p.id===state.selectedPlan);answer=plan?'The selected '+plan.name+' scenario considers '+plan.sequence.map(id=>crops.find(c=>c.id===id)?.name??id).join(' → ')+'. '+plan.reasons[0]+' This is broad crop-trait screening; a future planting decision needs regional variety, season, disease, soil-profile, and market information.':'Compare rotation paths in Crop planner after entering your current crop, water access, and known soil pH.';}
-  else answer='For '+state.location.name+', the workspace has '+(w?'weather-model analysis and a seven-day forecast':'a selected location, while weather is unavailable')+', a crop-trait comparison, and the economics assumptions you entered. Missing evidence includes a laboratory soil profile, field crop history, local varieties and planting windows, actual irrigation supply, and a verified local sale price. I can explain the weather, soil moisture, crop paths, or margin when you ask about one of those.';
-  return answer;
-}
-
 init();
 
 function replaceArrowGlyphs() {
