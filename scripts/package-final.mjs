@@ -11,7 +11,7 @@ const scriptSafe=s=>s.replace(/<\/script/gi,'<\\/script');
 let html=await read('dist/index.html');
 const logo=await dataUri('dist/assets/logo.svg','image/svg+xml');
 const landscape=await dataUri('dist/assets/field-landscape.jpg','image/jpeg');
-let css=(await Promise.all(['dist/vendor/maplibre-gl.css','dist/styles.css','dist/planning.css','dist/scenes.css','dist/i18n.css','dist/intro.css'].map(read))).join('\n');
+let css=(await Promise.all(['dist/vendor/maplibre-gl.css','dist/styles.css','dist/planning.css','dist/scenes.css','dist/i18n.css','dist/intro.css','dist/intro-real.css'].map(read))).join('\n');
 css=css.replaceAll("url('assets/field-landscape.jpg')",'url("'+landscape+'")');
 for (const name of ['sea','forest','sky-clear','sky-clouds','sky-storm']) {
   const asset = await dataUri('dist/assets/'+name+'.jpg','image/jpeg');
@@ -35,6 +35,9 @@ js+='(()=>{\n'+app+'\n})();';
 const vendor=await read('dist/vendor/maplibre-gl.js');
 html=html.replace('<script src="vendor/maplibre-gl.js"></script>',()=>'<script>'+scriptSafe(vendor)+'</script>');
 html=html.replace('<script type="module" src="app.js"></script>',()=>'<script>'+scriptSafe(js)+'</script>');
+for (const name of ['intro-earth','intro-farm','intro-plant']) {
+  html=html.replaceAll('assets/'+name+'.jpg',await dataUri('dist/assets/'+name+'.jpg','image/jpeg'));
+}
 const target=resolve(out,'FieldShift-Final.html');
 await writeFile(target,html);
 console.log('Portable website: '+target+' ('+Buffer.byteLength(html).toLocaleString()+' bytes)');

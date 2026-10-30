@@ -20,7 +20,9 @@ try{
   assert.equal(await page.locator('.intro-plant').count(),1,'The Earth sequence includes a plant close-up stage');
   assert.equal(await page.locator('body').evaluate(el=>el.classList.contains('intro-open')),true,'Opening locks the background');
   assert.match(await page.locator('.fieldshift-intro h1').innerText(),/Every field begins/,'English opening copy is visible');
-  await page.waitForTimeout(6200);
+  assert.equal(await page.locator('.intro-enter').isDisabled(),true,'Entry waits until the visual journey ends');
+  await page.waitForTimeout(8300);
+  assert.equal(await page.locator('.intro-enter').isEnabled(),true,'Entry becomes available after the seedling and copy');
   await page.screenshot({path:'/workspace/scratch/fieldshift-intro.png'});
   await page.locator('.intro-enter').click();
   await page.locator('.fieldshift-intro').waitFor({state:'hidden'});
