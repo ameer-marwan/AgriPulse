@@ -16,8 +16,11 @@ try{
   await page.goto(origin,{waitUntil:'domcontentloaded'});
   await page.locator('.fieldshift-intro').waitFor({state:'visible'});
   assert.equal(await page.locator('.intro-earth').count(),1,'The opening includes the rotating Earth focal point');
+  assert.equal(await page.locator('.intro-land').count(),1,'The Earth sequence includes a farm-land zoom stage');
+  assert.equal(await page.locator('.intro-plant').count(),1,'The Earth sequence includes a plant close-up stage');
   assert.equal(await page.locator('body').evaluate(el=>el.classList.contains('intro-open')),true,'Opening locks the background');
   assert.match(await page.locator('.fieldshift-intro h1').innerText(),/Every field begins/,'English opening copy is visible');
+  await page.waitForTimeout(6200);
   await page.screenshot({path:'/workspace/scratch/fieldshift-intro.png'});
   await page.locator('.intro-enter').click();
   await page.locator('.fieldshift-intro').waitFor({state:'hidden'});
@@ -39,7 +42,7 @@ try{
   await page.locator('.intro-skip').click();
   await page.emulateMedia({reducedMotion:'reduce'});
   await page.locator('.intro-replay-setting button').click();
-  assert.equal(await page.locator('.intro-orbit').first().evaluate(el=>getComputedStyle(el).animationName),'none','Reduced-motion disables orbit animation');
+  assert.equal(await page.locator('.intro-earth').evaluate(el=>getComputedStyle(el).animationName),'none','Reduced-motion disables Earth animation');
   assert.deepEqual(errors,[],'No uncaught opening errors');
   console.log('PASS: cinematic intro, session skip, replay, French/Arabic copy, phone layout, reduced motion.');
 }finally{await browser.close();}
