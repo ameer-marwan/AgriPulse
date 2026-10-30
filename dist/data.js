@@ -48,7 +48,7 @@ export async function fetchWeather(point, { signal } = {}) {
   if (saved && Date.now() - saved.at < 15 * 60 * 1000) return { ...saved.value, cached: true };
   const query = new URLSearchParams({
     latitude: lat, longitude: lon,
-    current: 'temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code',
+    current: 'temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code,is_day',
     hourly: 'temperature_2m,precipitation,soil_moisture_0_to_1cm,wind_speed_10m,relative_humidity_2m,weather_code',
     daily: 'temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,et0_fao_evapotranspiration,wind_speed_10m_max',
     timezone: 'auto', forecast_days: '7', temperature_unit: 'celsius', wind_speed_unit: 'kmh', precipitation_unit: 'mm'
@@ -68,6 +68,7 @@ export async function fetchWeather(point, { signal } = {}) {
       temperature: number(current.temperature_2m), feelsLike: number(current.apparent_temperature),
       humidity: number(current.relative_humidity_2m), wind: number(current.wind_speed_10m),
       weatherCode: number(current.weather_code),
+      isDay: current.is_day === 1 ? true : current.is_day === 0 ? false : null,
       soilMoisture: hourIndex >= 0 ? arrayValue(data.hourly, 'soil_moisture_0_to_1cm', hourIndex) : null,
       time: typeof current.time === 'string' ? current.time : null
     },

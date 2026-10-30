@@ -1,6 +1,7 @@
 import {fetchWeather, searchPlaces, fetchNasa, crops, recommendRotations, calculateEconomics, formatWeatherCode} from './data.js';
 import {createFieldMap, polygonAreaHa, validatePolygon, polygonReferencePoint} from './geo.js';
 import {initPlanning} from './planning.js';
+import {initScenes} from './scenes.js';
 
 const $ = (q, root = document) => root.querySelector(q);
 const $$ = (q, root = document) => [...root.querySelectorAll(q)];
@@ -87,6 +88,7 @@ function init() {
   renderEconomics(); renderRotations(); renderCropLibrary(); renderReports(); renderAssistantEvidence();
   navigate(); window.addEventListener('hashchange',navigate);
   initPlanning({getState:()=>state,fieldKey,toast,crops});
+  initScenes({getState:()=>state});
   loadWeather(); state.ready=true;
 }
 

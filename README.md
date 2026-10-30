@@ -10,6 +10,8 @@ The editable project is also included. Run `npm run dev` with Node 20+ to open i
 
 ## What is new in this edition
 
+- Section-specific scenic backgrounds: selected-field weather controls the sky, sun/moon, cloud, rain and snow overlays; Water has ocean imagery and Soil has a forest backdrop. These decorative scenes stay inside their sections, retain contrast in both appearances, and respect reduced-motion preferences. An unavailable forecast clears the previous weather scene.
+
 - Every selected coordinate has its own economics, crop-planner inputs, season schedule, scenario settings, soil records and observations. Returning to a field restores its records. A drawn/imported boundary supplies geometric area; changing land never transfers the previous field's yield or price assumptions.
 - Saved rotation plans can be restored and removed for the selected field, with the assumptions they were saved with.
 - Editable five-stage season timeline with planting date, stage durations and calendar dates. Durations are scheduling assumptions, not crop growth predictions.
@@ -54,6 +56,7 @@ For browser checks, install development dependencies (`npm install`) and Chromiu
 - OpenStreetMap contributors: optional cartographic basemap (the UI's alternative map layer).
 - [FAO crop information](https://www.fao.org/land-water/databases-and-software/crop-information/en/): general crop references. The library is broad trait screening and requires regional validation.
 - Landscape banner: [Unsplash photograph](https://images.unsplash.com/photo-1500382017468-9049fed747ef), used as an illustrative landscape, not as evidence about the selected place.
+- Section imagery from Unsplash: [sea](https://images.unsplash.com/photo-1518837695005-2083093ee35b), [forest](https://images.unsplash.com/photo-1448375240586-882707db888b), [clear sky](https://images.unsplash.com/photo-1601297183305-6df142704ea2), [clouds](https://images.unsplash.com/photo-1517483000871-1dbf64a6e1c6), and [storm sky](https://images.unsplash.com/photo-1534088568595-a066f410bcda). Images are bundled locally and are illustrative, not imagery of the chosen field.
 - MapLibre GL JS v5.6.1 and its CSS are vendored from the official distribution; see included license.
 
 ## Important boundaries
