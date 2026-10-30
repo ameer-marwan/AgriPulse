@@ -38,8 +38,8 @@ html=html.replace('<script type="module" src="app.js"></script>',()=>'<script>'+
 for (const name of ['intro-earth','intro-plant']) {
   html=html.replaceAll('assets/'+name+'.jpg',await dataUri('dist/assets/'+name+'.jpg','image/jpeg'));
 }
-html=html.replaceAll('assets/intro-journey.mp4',await dataUri('dist/assets/intro-journey.mp4','video/mp4'));
-html=html.replaceAll('assets/intro-journey-mobile.mp4',await dataUri('dist/assets/intro-journey-mobile.mp4','video/mp4'));
+html=html.replaceAll('assets/intro-zoom.mp4',await dataUri('dist/assets/intro-zoom.mp4','video/mp4'));
+html=html.replaceAll('assets/intro-zoom-mobile.mp4',await dataUri('dist/assets/intro-zoom-mobile.mp4','video/mp4'));
 const target=resolve(out,'FieldShift-Final.html');
 await writeFile(target,html);
 console.log('Portable website: '+target+' ('+Buffer.byteLength(html).toLocaleString()+' bytes)');

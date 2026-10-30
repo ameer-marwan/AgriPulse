@@ -27,7 +27,9 @@ try{
   await page.locator('.fieldshift-intro').waitFor({state:'hidden'});
   assert.equal(await page.locator('body').evaluate(el=>el.classList.contains('intro-open')),false,'Entering restores the workspace');
   await page.reload({waitUntil:'domcontentloaded'});
-  assert.equal(await page.locator('.fieldshift-intro').isHidden(),true,'Opening is not repeated in the same browser session');
+  await page.locator('.fieldshift-intro').waitFor({state:'visible'});
+  assert.equal(await page.locator('.fieldshift-intro').isVisible(),true,'Opening replays when the site is reopened');
+  await page.locator('.intro-skip').click();
   await page.goto(origin+'/#/settings',{waitUntil:'domcontentloaded'});
   await page.locator('#language').selectOption('fr');
   await page.locator('.intro-replay-setting button').click();

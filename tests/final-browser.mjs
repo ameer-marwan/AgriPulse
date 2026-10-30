@@ -6,7 +6,7 @@ try {playwright=require('playwright');} catch {playwright=require('/opt/codex/ru
 const origin=process.env.FIELDSHIFT_PREVIEW||'http://127.0.0.1:4173';
 const browser=await playwright.chromium.launch({executablePath:'/usr/bin/chromium',headless:true,proxy:process.env.HTTPS_PROXY?{server:process.env.HTTPS_PROXY,bypass:'127.0.0.1,localhost'}:undefined,args:['--no-sandbox','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
 const context=await browser.newContext({viewport:{width:1440,height:1000}});
-await context.addInitScript(()=>sessionStorage.setItem('fieldshift.intro.seen','1'));
+await context.addInitScript(()=>sessionStorage.setItem('fieldshift.intro.skip-auto','1'));
 const page=await context.newPage(),errors=[];
 page.on('pageerror',error=>errors.push(error.message));
 const day='2026-10-30';
