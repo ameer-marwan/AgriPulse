@@ -1,6 +1,13 @@
-.fieldshift-intro.text-intro{background:#0b1a14;color:#f1f6ea;padding:24px}
-.text-intro-content{width:min(100%,620px);text-align:center}
-.text-intro-content h1{margin:0;color:#f3f8ed;font-size:clamp(48px,9vw,100px);line-height:1;letter-spacing:-.055em;font-weight:650}
-.text-intro-content p{max-width:510px;margin:24px auto 32px;color:#b9cbb9;font-size:clamp(15px,2vw,18px);line-height:1.7}
-.text-intro-enter{border:0;border-radius:8px;padding:15px 25px;background:#c9ed82;color:#142916;font:inherit;font-weight:700;cursor:pointer}
-.text-intro-enter:hover{background:#dcf6a5}.text-intro-enter:focus-visible{outline:3px solid #f1ffcf;outline-offset:5px}
+.fieldshift-intro.earth-intro{background:#02090d;color:#f2f7ed;transition:background .45s ease,opacity .38s ease,visibility .38s ease}
+.earth-space{position:absolute;inset:0;display:grid;place-items:center;overflow:hidden;background-image:radial-gradient(circle,#dceeff8a 1px,transparent 1.4px),radial-gradient(circle,#c5dcff62 1px,transparent 1.4px);background-size:137px 149px,211px 229px;transition:opacity .55s ease}
+.earth-canvas{width:min(66vmin,620px);height:min(66vmin,620px);border-radius:50%;filter:drop-shadow(0 0 35px #44a4d775);transition:transform .9s cubic-bezier(.35,.02,.8,.2),opacity .72s ease;will-change:transform,opacity}
+.earth-intro.zooming .earth-canvas{transform:scale(8);opacity:0}
+.earth-intro.revealed{background:#0b1a14}
+.earth-intro.revealed .earth-space{display:none}
+.earth-intro-copy{position:relative;z-index:2;width:min(100%,650px);padding:24px;text-align:center;opacity:0;transform:translateY(20px);pointer-events:none}
+.earth-intro.revealed .earth-intro-copy{opacity:1;transform:translateY(0);pointer-events:auto;transition:opacity .62s ease,transform .62s ease}
+.earth-intro-copy h1{margin:0;color:#f3f8ed;font-size:clamp(52px,9vw,100px);line-height:1;letter-spacing:-.055em;font-weight:650}
+.earth-intro-copy p{max-width:520px;margin:24px auto 32px;color:#b9cbb9;font-size:clamp(15px,2vw,18px);line-height:1.7}
+.earth-intro-enter{border:0;border-radius:8px;padding:15px 25px;background:#c9ed82;color:#142916;font:inherit;font-weight:700;cursor:pointer}.earth-intro-enter:hover{background:#dcf6a5}.earth-intro-enter:focus-visible{outline:3px solid #f1ffcf;outline-offset:5px}
+@media(max-width:600px){.earth-canvas{width:78vmin;height:78vmin}.earth-intro-copy{padding:20px}.earth-intro-copy h1{font-size:58px}.earth-intro-copy p{font-size:14px}}
+@media(prefers-reduced-motion:reduce){.earth-space{display:none}.earth-intro-copy{opacity:1;transform:none;pointer-events:auto}}
