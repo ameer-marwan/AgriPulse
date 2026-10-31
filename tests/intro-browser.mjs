@@ -15,9 +15,10 @@ try{
   await page.waitForFunction(()=>document.querySelector('.fieldshift-intro').classList.contains('revealed'));
   assert.equal(await intro.locator('.earth-space').isHidden(),true,'Earth is absent from the final title screen');
   assert.equal(await intro.locator('h1').innerText(),'FieldShift');
-  assert.match(await intro.locator('p').innerText(),/weather, water, soil/);
+  assert.match(await intro.locator('p').innerText(),/Earth observations.*profit scenarios/);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,'Fits a phone');
   await intro.getByRole('button',{name:'Enter FieldShift'}).click();await intro.waitFor({state:'hidden'});
+  assert.equal(await page.locator('.sidebar .challenge-mark').count(),0,'Challenge label is removed from the sidebar');
   await page.goto(origin+'/#/settings',{waitUntil:'domcontentloaded'});
   await page.locator('#language').selectOption('fr');await page.locator('.intro-replay-setting button').click();
   assert.match(await intro.locator('p').innerText(),/météo/,'French caption');await intro.locator('button').click();
