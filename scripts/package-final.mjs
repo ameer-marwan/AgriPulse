@@ -19,6 +19,7 @@ for (const name of ['sea','forest','sky-clear','sky-clouds','sky-storm']) {
 }
 html=html.replace(/<link rel="stylesheet" href="[^"]+">/g,'').replace('</head>',()=>'<style>'+css.replace(/<\/style/gi,'<\\/style')+'</style></head>');
 html=html.replaceAll('assets/logo-new.png',logo);
+html=html.replaceAll('assets/dunia-alajial-logo.jpg',await dataUri('dist/assets/dunia-alajial-logo.jpg','image/jpeg'));
 let js='const __fieldshiftModules = {};\n';
 for(const name of ['data','geo','planning','scenes','i18n','intro']){
   let code=await read('dist/'+name+'.js');

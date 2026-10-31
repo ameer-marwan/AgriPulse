@@ -27,6 +27,10 @@ try{
   assert.equal(await page.locator('#view-about').isVisible(),true,'About us page opens');
   assert.match(await page.locator('#view-about').innerText(),/Dunia Alajial International School/);
   assert.match(await page.locator('#view-about').innerText(),/The Tech Team/);
+  assert.match(await page.locator('#view-about .school-logo').getAttribute('src'),/dunia-alajial-logo\.jpg/,'School logo appears on the About page');
+  const schoolLink=page.locator('#view-about .about-learn');
+  assert.equal(await schoolLink.getAttribute('href'),'https://share.google/ZDHDGsGC8tVU8AKJr');
+  assert.equal(await schoolLink.getAttribute('target'),'_blank','School link opens in a new tab');
   await page.goto(origin+'/#/settings',{waitUntil:'domcontentloaded'});
   await page.locator('#language').selectOption('fr');await page.locator('.intro-replay-setting button').click();
   assert.match(await intro.locator('p').innerText(),/météo/,'French caption');await intro.locator('button').click();
