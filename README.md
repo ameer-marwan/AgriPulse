@@ -11,6 +11,7 @@ The editable project is also included. Run `npm run dev` with Node 20+ to open i
 ## What is new in this edition
 
 - A rotating Earth opens the experience, holds for one second, then zooms past the camera and disappears. The final screen contains only the FieldShift title, a short caption, and the entry button. It can be replayed from Settings and follows English, French, and Arabic selections.
+- The FieldShift emblem now accompanies the intro title, and a dedicated About us page introduces Dunia Alajial International School and the Tech Team in all three interface languages.
 
 - Section-specific scenic backgrounds: selected-field weather controls the sky, sun/moon, cloud, rain and snow overlays; Water has ocean imagery and Soil has a forest backdrop. These decorative scenes stay inside their sections, retain contrast in both appearances, and respect reduced-motion preferences. An unavailable forecast clears the previous weather scene.
 
@@ -42,7 +43,7 @@ For browser checks, install development dependencies (`npm install`) and Chromiu
 
 ## Working capabilities
 
-- Ten hash routes with browser navigation, phone navigation, dark/daylight themes, and metric/imperial weather units.
+- Eleven hash routes with browser navigation, phone navigation, dark/daylight themes, and metric/imperial weather units.
 - A shared selected point, optional device location, place search, manual coordinates, satellite map, and stationary interactive globe.
 - Drawn or GeoJSON field boundaries, geodesic area, self-intersection validation, dateline-aware reference points, and local field persistence. The editor supports a single polygon outer ring, not holes or multipolygons.
 - Seven-day weather, hourly temperatures, precipitation, reference ET0, and modeled 0–1 cm soil moisture. Requests cancel on location changes and failures remain unavailable.

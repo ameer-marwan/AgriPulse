@@ -61,6 +61,7 @@ function init() {
   $('#view-assistant')?.remove();
   $('.advisor-link')?.remove();
   $('.system-status')?.remove();
+  const aboutLink=document.createElement('a');aboutLink.href='#/about';aboutLink.dataset.route='about';aboutLink.innerHTML='<svg><use href="#i-globe"/></svg>About us';$('.side-nav').append(aboutLink);
   replaceArrowGlyphs();
   const savedPlansPanel=document.createElement('article');savedPlansPanel.className='panel';
   savedPlansPanel.innerHTML='<div class="panel-heading"><div><span class="eyebrow">SAVED FOR THIS LAND</span><h2>Your rotation library</h2></div></div><div id="saved-plans-list"></div>';
@@ -102,10 +103,10 @@ function init() {
 
 function navigate() {
   const candidate = location.hash.replace(/^#\/?/,'').split('?')[0] || 'overview';
-  state.route = ['overview','map','weather','soil','water','crops','profit','reports','settings'].includes(candidate) ? candidate : 'overview';
+  state.route = ['overview','map','weather','soil','water','crops','profit','reports','settings','about'].includes(candidate) ? candidate : 'overview';
   $$('.view').forEach(view => {view.hidden=view.id !== 'view-'+state.route;});
   $$('[data-route]').forEach(link => {const active=link.dataset.route===state.route;link.classList.toggle('active',active);if(active)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');});
-  text('#route-name',({overview:'Overview',map:'Field explorer',weather:'Weather',soil:'Soil intelligence',water:'Water',crops:'Crop planner',profit:'Profit & scenarios',reports:'Reports',settings:'Settings'})[state.route]);
+  text('#route-name',({overview:'Overview',map:'Field explorer',weather:'Weather',soil:'Soil intelligence',water:'Water',crops:'Crop planner',profit:'Profit & scenarios',reports:'Reports',settings:'Settings',about:'About us'})[state.route]);
   const target = state.route==='map'?$('#explorer-map-host'):$('#home-map-host');
   target.append($('#map-dock'));
   document.body.classList.remove('menu-open');

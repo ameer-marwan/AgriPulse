@@ -12,7 +12,7 @@ function createEarth(canvas){
 export function initIntro({language='en'}={}){
   let current=copy[language]?language:'en',zoomTimer,revealTimer,hideTimer;
   const overlay=document.createElement('section');overlay.className='fieldshift-intro earth-intro';overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');overlay.setAttribute('aria-label','FieldShift introduction');
-  overlay.innerHTML='<div class="earth-space" aria-hidden="true"><canvas class="earth-canvas"></canvas></div><div class="earth-intro-copy"><h1></h1><p></p><button type="button" class="earth-intro-enter"></button></div>';document.body.append(overlay);
+  overlay.innerHTML='<div class="earth-space" aria-hidden="true"><canvas class="earth-canvas"></canvas></div><div class="earth-intro-copy"><img class="earth-intro-logo" src="assets/logo-new.png" alt="FieldShift logo"><h1></h1><p></p><button type="button" class="earth-intro-enter"></button></div>';document.body.append(overlay);
   const earth=createEarth(overlay.querySelector('.earth-canvas')),enter=overlay.querySelector('.earth-intro-enter');
   const panel=document.querySelector('.settings-panel'),row=document.createElement('div');row.className='setting-item intro-replay-setting';row.innerHTML='<div><b></b><p></p></div><button type="button" class="button secondary small"></button>';panel.append(row);
   const apply=()=>{const words=copy[current];overlay.querySelector('h1').textContent=words.title;overlay.querySelector('p').textContent=words.body;enter.textContent=words.enter;row.querySelector('b').textContent=words.replay;row.querySelector('p').textContent=words.replayBody;row.querySelector('button').textContent=words.replay;};

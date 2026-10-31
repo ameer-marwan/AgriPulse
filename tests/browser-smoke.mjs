@@ -26,7 +26,7 @@ try {
   await page.waitForTimeout(1500);
   assert.equal(errors.length, 0, 'No application startup errors: '+errors.join('; '));
   assert.match(await page.locator('[data-stat="temperature"]').first().innerText(), /21/, 'Live fixture is rendered');
-  for (const route of ['map','weather','soil','water','crops','profit','reports','settings','overview']) {
+  for (const route of ['map','weather','soil','water','crops','profit','reports','settings','about','overview']) {
     await page.goto(origin+'/#/'+route, {waitUntil:'domcontentloaded'});
     await page.waitForTimeout(250);
     assert.equal(await page.locator('#view-'+route).isVisible(), true, route+' route visible');
@@ -57,7 +57,7 @@ try {
   await page.waitForTimeout(400);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth), false, 'No mobile overflow');
   await page.screenshot({path:'/tmp/fieldshift-mobile.png',fullPage:true});
-  for (const route of ['map','weather','soil','water','crops','profit','reports','settings']) {
+  for (const route of ['map','weather','soil','water','crops','profit','reports','settings','about']) {
     await page.goto(origin+'/#/'+route, {waitUntil:'domcontentloaded'});
     await page.waitForTimeout(150);
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth), false, route+' has no mobile overflow');

@@ -24,6 +24,13 @@ const translations = {
   }
 };
 
+Object.assign(translations.fr,{
+  'About us':'À propos','ABOUT FIELD SHIFT':'À PROPOS DE FIELD SHIFT','Built by students. Grounded in purpose.':'Créé par des élèves. Guidé par une mission.','Meet the school and team behind FieldShift.':'Découvrez l’école et l’équipe derrière FieldShift.','OUR SCHOOL':'NOTRE ÉCOLE','Dunia Alajial International School':'École internationale Dunia Alajial','FieldShift was developed at Dunia Alajial International School, where students turn scientific ideas, technology and teamwork into projects designed to help people and communities.':'FieldShift a été développé à l’École internationale Dunia Alajial, où les élèves transforment les idées scientifiques, la technologie et le travail d’équipe en projets conçus pour aider les personnes et les communautés.','OUR TEAM':'NOTRE ÉQUIPE','The Tech Team':'L’équipe technique','The Tech Team created the FieldShift experience—from the visual identity and interface to the field planning tools that connect Earth observations with practical farm decisions.':'L’équipe technique a créé l’expérience FieldShift, de l’identité visuelle et de l’interface aux outils de planification qui relient les observations de la Terre aux décisions agricoles pratiques.'
+});
+Object.assign(translations.ar,{
+  'About us':'من نحن','ABOUT FIELD SHIFT':'عن فيلد شيفت','Built by students. Grounded in purpose.':'صنعه الطلاب. ويقوده هدف واضح.','Meet the school and team behind FieldShift.':'تعرّف على المدرسة والفريق وراء فيلد شيفت.','OUR SCHOOL':'مدرستنا','Dunia Alajial International School':'مدرسة دنيا الأجيال العالمية','FieldShift was developed at Dunia Alajial International School, where students turn scientific ideas, technology and teamwork into projects designed to help people and communities.':'تم تطوير فيلد شيفت في مدرسة دنيا الأجيال العالمية، حيث يحول الطلاب الأفكار العلمية والتقنية والعمل الجماعي إلى مشاريع صممت لخدمة الناس والمجتمعات.','OUR TEAM':'فريقنا','The Tech Team':'فريق التقنية','The Tech Team created the FieldShift experience—from the visual identity and interface to the field planning tools that connect Earth observations with practical farm decisions.':'أنشأ فريق التقنية تجربة فيلد شيفت، بدءًا من الهوية البصرية والواجهة ووصولًا إلى أدوات تخطيط الحقول التي تربط رصد الأرض بالقرارات الزراعية العملية.'
+});
+
 const originalText = new WeakMap();
 const originalAttribute = new WeakMap();
 let active = 'en';

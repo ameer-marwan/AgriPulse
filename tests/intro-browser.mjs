@@ -14,6 +14,7 @@ try{
   assert.equal(await intro.evaluate(el=>el.classList.contains('zooming')),true,'Earth begins zooming after one second');
   await page.waitForFunction(()=>document.querySelector('.fieldshift-intro').classList.contains('revealed'));
   assert.equal(await intro.locator('.earth-space').isHidden(),true,'Earth is absent from the final title screen');
+  assert.match(await intro.locator('.earth-intro-logo').getAttribute('src'),/logo-new\.png/,'FieldShift logo appears with the intro title');
   assert.equal(await intro.locator('h1').innerText(),'FieldShift');
   assert.match(await intro.locator('p').innerText(),/Earth observations.*profit scenarios/);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,'Fits a phone');
@@ -22,6 +23,10 @@ try{
   assert.equal(await page.title(),'FieldShift','Browser title is exactly FieldShift');
   assert.equal(await page.locator('.topbar-right>.avatar').count(),0,'FS badge is removed from the upper bar');
   assert.match(await page.locator('.sidebar>.brand img').getAttribute('src'),/logo-new\.png/,'New logo is used in the sidebar');
+  await page.goto(origin+'/#/about',{waitUntil:'domcontentloaded'});
+  assert.equal(await page.locator('#view-about').isVisible(),true,'About us page opens');
+  assert.match(await page.locator('#view-about').innerText(),/Dunia Alajial International School/);
+  assert.match(await page.locator('#view-about').innerText(),/The Tech Team/);
   await page.goto(origin+'/#/settings',{waitUntil:'domcontentloaded'});
   await page.locator('#language').selectOption('fr');await page.locator('.intro-replay-setting button').click();
   assert.match(await intro.locator('p').innerText(),/météo/,'French caption');await intro.locator('button').click();
