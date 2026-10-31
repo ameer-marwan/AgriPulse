@@ -19,6 +19,9 @@ try{
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,'Fits a phone');
   await intro.getByRole('button',{name:'Enter FieldShift'}).click();await intro.waitFor({state:'hidden'});
   assert.equal(await page.locator('.sidebar .challenge-mark').count(),0,'Challenge label is removed from the sidebar');
+  assert.equal(await page.title(),'FieldShift','Browser title is exactly FieldShift');
+  assert.equal(await page.locator('.topbar-right>.avatar').count(),0,'FS badge is removed from the upper bar');
+  assert.match(await page.locator('.sidebar>.brand img').getAttribute('src'),/logo-new\.png/,'New logo is used in the sidebar');
   await page.goto(origin+'/#/settings',{waitUntil:'domcontentloaded'});
   await page.locator('#language').selectOption('fr');await page.locator('.intro-replay-setting button').click();
   assert.match(await intro.locator('p').innerText(),/météo/,'French caption');await intro.locator('button').click();

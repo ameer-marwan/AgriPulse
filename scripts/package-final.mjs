@@ -9,7 +9,7 @@ const read=path=>readFile(resolve(root,path),'utf8');
 const dataUri=async(path,type)=>'data:'+type+';base64,'+(await readFile(resolve(root,path))).toString('base64');
 const scriptSafe=s=>s.replace(/<\/script/gi,'<\\/script');
 let html=await read('dist/index.html');
-const logo=await dataUri('dist/assets/logo.svg','image/svg+xml');
+const logo=await dataUri('dist/assets/logo-new.png','image/png');
 const landscape=await dataUri('dist/assets/field-landscape.jpg','image/jpeg');
 let css=(await Promise.all(['dist/vendor/maplibre-gl.css','dist/styles.css','dist/planning.css','dist/scenes.css','dist/i18n.css','dist/intro.css','dist/intro-real.css'].map(read))).join('\n');
 css=css.replaceAll("url('assets/field-landscape.jpg')",'url("'+landscape+'")');
@@ -18,7 +18,7 @@ for (const name of ['sea','forest','sky-clear','sky-clouds','sky-storm']) {
   css = css.replace(new RegExp('url\\([\'\"]?assets/'+name+'\\.jpg[\'\"]?\\)','g'),()=> 'url("'+asset+'")');
 }
 html=html.replace(/<link rel="stylesheet" href="[^"]+">/g,'').replace('</head>',()=>'<style>'+css.replace(/<\/style/gi,'<\\/style')+'</style></head>');
-html=html.replaceAll('assets/logo.svg',logo);
+html=html.replaceAll('assets/logo-new.png',logo);
 let js='const __fieldshiftModules = {};\n';
 for(const name of ['data','geo','planning','scenes','i18n','intro']){
   let code=await read('dist/'+name+'.js');
