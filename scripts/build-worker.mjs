@@ -14,5 +14,6 @@ await writeFile(resolve(output,'dist/server/index.js'),template.replace('__PAGE_
 await cp(resolve(root,'.openai/hosting.json'),resolve(output,'.openai/hosting.json'));
 await cp(resolve(root,'drizzle/0000_fieldshift_workspaces.sql'),resolve(output,'drizzle/0000_fieldshift_workspaces.sql'));
 await cp(resolve(root,'drizzle/0001_custom_auth.sql'),resolve(output,'drizzle/0001_custom_auth.sql'));
+await cp(resolve(root,'drizzle/0002_password_auth.sql'),resolve(output,'drizzle/0002_password_auth.sql'));
 await cp(resolve(root,'drizzle/meta/_journal.json'),resolve(output,'drizzle/meta/_journal.json'));
 console.log('Worker artifact: '+output);

@@ -10,7 +10,7 @@ The editable project is also included. Run `npm run dev` with Node 20+ to open i
 
 ## What is new in this edition
 
-- Provider-ready account access through Google Identity Services or a six-digit email code delivered through Resend. Codes are hashed, expire after ten minutes and are rate-limited; sessions use secure HttpOnly cookies. Signed-in users receive a private cloud-synced workspace, while Continue as guest uses session-only storage that disappears when the browser tab is closed. Configure `AUTH_SECRET`, `RESEND_API_KEY`, `AUTH_FROM_EMAIL`, and `GOOGLE_CLIENT_ID` as hosted runtime values to activate the external providers.
+- Real email-and-password accounts with separate Log in and Create account forms. New accounts collect a username, email, and password; PBKDF2 password hashes use unique salts, login attempts are rate-limited, and sessions use secure HttpOnly cookies. Signed-in users receive a private cloud-synced workspace, while Continue as guest uses session-only storage that disappears when the browser tab is closed. Google Identity Services is integrated and activates when `GOOGLE_CLIENT_ID` is configured for the hosted FieldShift origin.
 
 - A rotating Earth opens before authentication, holds for one second, then zooms past the camera and disappears. The final screen contains only the FieldShift title, a short caption, and the entry button. It can be replayed from Settings and follows English, French, and Arabic selections.
 - The FieldShift emblem now accompanies the intro title, and a dedicated About us page introduces Dunia Alajial International School and the Tech Team in all three interface languages. The school card includes its official logo and an external Learn more link.
