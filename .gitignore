@@ -4,5 +4,6 @@ worker-dist/
 *.tgz
 .env
 .env.*
+!.env.example
 playwright-report/
 test-results/

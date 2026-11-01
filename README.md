@@ -10,9 +10,9 @@ The editable project is also included. Run `npm run dev` with Node 20+ to open i
 
 ## What is new in this edition
 
-- Real account access through secure Sign in with ChatGPT. Account creation and email verification are handled by the identity provider; FieldShift never stores a password. Signed-in users receive a private cloud-synced workspace, while Continue as guest uses session-only storage that disappears when the browser tab is closed.
+- Provider-ready account access through Google Identity Services or a six-digit email code delivered through Resend. Codes are hashed, expire after ten minutes and are rate-limited; sessions use secure HttpOnly cookies. Signed-in users receive a private cloud-synced workspace, while Continue as guest uses session-only storage that disappears when the browser tab is closed. Configure `AUTH_SECRET`, `RESEND_API_KEY`, `AUTH_FROM_EMAIL`, and `GOOGLE_CLIENT_ID` as hosted runtime values to activate the external providers.
 
-- A rotating Earth opens the experience, holds for one second, then zooms past the camera and disappears. The final screen contains only the FieldShift title, a short caption, and the entry button. It can be replayed from Settings and follows English, French, and Arabic selections.
+- A rotating Earth opens before authentication, holds for one second, then zooms past the camera and disappears. The final screen contains only the FieldShift title, a short caption, and the entry button. It can be replayed from Settings and follows English, French, and Arabic selections.
 - The FieldShift emblem now accompanies the intro title, and a dedicated About us page introduces Dunia Alajial International School and the Tech Team in all three interface languages. The school card includes its official logo and an external Learn more link.
 
 - Section-specific scenic backgrounds: selected-field weather controls the sky, sun/moon, cloud, rain and snow overlays; Water has ocean imagery and Soil has a forest backdrop. These decorative scenes stay inside their sections, retain contrast in both appearances, and respect reduced-motion preferences. An unavailable forecast clears the previous weather scene.

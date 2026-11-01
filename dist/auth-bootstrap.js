@@ -1,63 +1,33 @@
-const api = '/api';
-const gate = document.querySelector('#auth-gate');
-const status = gate.querySelector('[data-auth-status]');
-const guestButton = gate.querySelector('[data-auth-guest]');
-const signInLinks = gate.querySelectorAll('[data-auth-signin]');
-const copy = {
-  en:{eyebrow:'YOUR FIELD. YOUR WORKSPACE.',title:'How would you like to continue?',body:'Create an account to keep your fields, plans, soil records and reports safely available when you return.',login:'Log in',signup:'Create account',guest:'Continue as guest',guestNote:'Guest data lasts only for this browser tab and is not saved to an account.',secure:'Secure sign-in and email verification are handled by ChatGPT.',loading:'Checking your account…',error:'Account service is temporarily unavailable. You can still continue as a guest.',guestChip:'Guest mode',accountChip:'Account',saveCloud:'Cloud-synced workspace',saveCloudBody:'Your fields, journal records and assumptions are saved securely to your account.',saveGuest:'Guest workspace',saveGuestBody:'Your work lasts only for this tab. Sign in to keep it.'},
-  fr:{eyebrow:'VOTRE CHAMP. VOTRE ESPACE.',title:'Comment souhaitez-vous continuer ?',body:'Créez un compte pour retrouver vos champs, plans, analyses du sol et rapports lors de votre prochaine visite.',login:'Se connecter',signup:'Créer un compte',guest:'Continuer en invité',guestNote:'Les données invité restent uniquement dans cet onglet et ne sont pas enregistrées dans un compte.',secure:'La connexion sécurisée et la vérification de l’adresse e-mail sont gérées par ChatGPT.',loading:'Vérification de votre compte…',error:'Le service de compte est temporairement indisponible. Vous pouvez continuer en invité.',guestChip:'Mode invité',accountChip:'Compte',saveCloud:'Espace synchronisé dans le cloud',saveCloudBody:'Vos champs, journaux et hypothèses sont enregistrés en toute sécurité dans votre compte.',saveGuest:'Espace invité',saveGuestBody:'Votre travail reste uniquement dans cet onglet. Connectez-vous pour le conserver.'},
-  ar:{eyebrow:'حقلك. مساحة عملك.',title:'كيف تريد المتابعة؟',body:'أنشئ حساباً للاحتفاظ بالحقول والخطط وسجلات التربة والتقارير والعودة إليها لاحقاً.',login:'تسجيل الدخول',signup:'إنشاء حساب',guest:'المتابعة كضيف',guestNote:'تدوم بيانات الضيف في علامة التبويب هذه فقط ولا تُحفظ في حساب.',secure:'يتولى ChatGPT تسجيل الدخول الآمن والتحقق من البريد الإلكتروني.',loading:'جارٍ التحقق من حسابك…',error:'خدمة الحساب غير متاحة مؤقتاً. يمكنك المتابعة كضيف.',guestChip:'وضع الضيف',accountChip:'الحساب',saveCloud:'مساحة عمل متزامنة سحابياً',saveCloudBody:'تُحفظ حقولك وسجلاتك وافتراضاتك بأمان في حسابك.',saveGuest:'مساحة عمل الضيف',saveGuestBody:'يبقى عملك في علامة التبويب هذه فقط. سجّل الدخول للاحتفاظ به.'}
+import {initIntro} from './intro.js';
+
+const api='/api',gate=document.querySelector('#auth-gate'),status=gate.querySelector('[data-auth-status]');
+const guestButton=gate.querySelector('[data-auth-guest]'),emailForm=gate.querySelector('[data-auth-email]'),codeForm=gate.querySelector('[data-auth-code]');
+const googleHost=gate.querySelector('[data-auth-google]'),codeEmail=gate.querySelector('[data-auth-code-email]');
+const copy={
+  en:{eyebrow:'YOUR FIELD. YOUR WORKSPACE.',title:'Sign in to your land.',body:'Use Google or receive a one-time verification code by email. New addresses create an account automatically.',google:'Continue with Google',or:'OR',emailLabel:'Email address',sendCode:'Send verification code',codeSent:'We sent a six-digit code to',codeLabel:'Verification code',verify:'Verify and continue',useAnother:'Use another email',guest:'Continue as guest',guestNote:'Guest data lasts only for this browser tab and is not saved to an account.',secure:'Codes expire after ten minutes. FieldShift never stores your password.',loading:'Checking your account…',sent:'Verification code sent. Check your inbox.',invalid:'That code is invalid or expired.',unavailable:'Email and Google sign-in need provider setup. Guest mode is ready.',guestChip:'Guest mode',signup:'Sign in',saveCloud:'Cloud-synced workspace',saveCloudBody:'Your fields, journal records and assumptions are saved securely to your account.',saveGuest:'Guest workspace',saveGuestBody:'Your work lasts only in this tab. Sign in to keep it.',signOut:'Sign out'},
+  fr:{eyebrow:'VOTRE CHAMP. VOTRE ESPACE.',title:'Connectez-vous à votre terre.',body:'Utilisez Google ou recevez un code de vérification à usage unique par e-mail. Une nouvelle adresse crée automatiquement un compte.',google:'Continuer avec Google',or:'OU',emailLabel:'Adresse e-mail',sendCode:'Envoyer le code',codeSent:'Nous avons envoyé un code à six chiffres à',codeLabel:'Code de vérification',verify:'Vérifier et continuer',useAnother:'Utiliser une autre adresse',guest:'Continuer en invité',guestNote:'Les données invité restent uniquement dans cet onglet et ne sont pas enregistrées dans un compte.',secure:'Les codes expirent après dix minutes. FieldShift ne conserve jamais votre mot de passe.',loading:'Vérification de votre compte…',sent:'Code envoyé. Consultez votre boîte de réception.',invalid:'Ce code est incorrect ou a expiré.',unavailable:'La connexion e-mail et Google nécessite la configuration du fournisseur. Le mode invité est prêt.',guestChip:'Mode invité',signup:'Se connecter',saveCloud:'Espace synchronisé dans le cloud',saveCloudBody:'Vos champs, journaux et hypothèses sont enregistrés en toute sécurité dans votre compte.',saveGuest:'Espace invité',saveGuestBody:'Votre travail reste dans cet onglet. Connectez-vous pour le conserver.',signOut:'Se déconnecter'},
+  ar:{eyebrow:'حقلك. مساحة عملك.',title:'سجّل الدخول إلى أرضك.',body:'استخدم Google أو استلم رمز تحقق لمرة واحدة عبر البريد الإلكتروني. ينشئ البريد الجديد حساباً تلقائياً.',google:'المتابعة باستخدام Google',or:'أو',emailLabel:'البريد الإلكتروني',sendCode:'إرسال رمز التحقق',codeSent:'أرسلنا رمزاً من ستة أرقام إلى',codeLabel:'رمز التحقق',verify:'تحقق وتابع',useAnother:'استخدم بريداً آخر',guest:'المتابعة كضيف',guestNote:'تدوم بيانات الضيف في علامة التبويب هذه فقط ولا تُحفظ في حساب.',secure:'تنتهي صلاحية الرموز بعد عشر دقائق. لا يخزن FieldShift كلمة مرورك أبداً.',loading:'جارٍ التحقق من حسابك…',sent:'تم إرسال الرمز. تحقق من بريدك الوارد.',invalid:'الرمز غير صحيح أو منتهي الصلاحية.',unavailable:'يحتاج تسجيل الدخول بالبريد وGoogle إلى إعداد المزوّد. وضع الضيف جاهز.',guestChip:'وضع الضيف',signup:'تسجيل الدخول',saveCloud:'مساحة عمل متزامنة سحابياً',saveCloudBody:'تُحفظ حقولك وسجلاتك وافتراضاتك بأمان في حسابك.',saveGuest:'مساحة عمل الضيف',saveGuestBody:'يبقى عملك في علامة التبويب هذه. سجّل الدخول للاحتفاظ به.',signOut:'تسجيل الخروج'}
 };
-function language(){
-  for(const store of [sessionStorage,localStorage])try{const value=JSON.parse(store.getItem('fieldshift.preferences'));if(copy[value?.language])return value.language;}catch{}
-  return copy[navigator.language?.slice(0,2)]?navigator.language.slice(0,2):'en';
-}
-const words=copy[language()];
-for(const [key,value] of Object.entries(words))gate.querySelectorAll(`[data-copy="${key}"]`).forEach(el=>el.textContent=value);
-signInLinks.forEach(link=>link.href='/signin-with-chatgpt?return_to=/');
-let started=false, syncTimer;
+function language(){for(const store of [sessionStorage,localStorage])try{const value=JSON.parse(store.getItem('fieldshift.preferences'));if(copy[value?.language])return value.language;}catch{}return copy[navigator.language?.slice(0,2)]?navigator.language.slice(0,2):'en';}
+const words=copy[language()];for(const [key,value] of Object.entries(words))gate.querySelectorAll(`[data-copy="${key}"]`).forEach(el=>el.textContent=value);
+let started=false,syncTimer,pendingEmail='';
 const fieldKeys=store=>Object.keys(store).filter(key=>key.startsWith('fieldshift.')&&!key.includes('intro.skip-auto'));
 const snapshot=store=>Object.fromEntries(fieldKeys(store).map(key=>[key,store.getItem(key)]));
-function accountStorage(){
-  return {getItem:key=>localStorage.getItem(key),setItem(key,value){localStorage.setItem(key,value);scheduleSync();},removeItem(key){localStorage.removeItem(key);scheduleSync();}};
-}
-async function sync(){
-  const response=await fetch(api+'/workspace',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({data:snapshot(localStorage)})});
-  if(!response.ok)throw new Error('Workspace sync failed');
-  window.dispatchEvent(new CustomEvent('fieldshift:sync',{detail:{state:'saved'}}));
-}
+function accountStorage(){return{getItem:key=>localStorage.getItem(key),setItem(key,value){localStorage.setItem(key,value);scheduleSync();},removeItem(key){localStorage.removeItem(key);scheduleSync();}};}
+async function sync(){const response=await fetch(api+'/workspace',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({data:snapshot(localStorage)})});if(!response.ok)throw new Error('Workspace sync failed');window.dispatchEvent(new CustomEvent('fieldshift:sync',{detail:{state:'saved'}}));}
 function scheduleSync(){clearTimeout(syncTimer);syncTimer=setTimeout(()=>sync().catch(()=>window.dispatchEvent(new CustomEvent('fieldshift:sync',{detail:{state:'error'}}))),700);}
-async function start(mode,user){
-  if(started)return;started=true;
-  window.__fieldshiftAccount=user||null;
-  window.__fieldshiftStorage=mode==='guest'?sessionStorage:accountStorage();
-  gate.classList.add('leaving');setTimeout(()=>gate.hidden=true,360);
-  await import('./app.js');
-  addAccountControl(mode,user);
-}
-function addAccountControl(mode,user){
-  const top=document.querySelector('.topbar-right');if(!top)return;
-  const control=document.createElement(mode==='account'?'a':'button');
-  control.className='auth-chip';
-  if(mode==='account'){control.href='/signout-with-chatgpt?return_to=/';control.target='_top';control.title='Sign out';control.innerHTML=`<span></span><b>${escapeHTML(user.email)}</b><small>Sign out</small>`;}
-  else{control.type='button';control.innerHTML=`<span></span><b>${words.guestChip}</b><small>${words.signup}</small>`;control.onclick=()=>location.assign('/signin-with-chatgpt?return_to=/');}
-  top.prepend(control);
-  const setting=[...document.querySelectorAll('.setting-item')].find(item=>item.querySelector('b')?.textContent.includes('Device-local'));
-  if(setting){setting.querySelector('b').textContent=mode==='account'?words.saveCloud:words.saveGuest;setting.querySelector('p').textContent=mode==='account'?words.saveCloudBody:words.saveGuestBody;setting.querySelector('.pill').textContent=mode==='account'?'SYNCED':'SESSION';}
-}
+async function start(mode,user){if(started)return;started=true;window.__fieldshiftAccount=user||null;window.__fieldshiftStorage=mode==='guest'?sessionStorage:accountStorage();gate.classList.add('leaving');setTimeout(()=>gate.hidden=true,360);await import('./app.js');addAccountControl(mode,user);}
+function addAccountControl(mode,user){const top=document.querySelector('.topbar-right');if(!top)return;const control=document.createElement('button');control.className='auth-chip';control.type='button';if(mode==='account'){control.title=words.signOut;control.innerHTML=`<span></span><b>${escapeHTML(user.email)}</b><small>${words.signOut}</small>`;control.onclick=async()=>{await fetch(api+'/auth/logout',{method:'POST'});location.reload();};}else{control.innerHTML=`<span></span><b>${words.guestChip}</b><small>${words.signup}</small>`;control.onclick=()=>{gate.hidden=false;gate.classList.remove('leaving');requestAnimationFrame(()=>gate.classList.add('visible','ready'));};}top.prepend(control);const setting=[...document.querySelectorAll('.setting-item')].find(item=>item.querySelector('b')?.textContent.includes('Device-local'));if(setting){setting.querySelector('b').textContent=mode==='account'?words.saveCloud:words.saveGuest;setting.querySelector('p').textContent=mode==='account'?words.saveCloudBody:words.saveGuestBody;setting.querySelector('.pill').textContent=mode==='account'?'SYNCED':'SESSION';}}
 const escapeHTML=value=>String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+function setBusy(form,busy){form.querySelectorAll('input,button').forEach(el=>el.disabled=busy);}
 guestButton.onclick=()=>{sessionStorage.setItem('fieldshift.guest','1');start('guest');};
-async function boot(){
-  status.textContent=words.loading;
-  if(location.protocol==='file:'||((location.hostname==='127.0.0.1'||location.hostname==='localhost')&&!new URLSearchParams(location.search).has('auth-preview'))){await start('guest');return;}
-  try{
-    const response=await fetch(api+'/me',{credentials:'same-origin'});if(!response.ok)throw new Error();
-    const identity=await response.json();
-    if(!identity.authenticated){status.textContent='';gate.classList.add('ready');return;}
-    const saved=await fetch(api+'/workspace',{credentials:'same-origin'});const payload=saved.ok?await saved.json():{data:{}};
-    const cloud=payload.data||{};const guest=snapshot(sessionStorage);const merged=Object.keys(cloud).length?cloud:{...snapshot(localStorage),...guest};
-    fieldKeys(localStorage).forEach(key=>localStorage.removeItem(key));for(const [key,value] of Object.entries(merged))if(key.startsWith('fieldshift.')&&typeof value==='string')localStorage.setItem(key,value);
-    await start('account',identity);if(!Object.keys(cloud).length&&Object.keys(merged).length)scheduleSync();
-  }catch{status.textContent=words.error;gate.classList.add('ready');}
-}
-boot();
+emailForm.onsubmit=async event=>{event.preventDefault();pendingEmail=emailForm.elements.email.value.trim().toLowerCase();setBusy(emailForm,true);status.textContent='';try{const response=await fetch(api+'/auth/email/send-code',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email:pendingEmail})});const data=await response.json();if(!response.ok)throw new Error(data.error||words.unavailable);codeEmail.textContent=pendingEmail;emailForm.hidden=true;codeForm.hidden=false;codeForm.elements.code.focus();status.textContent=words.sent;}catch(error){status.textContent=error.message;}finally{setBusy(emailForm,false);}};
+codeForm.onsubmit=async event=>{event.preventDefault();setBusy(codeForm,true);status.textContent='';try{const response=await fetch(api+'/auth/email/verify',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email:pendingEmail,code:codeForm.elements.code.value})});const data=await response.json();if(!response.ok)throw new Error(data.error||words.invalid);await loadAccount(data.user);}catch(error){status.textContent=error.message;}finally{setBusy(codeForm,false);}};
+gate.querySelector('[data-auth-back]').onclick=()=>{codeForm.hidden=true;emailForm.hidden=false;status.textContent='';emailForm.elements.email.focus();};
+async function googleCredential(response){status.textContent=words.loading;try{const result=await fetch(api+'/auth/google',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({credential:response.credential})});const data=await result.json();if(!result.ok)throw new Error(data.error||words.unavailable);await loadAccount(data.user);}catch(error){status.textContent=error.message;}}
+async function configureProviders(){try{const response=await fetch(api+'/auth/config');const config=await response.json();emailForm.querySelector('button[type="submit"]').disabled=!config.emailEnabled;if(config.googleClientId){await loadGoogle();google.accounts.id.initialize({client_id:config.googleClientId,callback:googleCredential});googleHost.innerHTML='';google.accounts.id.renderButton(googleHost,{theme:'outline',size:'large',shape:'rectangular',width:400,text:'continue_with'});}else googleHost.querySelector('button').disabled=true;if(!config.emailEnabled&&!config.googleClientId)status.textContent=words.unavailable;}catch{status.textContent=words.unavailable;}}
+function loadGoogle(){return new Promise((resolve,reject)=>{if(window.google?.accounts?.id)return resolve();const script=document.createElement('script');script.src='https://accounts.google.com/gsi/client';script.async=true;script.onload=resolve;script.onerror=reject;document.head.append(script);});}
+async function loadAccount(identity){const saved=await fetch(api+'/workspace');const payload=saved.ok?await saved.json():{data:{}};const cloud=payload.data||{},guest=snapshot(sessionStorage),merged=Object.keys(cloud).length?cloud:{...snapshot(localStorage),...guest};fieldKeys(localStorage).forEach(key=>localStorage.removeItem(key));for(const [key,value] of Object.entries(merged))if(key.startsWith('fieldshift.')&&typeof value==='string')localStorage.setItem(key,value);await start('account',identity);if(!Object.keys(cloud).length&&Object.keys(merged).length)scheduleSync();}
+async function boot(){status.textContent=words.loading;if(location.protocol==='file:'||((location.hostname==='127.0.0.1'||location.hostname==='localhost')&&!new URLSearchParams(location.search).has('auth-preview'))){await start('guest');return;}try{const response=await fetch(api+'/me');if(!response.ok)throw new Error();const identity=await response.json();if(identity.authenticated){await loadAccount(identity);return;}gate.classList.add('visible','ready');status.textContent='';await configureProviders();}catch{gate.classList.add('visible','ready');status.textContent=words.unavailable;}}
+function begin(){if(sessionStorage.getItem('fieldshift.intro.skip-auto'))boot();else{gate.classList.remove('visible');window.addEventListener('fieldshift:intro:closed',boot,{once:true});window.__fieldshiftIntro=initIntro({language:language()});}}
+begin();

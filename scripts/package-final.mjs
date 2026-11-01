@@ -35,7 +35,9 @@ app=app.replace(/^import\s+\{([^}]+)\}\s+from\s+['"]\.\/(\w+)\.js['"];?/gm,(_mat
 if(/^import\s/m.test(app))throw Error('Unresolved app import');
 js+='const __startFieldShift=()=>{\n'+app+'\n};';
 let auth=await read('dist/auth-bootstrap.js');
+auth=auth.replace(/^import\s+\{([^}]+)\}\s+from\s+['"]\.\/(\w+)\.js['"];?/gm,(_match,names,module)=>'const {'+names+'} = __fieldshiftModules.'+module+';');
 auth=auth.replace("await import('./app.js');",'__startFieldShift();');
+if(/^import\s/m.test(auth))throw Error('Unresolved auth bootstrap import');
 js+='\n'+auth;
 const vendor=await read('dist/vendor/maplibre-gl.js');
 html=html.replace('<script src="vendor/maplibre-gl.js"></script>',()=>'<script>'+scriptSafe(vendor)+'</script>');

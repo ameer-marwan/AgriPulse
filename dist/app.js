@@ -98,7 +98,7 @@ function init() {
   initPlanning({getState:()=>state,fieldKey,toast,crops});
   initScenes({getState:()=>state});
   initI18n({preferences:state.preferences,save:preferences => write('fieldshift.preferences',preferences),rerender:() => { renderLocation(); renderRotations(); renderReports(); }});
-  initIntro({language:state.preferences.language});
+  window.__fieldshiftIntro ||= initIntro({language:state.preferences.language});
   loadWeather(); state.ready=true;
 }
 
