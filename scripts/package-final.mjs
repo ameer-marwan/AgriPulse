@@ -33,15 +33,10 @@ for(const name of ['storage','data','geo','planning','scenes','i18n','intro']){
 let app=await read('dist/app.js');
 app=app.replace(/^import\s+\{([^}]+)\}\s+from\s+['"]\.\/(\w+)\.js['"];?/gm,(_match,names,module)=>'const {'+names+'} = __fieldshiftModules.'+module+';');
 if(/^import\s/m.test(app))throw Error('Unresolved app import');
-js+='const __startFieldShift=()=>{\n'+app+'\n};';
-let auth=await read('dist/auth-bootstrap.js');
-auth=auth.replace(/^import\s+\{([^}]+)\}\s+from\s+['"]\.\/(\w+)\.js['"];?/gm,(_match,names,module)=>'const {'+names+'} = __fieldshiftModules.'+module+';');
-auth=auth.replace("await import('./app.js');",'__startFieldShift();');
-if(/^import\s/m.test(auth))throw Error('Unresolved auth bootstrap import');
-js+='\n'+auth;
+js+=app;
 const vendor=await read('dist/vendor/maplibre-gl.js');
 html=html.replace('<script src="vendor/maplibre-gl.js"></script>',()=>'<script>'+scriptSafe(vendor)+'</script>');
-html=html.replace('<script type="module" src="auth-bootstrap.js"></script>',()=>'<script>'+scriptSafe(js)+'</script>');
+html=html.replace('<script type="module" src="app.js"></script>',()=>'<script>'+scriptSafe(js)+'</script>');
 // Dynamic intro markup is part of the injected bundle, so embed its logo after script assembly too.
 html=html.replaceAll('assets/logo-new.png',logo);
 html=html.replaceAll('assets/earth-texture.jpg',await dataUri('dist/assets/earth-texture.jpg','image/jpeg'));

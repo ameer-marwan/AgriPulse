@@ -10,9 +10,7 @@ The editable project is also included. Run `npm run dev` with Node 20+ to open i
 
 ## What is new in this edition
 
-- Real email-and-password accounts with separate Log in and Create account forms. New accounts collect a username, email, and password; PBKDF2 password hashes use unique salts, login attempts are rate-limited, and sessions use secure HttpOnly cookies. Signed-in users receive a private cloud-synced workspace, while Continue as guest uses session-only storage that disappears when the browser tab is closed. Google Identity Services is integrated and activates when `GOOGLE_CLIENT_ID` is configured for the hosted FieldShift origin.
-
-- A rotating Earth opens before authentication, holds for one second, then zooms past the camera and disappears. The final screen contains only the FieldShift title, a short caption, and the entry button. It can be replayed from Settings and follows English, French, and Arabic selections.
+- A rotating Earth opens before the workspace, holds for one second, then zooms past the camera and disappears. The final screen contains only the FieldShift title, a short caption, and the entry button. It can be replayed from Settings and follows English, French, and Arabic selections.
 - The FieldShift emblem now accompanies the intro title, and a dedicated About us page introduces Dunia Alajial International School and the Tech Team in all three interface languages. The school card includes its official logo and an external Learn more link.
 
 - Section-specific scenic backgrounds: selected-field weather controls the sky, sun/moon, cloud, rain and snow overlays; Water has ocean imagery and Soil has a forest backdrop. These decorative scenes stay inside their sections, retain contrast in both appearances, and respect reduced-motion preferences. An unavailable forecast clears the previous weather scene.
@@ -27,7 +25,7 @@ The editable project is also included. Run `npm run dev` with Node 20+ to open i
 - Printable field report including the selected rotation, economics assumptions, soil records, schedule, scenario and observations.
 - Field selector accessible from every page; responsive phone and desktop layouts.
 
-Save a workspace backup from Settings and a season/photo backup after adding records. Browser data is device-local; files opened from a different path or a different browser may have a separate storage area. The portable file includes no personal field records.
+FieldShift opens directly after its introduction with no account, login, or password gate. Save a workspace backup from Settings and a season/photo backup after adding records. Browser data is device-local; files opened from a different path or a different browser may have a separate storage area. The portable file includes no personal field records.
 
 ## Run locally
 
@@ -66,7 +64,7 @@ For browser checks, install development dependencies (`npm install`) and Chromiu
 
 ## Important boundaries
 
-The hosted application stores signed-in records in a user-isolated cloud workspace. Guest sessions are deliberately temporary, and the standalone downloadable HTML remains device/session-local because it has no hosted identity service. A selected point uses the provider's reference grid. A drawn polygon gives geometric area; the application does not pretend to calculate a spatially aggregated soil/weather measurement over that polygon.
+The hosted application stores workspace records only in the current browser. There is no account system or cloud synchronization. A selected point uses the provider's reference grid. A drawn polygon gives geometric area; the application does not pretend to calculate a spatially aggregated soil/weather measurement over that polygon.
 
 Soil pH/carbon values come only from user-entered samples. Regional SoilGrids property maps are not connected. Economics uses entered assumptions, not a live commodity feed; it excludes costs that were not entered. Rotation results explain broad trait rules and do not predict yield or certify suitability.
 

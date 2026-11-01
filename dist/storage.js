@@ -1,2 +1,3 @@
-/** Storage is selected before the application starts: cloud-synced local storage for accounts, session-only for guests. */
+/** The normal FieldShift workspace is stored on this device with no account gate. */
 export const workspaceStorage = window.__fieldshiftStorage || window.localStorage;
+window.__fieldshiftStorage = workspaceStorage;
