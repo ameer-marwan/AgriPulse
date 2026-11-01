@@ -17,6 +17,7 @@ for (const name of ['sea','forest','sky-clear','sky-clouds','sky-storm']) {
   const asset = await dataUri('dist/assets/'+name+'.jpg','image/jpeg');
   css = css.replace(new RegExp('url\\([\'\"]?assets/'+name+'\\.jpg[\'\"]?\\)','g'),()=> 'url("'+asset+'")');
 }
+css=css.replaceAll("url('assets/intro-plant.jpg')",'url("'+await dataUri('dist/assets/intro-plant.jpg','image/jpeg')+'")');
 html=html.replace(/<link rel="stylesheet" href="[^"]+">/g,'').replace('</head>',()=>'<style>'+css.replace(/<\/style/gi,'<\\/style')+'</style></head>');
 html=html.replaceAll('assets/logo-new.png',logo);
 html=html.replaceAll('assets/dunia-alajial-logo.jpg',await dataUri('dist/assets/dunia-alajial-logo.jpg','image/jpeg'));

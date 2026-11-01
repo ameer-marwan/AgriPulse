@@ -26,6 +26,13 @@ try {
   await page.waitForTimeout(1500);
   assert.equal(errors.length, 0, 'No application startup errors: '+errors.join('; '));
   assert.match(await page.locator('[data-stat="temperature"]').first().innerText(), /21/, 'Live fixture is rendered');
+  await page.setViewportSize({width:1440,height:620});
+  const sidebarScroll = await page.locator('.sidebar').evaluate(el => ({overflow:getComputedStyle(el).overflowY,scrollHeight:el.scrollHeight,clientHeight:el.clientHeight}));
+  assert.equal(sidebarScroll.overflow, 'auto', 'Sidebar uses independent vertical scrolling');
+  assert.ok(sidebarScroll.scrollHeight > sidebarScroll.clientHeight, 'Sidebar scrolls when the viewport is shorter than its options');
+  await page.locator('.sidebar').evaluate(el => { el.scrollTop = el.scrollHeight; });
+  assert.equal(await page.locator('.side-nav [data-route="feedback"]').isVisible(), true, 'Last navigation options remain reachable');
+  await page.setViewportSize({width:1440,height:1080});
   for (const route of ['map','weather','soil','water','crops','profit','reports','feedback','settings','about','overview']) {
     await page.goto(origin+'/#/'+route, {waitUntil:'domcontentloaded'});
     await page.waitForTimeout(250);
