@@ -26,7 +26,7 @@ try {
   await page.waitForTimeout(1500);
   assert.equal(errors.length, 0, 'No application startup errors: '+errors.join('; '));
   assert.match(await page.locator('[data-stat="temperature"]').first().innerText(), /21/, 'Live fixture is rendered');
-  for (const route of ['map','weather','soil','water','crops','profit','reports','settings','about','overview']) {
+  for (const route of ['map','weather','soil','water','crops','profit','reports','feedback','settings','about','overview']) {
     await page.goto(origin+'/#/'+route, {waitUntil:'domcontentloaded'});
     await page.waitForTimeout(250);
     assert.equal(await page.locator('#view-'+route).isVisible(), true, route+' route visible');
@@ -51,17 +51,26 @@ try {
   await page.locator('#appearance').selectOption('light');
   assert.equal(await page.locator('body').evaluate(el=>el.classList.contains('light')), true);
   await page.locator('#appearance').selectOption('dark');
+  await page.goto(origin+'/#/feedback');
+  await page.locator('#feedback-form [name="name"]').fill('Field tester');
+  await page.locator('#feedback-form [name="category"]').selectOption('Idea');
+  await page.locator('#feedback-form [name="rating"]').selectOption('5');
+  await page.locator('#feedback-form [name="comment"]').fill('Please add more regional crop references.');
+  await page.locator('#feedback-form button[type="submit"]').click();
+  assert.match(await page.locator('#feedback-list').innerText(),/regional crop references/,'Feedback is rendered');
+  await page.reload();
+  assert.match(await page.locator('#feedback-list').innerText(),/regional crop references/,'Feedback persists on this device');
   await page.goto(origin+'/#/overview');
   await page.screenshot({path:'/tmp/fieldshift-desktop.png',fullPage:true});
   await page.setViewportSize({width:390,height:844});
   await page.waitForTimeout(400);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth), false, 'No mobile overflow');
   await page.screenshot({path:'/tmp/fieldshift-mobile.png',fullPage:true});
-  for (const route of ['map','weather','soil','water','crops','profit','reports','settings','about']) {
+  for (const route of ['map','weather','soil','water','crops','profit','reports','feedback','settings','about']) {
     await page.goto(origin+'/#/'+route, {waitUntil:'domcontentloaded'});
     await page.waitForTimeout(150);
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth), false, route+' has no mobile overflow');
   }
   assert.deepEqual(errors, [], 'No uncaught application errors');
-  console.log('PASS: startup, 10 routes, profit, saved sample, guide, theme, desktop/mobile overflow.');
+  console.log('PASS: startup, 11 routes, profit, saved sample, comments and feedback, theme, desktop/mobile overflow.');
 } finally { await browser.close(); }

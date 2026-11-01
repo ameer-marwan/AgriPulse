@@ -21,6 +21,7 @@ const state = {
   location:validPoint(savedLocation) ? savedLocation : {...example},
   preferences:read('fieldshift.preferences',{theme:'dark',units:'metric',language:'en'}),
   fields:read('fieldshift.fields',[]),samples:read('fieldshift.samples',[]),journal:read('fieldshift.journal',[]),
+  feedback:read('fieldshift.feedback',[]),
   plans:read('fieldshift.plans',[]),weather:null,nasa:null,economics:null,rotationOptions:[],selectedPlan:'soil',
   weatherController:null,nasaController:null,searchController:null,requestId:0,route:'overview',map:null,ready:false,
   fieldSettings:read('fieldshift.fieldSettings',{}),
@@ -62,7 +63,10 @@ function init() {
   $('#view-assistant')?.remove();
   $('.advisor-link')?.remove();
   $('.system-status')?.remove();
+  const feedbackLink=document.createElement('a');feedbackLink.href='#/feedback';feedbackLink.dataset.route='feedback';feedbackLink.innerHTML='<svg><use href="#i-file"/></svg>Comments & feedback';$('.side-nav').append(feedbackLink);
   const aboutLink=document.createElement('a');aboutLink.href='#/about';aboutLink.dataset.route='about';aboutLink.innerHTML='<svg><use href="#i-globe"/></svg>About us';$('.side-nav').append(aboutLink);
+  const feedbackView=document.createElement('section');feedbackView.className='view';feedbackView.id='view-feedback';feedbackView.hidden=true;feedbackView.innerHTML='<div class="page-heading"><div><span class="eyebrow">COMMENTS & FEEDBACK</span><h1>Help FieldShift grow<span>.</span></h1><p>Share an idea, report a problem, or tell us what works well.</p></div><span class="pill">SAVED ON THIS DEVICE</span></div><div class="feedback-layout"><form id="feedback-form" class="panel feedback-form"><div class="panel-heading"><div><span class="eyebrow">YOUR MESSAGE</span><h2>What would you like us to know?</h2></div></div><label>Name (optional)<input name="name" maxlength="60" placeholder="Your name"></label><div class="form-grid"><label>Feedback type<select name="category"><option value="Idea">Idea</option><option value="Problem">Problem</option><option value="Question">Question</option><option value="Compliment">Compliment</option></select></label><label>Overall rating<select name="rating"><option value="5">5 · Excellent</option><option value="4">4 · Good</option><option value="3">3 · Okay</option><option value="2">2 · Needs work</option><option value="1">1 · Poor</option></select></label></div><label>Comment<textarea name="comment" minlength="10" maxlength="1000" required placeholder="Write your feedback here…"></textarea></label><button class="button full" type="submit">Save feedback</button><p class="fine-print">Feedback is stored only in this browser and is included when you download the workspace backup.</p></form><article class="panel feedback-history"><div class="panel-heading"><div><span class="eyebrow">YOUR FEEDBACK</span><h2>Comments from this device</h2></div><span class="pill" id="feedback-count">0 COMMENTS</span></div><div id="feedback-list"></div></article></div>';
+  $('main').insertBefore(feedbackView,$('.app-footer'));
   replaceArrowGlyphs();
   const savedPlansPanel=document.createElement('article');savedPlansPanel.className='panel';
   savedPlansPanel.innerHTML='<div class="panel-heading"><div><span class="eyebrow">SAVED FOR THIS LAND</span><h2>Your rotation library</h2></div></div><div id="saved-plans-list"></div>';
@@ -93,7 +97,7 @@ function init() {
   if(!Object.keys(state.fieldSettings).length){const legacy=read('fieldshift.economics',null);if(legacy)state.fieldSettings[fieldKey()]={economics:legacy};}
   restoreFieldSettings();
   $('#water-record-form').elements.date.value=today(); $('#soil-sample-form').elements.date.value=today();
-  renderEconomics(); renderRotations(); renderCropLibrary(); renderReports();
+  renderEconomics(); renderRotations(); renderCropLibrary(); renderReports(); renderFeedback();
   navigate(); window.addEventListener('hashchange',navigate);
   initPlanning({getState:()=>state,fieldKey,toast,crops});
   initScenes({getState:()=>state});
@@ -104,10 +108,10 @@ function init() {
 
 function navigate() {
   const candidate = location.hash.replace(/^#\/?/,'').split('?')[0] || 'overview';
-  state.route = ['overview','map','weather','soil','water','crops','profit','reports','settings','about'].includes(candidate) ? candidate : 'overview';
+  state.route = ['overview','map','weather','soil','water','crops','profit','reports','feedback','settings','about'].includes(candidate) ? candidate : 'overview';
   $$('.view').forEach(view => {view.hidden=view.id !== 'view-'+state.route;});
   $$('[data-route]').forEach(link => {const active=link.dataset.route===state.route;link.classList.toggle('active',active);if(active)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');});
-  text('#route-name',({overview:'Overview',map:'Field explorer',weather:'Weather',soil:'Soil intelligence',water:'Water',crops:'Crop planner',profit:'Profit & scenarios',reports:'Reports',settings:'Settings',about:'About us'})[state.route]);
+  text('#route-name',({overview:'Overview',map:'Field explorer',weather:'Weather',soil:'Soil intelligence',water:'Water',crops:'Crop planner',profit:'Profit & scenarios',reports:'Reports',feedback:'Comments & feedback',settings:'Settings',about:'About us'})[state.route]);
   const target = state.route==='map'?$('#explorer-map-host'):$('#home-map-host');
   target.append($('#map-dock'));
   document.body.classList.remove('menu-open');
@@ -139,8 +143,9 @@ function bindEvents() {
       'export-csv':exportCSV,
       print:() => window.print(),
       nasa:loadNasa,
+      'delete-feedback':() => {state.feedback=state.feedback.filter(item=>item.id!==action.dataset.id);write('fieldshift.feedback',state.feedback);renderFeedback();toast('Feedback removed from this device');},
       'reset-location':() => {selectLocation({...example});toast('Example location restored');},
-      backup:() => download('fieldshift-workspace.json',JSON.stringify({schemaVersion:3,fields:state.fields,location:state.location,samples:state.samples,journal:state.journal,plans:state.plans,fieldSettings:state.fieldSettings,seasons:read('fieldshift.seasons.v1',{})},null,2),'application/json')
+      backup:() => download('fieldshift-workspace.json',JSON.stringify({schemaVersion:3,fields:state.fields,location:state.location,samples:state.samples,journal:state.journal,plans:state.plans,feedback:state.feedback,fieldSettings:state.fieldSettings,seasons:read('fieldshift.seasons.v1',{})},null,2),'application/json')
     };
     try {actions[action.dataset.action]?.();} catch(error){toast(error.message);console.error(error);}
   });
@@ -151,6 +156,7 @@ function bindEvents() {
   $('#economics-form').addEventListener('submit',event => {event.preventDefault();state.fieldSettings[fieldKey()]={...state.fieldSettings[fieldKey()],economicsReviewed:true};renderEconomics();toast('Economics scenario updated');});
   $('#soil-sample-form').addEventListener('submit',saveSample);
   $('#water-record-form').addEventListener('submit',saveWater);
+  $('#feedback-form').addEventListener('submit',saveFeedback);
   $('#crop-filter').addEventListener('input',event => renderCropLibrary(event.target.value));
   $('#current-crop').addEventListener('change',renderRotations);
   $('#planning-priority').addEventListener('change',renderRotations);
@@ -326,6 +332,19 @@ function renderSamples(){
   notifyFieldUpdate();
 }
 function saveWater(event){event.preventDefault();const data=Object.fromEntries(new FormData(event.target));addJournal('Irrigation applied',Number(data.amount).toFixed(1)+' mm · '+data.date);toast('Irrigation record saved');event.target.elements.amount.value='';}
+function saveFeedback(event){
+  event.preventDefault();
+  const data=Object.fromEntries(new FormData(event.target)),comment=String(data.comment||'').trim(),name=String(data.name||'').trim();
+  if(comment.length<10)return toast('Please write at least 10 characters.');
+  state.feedback.unshift({id:crypto.randomUUID(),name:name||'Anonymous',category:String(data.category||'Idea'),rating:Number(data.rating)||5,comment,createdAt:new Date().toISOString()});
+  state.feedback=state.feedback.slice(0,50);write('fieldshift.feedback',state.feedback);event.target.reset();renderFeedback();toast('Thank you. Your feedback was saved on this device.');
+}
+function renderFeedback(){
+  const host=$('#feedback-list');if(!host)return;
+  text('#feedback-count',state.feedback.length+' '+(state.feedback.length===1?'COMMENT':'COMMENTS'));
+  if(!state.feedback.length){host.innerHTML='<div class="feedback-empty"><span>✦</span><h3>No comments yet</h3><p>Your ideas and observations will appear here after you submit the form.</p></div>';return;}
+  host.innerHTML=state.feedback.map(item=>'<article class="feedback-entry"><div class="feedback-entry-head"><span class="pill">'+escapeHTML(item.category)+'</span><span class="feedback-stars" aria-label="'+item.rating+' out of 5">'+'★'.repeat(item.rating)+'<i>'+'★'.repeat(5-item.rating)+'</i></span></div><p>'+escapeHTML(item.comment)+'</p><footer><span><b>'+escapeHTML(item.name)+'</b> · '+new Date(item.createdAt).toLocaleDateString()+'</span><button type="button" data-action="delete-feedback" data-id="'+item.id+'">Remove</button></footer></article>').join('');
+}
 
 function evidenceRows(){const w=state.weather,c=w?.current;return [
   ['Air temperature',c?temp(c.temperature):'Unavailable','Current model analysis','Open-Meteo'],
