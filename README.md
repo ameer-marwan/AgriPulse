@@ -10,6 +10,8 @@ The editable project is also included. Run `npm run dev` with Node 20+ to open i
 
 ## What is new in this edition
 
+- Real account access through secure Sign in with ChatGPT. Account creation and email verification are handled by the identity provider; FieldShift never stores a password. Signed-in users receive a private cloud-synced workspace, while Continue as guest uses session-only storage that disappears when the browser tab is closed.
+
 - A rotating Earth opens the experience, holds for one second, then zooms past the camera and disappears. The final screen contains only the FieldShift title, a short caption, and the entry button. It can be replayed from Settings and follows English, French, and Arabic selections.
 - The FieldShift emblem now accompanies the intro title, and a dedicated About us page introduces Dunia Alajial International School and the Tech Team in all three interface languages. The school card includes its official logo and an external Learn more link.
 
@@ -64,7 +66,7 @@ For browser checks, install development dependencies (`npm install`) and Chromiu
 
 ## Important boundaries
 
-The application stores records on the current device. It has no account database or cross-device synchronization. A selected point uses the provider's reference grid. A drawn polygon gives geometric area; the application does not pretend to calculate a spatially aggregated soil/weather measurement over that polygon.
+The hosted application stores signed-in records in a user-isolated cloud workspace. Guest sessions are deliberately temporary, and the standalone downloadable HTML remains device/session-local because it has no hosted identity service. A selected point uses the provider's reference grid. A drawn polygon gives geometric area; the application does not pretend to calculate a spatially aggregated soil/weather measurement over that polygon.
 
 Soil pH/carbon values come only from user-entered samples. Regional SoilGrids property maps are not connected. Economics uses entered assumptions, not a live commodity feed; it excludes costs that were not entered. Rotation results explain broad trait rules and do not predict yield or certify suitability.
 

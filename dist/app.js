@@ -4,14 +4,15 @@ import {initPlanning} from './planning.js';
 import {initScenes} from './scenes.js';
 import {initI18n} from './i18n.js';
 import {initIntro} from './intro.js';
+import {workspaceStorage} from './storage.js';
 
 const $ = (q, root = document) => root.querySelector(q);
 const $$ = (q, root = document) => [...root.querySelectorAll(q)];
 const text = (q, value) => $$(q).forEach(el => { el.textContent = value; });
 const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const number = n => typeof n === 'number' && Number.isFinite(n);
-function read(key, fallback) { try { const value = JSON.parse(localStorage.getItem(key)); return value ?? fallback; } catch { return fallback; } }
-function write(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch { toast('Device storage is unavailable. Export a report to keep your work.'); } }
+function read(key, fallback) { try { const value = JSON.parse(workspaceStorage.getItem(key)); return value ?? fallback; } catch { return fallback; } }
+function write(key, value) { try { workspaceStorage.setItem(key, JSON.stringify(value)); } catch { toast('Workspace storage is unavailable. Export a report to keep your work.'); } }
 const example = {lat:38.46,lon:-98.25,name:'Central Kansas',method:'Example location',id:'example-kansas',boundary:null};
 const validPoint = loc => loc && number(loc.lat) && number(loc.lon) && Math.abs(loc.lat) <= 90 && Math.abs(loc.lon) <= 180;
 const savedLocation = read('fieldshift.location', null);

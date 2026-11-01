@@ -1,4 +1,5 @@
 {
   "project_id": "appgprj_6ae353e1e4488191ac7c252ec6b15a31",
-  "static": { "directory": "dist" }
+  "d1": { "binding": "DB", "migrations_dir": "migrations" },
+  "r2": null
 }

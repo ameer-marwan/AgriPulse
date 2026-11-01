@@ -21,21 +21,25 @@ html=html.replace(/<link rel="stylesheet" href="[^"]+">/g,'').replace('</head>',
 html=html.replaceAll('assets/logo-new.png',logo);
 html=html.replaceAll('assets/dunia-alajial-logo.jpg',await dataUri('dist/assets/dunia-alajial-logo.jpg','image/jpeg'));
 let js='const __fieldshiftModules = {};\n';
-for(const name of ['data','geo','planning','scenes','i18n','intro']){
+for(const name of ['storage','data','geo','planning','scenes','i18n','intro']){
   let code=await read('dist/'+name+'.js');
   const names=[...code.matchAll(/^export\s+(?:async\s+)?(?:function|const|let|class)\s+(\w+)/gm)].map(m=>m[1]);
   if(!names.length)throw Error('No named exports in '+name);
   code=code.replace(/^export\s+/gm,'');
+  code=code.replace(/^import\s+\{([^}]+)\}\s+from\s+['"]\.\/(\w+)\.js['"];?/gm,(_match,names,module)=>'const {'+names+'} = __fieldshiftModules.'+module+';');
   if(/^import\s/m.test(code))throw Error('Resolve module imports before packaging '+name);
   js+='__fieldshiftModules.'+name+' = (()=>{\n'+code+'\nreturn {'+names.join(',')+'};\n})();\n';
 }
 let app=await read('dist/app.js');
 app=app.replace(/^import\s+\{([^}]+)\}\s+from\s+['"]\.\/(\w+)\.js['"];?/gm,(_match,names,module)=>'const {'+names+'} = __fieldshiftModules.'+module+';');
 if(/^import\s/m.test(app))throw Error('Unresolved app import');
-js+='(()=>{\n'+app+'\n})();';
+js+='const __startFieldShift=()=>{\n'+app+'\n};';
+let auth=await read('dist/auth-bootstrap.js');
+auth=auth.replace("await import('./app.js');",'__startFieldShift();');
+js+='\n'+auth;
 const vendor=await read('dist/vendor/maplibre-gl.js');
 html=html.replace('<script src="vendor/maplibre-gl.js"></script>',()=>'<script>'+scriptSafe(vendor)+'</script>');
-html=html.replace('<script type="module" src="app.js"></script>',()=>'<script>'+scriptSafe(js)+'</script>');
+html=html.replace('<script type="module" src="auth-bootstrap.js"></script>',()=>'<script>'+scriptSafe(js)+'</script>');
 html=html.replaceAll('assets/earth-texture.jpg',await dataUri('dist/assets/earth-texture.jpg','image/jpeg'));
 const target=resolve(out,'FieldShift-Final.html');
 await writeFile(target,html);

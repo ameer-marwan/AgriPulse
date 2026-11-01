@@ -1,12 +1,13 @@
 /** Field-scoped seasonal planning. All stress cases are explicit sensitivities. */
+import {workspaceStorage} from './storage.js';
 const $ = q => document.querySelector(q);
 const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const finite = v => typeof v === 'number' && Number.isFinite(v);
 const today = () => new Date().toISOString().slice(0,10);
 const key = 'fieldshift.seasons.v1';
 const stageNames = ['Establishment','Vegetative growth','Flowering & set','Yield formation','Harvest readiness'];
-function read(){try{return JSON.parse(localStorage.getItem(key))||{};}catch{return {};}}
-function save(value){localStorage.setItem(key,JSON.stringify(value));}
+function read(){try{return JSON.parse(workspaceStorage.getItem(key))||{};}catch{return {};}}
+function save(value){workspaceStorage.setItem(key,JSON.stringify(value));}
 function download(name,value){const url=URL.createObjectURL(new Blob([JSON.stringify(value,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 function panel(id,eyebrow,title,body){return `<article class="panel planning-panel" id="${id}"><div class="panel-heading"><div><span class="eyebrow">${eyebrow}</span><h2>${title}</h2></div><span class="pill">SELECTED FIELD</span></div>${body}</article>`;}
 function insert(view,html){document.querySelector('#view-'+view).insertAdjacentHTML('beforeend',html);}
@@ -33,7 +34,7 @@ export function initPlanning({getState,fieldKey,toast,crops}){
   $('#planning-export').onclick=exportAll;$('#planning-export-settings').onclick=exportAll;
   const openGuide=()=>{renderEvidence();$('#planning-guide').showModal();};
   $('#planning-guide-open').onclick=openGuide;$('#planning-reopen').onclick=openGuide;
-  const closeGuide=()=>{$('#planning-guide').close();try{localStorage.setItem('fieldshift.guide.seen','1');}catch{}};
+  const closeGuide=()=>{$('#planning-guide').close();try{workspaceStorage.setItem('fieldshift.guide.seen','1');}catch{}};
   $('#planning-guide-close').onclick=closeGuide;$('#planning-guide-done').onclick=closeGuide;
   $('#planning-guide').addEventListener('click',e=>{if(e.target.closest('a,button[data-action]'))closeGuide();});
   $('#planning-note-form').addEventListener('submit',async e=>{
