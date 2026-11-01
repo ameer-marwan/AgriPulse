@@ -42,7 +42,10 @@ js+='\n'+auth;
 const vendor=await read('dist/vendor/maplibre-gl.js');
 html=html.replace('<script src="vendor/maplibre-gl.js"></script>',()=>'<script>'+scriptSafe(vendor)+'</script>');
 html=html.replace('<script type="module" src="auth-bootstrap.js"></script>',()=>'<script>'+scriptSafe(js)+'</script>');
+// Dynamic intro markup is part of the injected bundle, so embed its logo after script assembly too.
+html=html.replaceAll('assets/logo-new.png',logo);
 html=html.replaceAll('assets/earth-texture.jpg',await dataUri('dist/assets/earth-texture.jpg','image/jpeg'));
+if(html.includes('assets/logo-new.png'))throw Error('Portable build contains an unresolved FieldShift logo URL');
 const target=resolve(out,'FieldShift-Final.html');
 await writeFile(target,html);
 console.log('Portable website: '+target+' ('+Buffer.byteLength(html).toLocaleString()+' bytes)');
