@@ -41,6 +41,9 @@ html=html.replace('<script type="module" src="app.js"></script>',()=>'<script>'+
 // Dynamic intro markup is part of the injected bundle, so embed its logo after script assembly too.
 html=html.replaceAll('assets/logo-new.png',logo);
 html=html.replaceAll('assets/earth-texture.jpg',await dataUri('dist/assets/earth-texture.jpg','image/jpeg'));
+for (const name of ['china','ksa','netherlands','kenya','brazil']) {
+  html=html.replaceAll('assets/explore-'+name+'.webp',await dataUri('dist/assets/explore-'+name+'.webp','image/webp'));
+}
 if(html.includes('assets/logo-new.png'))throw Error('Portable build contains an unresolved FieldShift logo URL');
 const target=resolve(out,'FieldShift-Final.html');
 await writeFile(target,html);

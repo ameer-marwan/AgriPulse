@@ -33,7 +33,7 @@ try {
   await page.locator('.sidebar').evaluate(el => { el.scrollTop = el.scrollHeight; });
   assert.equal(await page.locator('.side-nav [data-route="feedback"]').isVisible(), true, 'Last navigation options remain reachable');
   await page.setViewportSize({width:1440,height:1080});
-  for (const route of ['map','weather','soil','water','crops','profit','reports','learn','feedback','settings','about','overview']) {
+  for (const route of ['map','weather','soil','water','crops','profit','reports','explore','learn','feedback','settings','about','overview']) {
     await page.goto(origin+'/#/'+route, {waitUntil:'domcontentloaded'});
     await page.waitForTimeout(250);
     assert.equal(await page.locator('#view-'+route).isVisible(), true, route+' route visible');
@@ -50,6 +50,11 @@ try {
   assert.match(resourceLinks[1].href,/nasaharvest\.org/);
   assert.match(resourceLinks[2].href,/earth\.google\.com/);
   assert.ok(resourceLinks.every(link => link.target==='_blank' && link.rel.includes('noopener')),'Resources open safely in new tabs');
+  await page.goto(origin+'/#/explore');
+  assert.equal(await page.locator('#view-explore .world-feature').count(),2,'China and Saudi Arabia are featured');
+  assert.equal(await page.locator('#view-explore .world-story').count(),3,'Three additional agriculture examples are shown');
+  assert.match(await page.locator('#view-explore').innerText(),/\$1\.65 trillion/,'China estimate is visible');
+  assert.equal(await page.locator('#view-explore img').count(),5,'Every country example has an image');
   await page.goto(origin+'/#/soil');
   await page.getByRole('button', {name:'Add a soil sample', exact:true}).click();
   await page.locator('#soil-sample-form [name="name"]').fill('QA laboratory sample');
@@ -85,11 +90,11 @@ try {
   await page.waitForTimeout(400);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth), false, 'No mobile overflow');
   await page.screenshot({path:'/tmp/fieldshift-mobile.png',fullPage:true});
-  for (const route of ['map','weather','soil','water','crops','profit','reports','learn','feedback','settings','about']) {
+  for (const route of ['map','weather','soil','water','crops','profit','reports','explore','learn','feedback','settings','about']) {
     await page.goto(origin+'/#/'+route, {waitUntil:'domcontentloaded'});
     await page.waitForTimeout(150);
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth), false, route+' has no mobile overflow');
   }
   assert.deepEqual(errors, [], 'No uncaught application errors');
-  console.log('PASS: startup, 12 routes, agriculture resources, profit, saved sample, comments and feedback, theme, desktop/mobile overflow.');
+  console.log('PASS: startup, 13 routes, world agriculture explore, resources, profit, saved sample, feedback, theme, desktop/mobile overflow.');
 } finally { await browser.close(); }
