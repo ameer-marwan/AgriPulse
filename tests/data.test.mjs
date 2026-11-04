@@ -29,6 +29,19 @@ test('economics preserves losses and handles zero yield/price without infinity',
   assert.throws(() => calculateEconomics({ ...basic, yieldTonnesHa: NaN }));
 });
 
+test('economics applies local selling losses, transport and market fees', () => {
+  const value = calculateEconomics({ ...basic, sellingLossPercent: 10, transportCostPerTonne: 20, marketFeePercent: 5 });
+  assert.equal(value.saleableYieldTonnesHa, 3.6);
+  assert.equal(value.revenue, 1800);
+  assert.equal(value.sellingCosts, 234);
+  assert.equal(value.cost, 1234);
+  assert.equal(value.margin, 566);
+  assert.ok(Math.abs(value.breakEvenPrice - 167.2514619883041) < 1e-9);
+  assert.ok(Math.abs(value.breakEvenYield - 2.554278416347382) < 1e-9);
+  assert.throws(() => calculateEconomics({ ...basic, sellingLossPercent: 101 }));
+  assert.throws(() => calculateEconomics({ ...basic, marketFeePercent: -1 }));
+});
+
 test('rotation scenarios respond to priority, family and pH constraints', () => {
   const value = recommendRotations({ priority: 'water', currentCrop: 'wheat', irrigated: false, ph: 6.5 });
   assert.equal(value[0].id, 'water');

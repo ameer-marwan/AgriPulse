@@ -13,14 +13,17 @@ const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'
 const number = n => typeof n === 'number' && Number.isFinite(n);
 function read(key, fallback) { try { const value = JSON.parse(workspaceStorage.getItem(key)); return value ?? fallback; } catch { return fallback; } }
 function write(key, value) { try { workspaceStorage.setItem(key, JSON.stringify(value)); } catch { toast('Workspace storage is unavailable. Export a report to keep your work.'); } }
-const example = {lat:38.46,lon:-98.25,name:'Central Kansas',method:'Example location',id:'example-kansas',boundary:null};
+const example = {lat:38.46,lon:-98.25,name:'Central Kansas',country:'United States',region:'Kansas',method:'Example location',id:'example-kansas',boundary:null};
 const validPoint = loc => loc && number(loc.lat) && number(loc.lon) && Math.abs(loc.lat) <= 90 && Math.abs(loc.lon) <= 180;
 const savedLocation = read('fieldshift.location', null);
-const defaultEconomics = {currency:'USD',areaHa:1,yieldTonnesHa:3,pricePerTonne:350,seedCostHa:120,fertilizerCostHa:180,waterCostHa:80,operationsCostHa:220};
+const defaultEconomics = {currency:'USD',areaHa:1,yieldTonnesHa:3,pricePerTonne:350,sellingLossPercent:0,transportCostPerTonne:0,marketFeePercent:0,seedCostHa:120,fertilizerCostHa:180,waterCostHa:80,operationsCostHa:220,priceSource:'estimate',priceDate:''};
 // Fixed planning-rate reference: every entry is the number of currency units per USD.
 // These values make scenarios comparable; they are not live market exchange rates.
-const currencyPerUsd = {USD:1,EUR:.92,GBP:.79,INR:83.1,KES:129,EGP:50,SAR:3.75};
-const currencyFields = ['pricePerTonne','seedCostHa','fertilizerCostHa','waterCostHa','operationsCostHa'];
+const currencyPerUsd = {USD:1,EUR:.92,GBP:.79,INR:83.1,KES:129,EGP:50,SAR:3.75,CNY:7.12,BRL:5.05,ZAR:17.7,NGN:1450};
+const currencyFields = ['pricePerTonne','transportCostPerTonne','seedCostHa','fertilizerCostHa','waterCostHa','operationsCostHa'];
+const economicsTextFields = new Set(['currency','priceSource','priceDate']);
+const countryCurrencies = {'Saudi Arabia':'SAR','United States':'USD','United States of America':'USD','United Kingdom':'GBP','India':'INR','Kenya':'KES','Egypt':'EGP','China':'CNY','Brazil':'BRL','South Africa':'ZAR','Nigeria':'NGN','France':'EUR','Germany':'EUR','Netherlands':'EUR','Spain':'EUR','Italy':'EUR','Portugal':'EUR','Ireland':'EUR','Belgium':'EUR','Austria':'EUR','Greece':'EUR','Finland':'EUR'};
+const priceSourceNames={estimate:'User estimate',farmgate:'Farm-gate quote',cooperative:'Cooperative or contract',wholesale:'Wholesale market quote',benchmark:'Published benchmark'};
 const state = {
   location:validPoint(savedLocation) ? savedLocation : {...example},
   preferences:read('fieldshift.preferences',{theme:'dark',units:'metric',language:'en'}),
@@ -52,13 +55,22 @@ function persistFieldSettings(){
 function restoreFieldSettings(){
   const settings=state.fieldSettings[fieldKey()];
   state.economicsInputs={...defaultEconomics,...settings?.economics};
+  if(!settings?.economics){
+    const suggested=countryCurrencies[state.location.country];
+    if(suggested&&suggested!==state.economicsInputs.currency){
+      const factor=(currencyPerUsd[suggested]||1)/(currencyPerUsd[state.economicsInputs.currency]||1);
+      for(const name of currencyFields)state.economicsInputs[name]=Math.round(Number(state.economicsInputs[name]||0)*factor*100)/100;
+      state.economicsInputs.currency=suggested;
+    }
+  }
+  if(!state.economicsInputs.priceDate)state.economicsInputs.priceDate=today();
   if(state.location.boundary)state.economicsInputs.areaHa=Number(polygonAreaHa(state.location.boundary).toFixed(4));
   Object.entries(state.economicsInputs).forEach(([key,value])=>{if($('#economics-form').elements[key])$('#economics-form').elements[key].value=value;});
   const planner=settings?.planner??{};
   $('#current-crop').value=crops.some(c=>c.id===planner.crop)?planner.crop:'wheat';
   $('#planning-priority').value=planner.priority||'soil';$('#irrigation').value=planner.irrigation||'rainfed';$('#planner-ph').value=planner.ph??'';
   state.selectedPlan=planner.selectedPlan||'soil';state.weather=null;state.economics=null;
-  renderEconomics();renderRotations();
+  renderEconomics();renderRotations();renderMarketContext();
 }
 
 function init() {
@@ -180,11 +192,13 @@ function bindEvents() {
   $('#geojson-import').addEventListener('change',importBoundary);
   $('#economics-form').addEventListener('submit',event => {event.preventDefault();state.fieldSettings[fieldKey()]={...state.fieldSettings[fieldKey()],economicsReviewed:true};renderEconomics();toast('Economics scenario updated');});
   $('#economics-form').elements.currency.addEventListener('change',convertCurrency);
+  $('#economics-form').elements.priceSource.addEventListener('change',renderMarketContext);
+  $('#economics-form').elements.priceDate.addEventListener('change',renderMarketContext);
   $('#soil-sample-form').addEventListener('submit',saveSample);
   $('#water-record-form').addEventListener('submit',saveWater);
   $('#feedback-form').addEventListener('submit',saveFeedback);
   $('#crop-filter').addEventListener('input',event => renderCropLibrary(event.target.value));
-  $('#current-crop').addEventListener('change',renderRotations);
+  $('#current-crop').addEventListener('change',()=>{renderRotations();renderMarketContext();});
   $('#planning-priority').addEventListener('change',renderRotations);
   $('#irrigation').addEventListener('change',renderRotations);
   $('#planner-ph').addEventListener('change',renderRotations);
@@ -193,6 +207,16 @@ function bindEvents() {
   $$('.location-dialog-content').forEach(form => form.addEventListener('keydown',event => {if(event.key==='Escape')form.closest('dialog').close();}));
 }
 function setMapModeButtons(mode) {$$('[data-map-mode]').forEach(b => b.classList.toggle('selected',b.dataset.mapMode===mode));}
+function renderMarketContext(){
+  const form=$('#economics-form');if(!form)return;
+  const source=form.elements.priceSource?.value||state.economicsInputs.priceSource||'estimate';
+  const crop=crops.find(item=>item.id===$('#current-crop')?.value);
+  const place=[state.location.region,state.location.country].filter(Boolean).join(', ')||state.location.name;
+  text('#market-location',place||'Selected field');text('#market-crop',crop?.name||'Select a crop in Crop planner');text('#market-evidence',t(priceSourceNames[source]||'User estimate'));
+  text('#market-region-note',state.location.country?t('Market context follows the selected land.') : t('Use a place search to identify the country market.'));
+  const suggested=countryCurrencies[state.location.country],currency=form.elements.currency?.value||state.economicsInputs.currency;
+  text('#market-currency-note',suggested&&suggested!==currency?t('Recommended local currency')+': '+suggested:t('Scenario currency')+': '+currency);
+}
 function convertCurrency(event){
   const form=$('#economics-form'),next=event.target.value,previous=state.economicsInputs.currency||'USD';
   if(next===previous)return;
@@ -205,6 +229,7 @@ function convertCurrency(event){
   state.economicsInputs={...state.economicsInputs,currency:next};
   state.fieldSettings[fieldKey()]={...state.fieldSettings[fieldKey()],economicsReviewed:true};
   renderEconomics();
+  renderMarketContext();
   toast(t('Converted at the planning reference rate.'));
 }
 function applyPreferences() {
@@ -224,7 +249,7 @@ function renderLocation() {
   text('#mapped-area',area?area.toFixed(2)+' ha / '+(area*2.47105).toFixed(2)+' acres':'No boundary drawn');
   text('#report-area',area?area.toFixed(2)+' hectares':'Point selection');
   $('#field-name-input').value=l.method==='Example location'?'':l.name;
-  renderReports();renderSamples();renderJournal();renderSavedPlans();notifyFieldUpdate();
+  renderReports();renderSamples();renderJournal();renderSavedPlans();renderMarketContext();notifyFieldUpdate();
 }
 function clearNasa(){
   state.nasaController?.abort();state.nasa=null;
@@ -354,11 +379,12 @@ function renderSavedPlans(){
   }
 }
 function renderEconomics(){
-  text('#economics-status',state.fieldSettings[fieldKey()]?.economicsReviewed?'REVIEWED ASSUMPTIONS':'EXAMPLE ASSUMPTIONS · EDIT FOR YOUR LAND');
-  try {const data=Object.fromEntries(new FormData($('#economics-form')));const inputs=Object.fromEntries(Object.entries(data).map(([key,value])=>[key,key==='currency'?value:Number(value)]));state.economics=calculateEconomics(inputs);state.economicsInputs=inputs;persistFieldSettings();const e=state.economics,locale=({en:'en-US',fr:'fr-FR',ar:'ar-SA'})[currentLanguage()]||'en-US';
-    text('#profit-total',money(e.margin));text('#profit-per-ha',money(e.perHa.margin)+' '+t('per hectare')+' · '+e.areaHa.toLocaleString(locale)+' ha');text('[data-stat="margin"]',money(e.perHa.margin));text('#profit-revenue',money(e.revenue));text('#profit-cost',money(e.cost));text('#break-even-price',number(e.breakEvenPrice)?money(e.breakEvenPrice)+' / t':t('Not defined at zero yield'));text('#break-even-yield',number(e.breakEvenYield)?e.breakEvenYield.toFixed(2)+' t/ha':t('Not defined at zero price'));
+  const form=$('#economics-form'),reviewed=state.fieldSettings[fieldKey()]?.economicsReviewed,source=form?.elements.priceSource?.value||state.economicsInputs.priceSource;
+  text('#economics-status',reviewed&&source!=='estimate'?t('LOCAL MARKET INPUTS'):t('VERIFY LOCAL PRICE'));
+  try {const data=Object.fromEntries(new FormData(form));const inputs=Object.fromEntries(Object.entries(data).map(([key,value])=>[key,economicsTextFields.has(key)?value:Number(value)]));state.economics=calculateEconomics(inputs);state.economicsInputs=inputs;persistFieldSettings();const e=state.economics,locale=({en:'en-US',fr:'fr-FR',ar:'ar-SA'})[currentLanguage()]||'en-US';
+    text('#profit-total',money(e.margin));text('#profit-per-ha',money(e.perHa.margin)+' '+t('per hectare')+' · '+e.areaHa.toLocaleString(locale)+' ha');text('[data-stat="margin"]',money(e.perHa.margin));text('#profit-revenue',money(e.revenue));text('#profit-cost',money(e.cost));text('#profit-selling-costs',money(e.sellingCosts));text('#break-even-price',number(e.breakEvenPrice)?money(e.breakEvenPrice)+' / t':t('Not defined for these inputs'));text('#break-even-yield',number(e.breakEvenYield)?e.breakEvenYield.toFixed(2)+' t/ha':t('Not defined for these inputs'));
     const max=Math.max(1,...e.scenarios.map(s=>Math.abs(s.margin)));
-    $('#profit-scenarios').innerHTML=e.scenarios.map((s,i)=>'<div class="scenario-row"><span>'+escapeHTML(s.name)+'<small>'+(i===0?'Yield and price −10%':i===2?'Yield and price +10%':'Your entered yield and price')+'</small></span><div class="scenario-bar"><i style="width:'+Math.max(3,Math.abs(s.margin)/max*100)+'%"></i></div><strong>'+money(s.margin)+'</strong></div>').join('');renderReports();
+    $('#profit-scenarios').innerHTML=e.scenarios.map((s,i)=>'<div class="scenario-row"><span>'+escapeHTML(t(s.name))+'<small>'+t(i===0?'Local yield and price −10%':i===2?'Local yield and price +10%':'Your local yield and price')+'</small></span><div class="scenario-bar"><i style="width:'+Math.max(3,Math.abs(s.margin)/max*100)+'%"></i></div><strong>'+money(s.margin)+'</strong></div>').join('');renderMarketContext();renderReports();
   }catch(error){toast(error.message);}
 }
 function addJournal(title,detail){state.journal.unshift({id:crypto.randomUUID(),title,detail,field:fieldKey(),time:new Date().toISOString()});state.journal=state.journal.slice(0,100);write('fieldshift.journal',state.journal);renderJournal();}
@@ -387,11 +413,12 @@ function renderFeedback(){
   host.innerHTML=state.feedback.map(item=>'<article class="feedback-entry"><div class="feedback-entry-head"><span class="pill">'+escapeHTML(t(item.category))+'</span><span class="feedback-stars" aria-label="'+item.rating+' '+escapeHTML(t('out of 5'))+'">'+'★'.repeat(item.rating)+'<i>'+'★'.repeat(5-item.rating)+'</i></span></div><p>'+escapeHTML(item.comment)+'</p><footer><span><b>'+escapeHTML(item.name)+'</b> · '+new Date(item.createdAt).toLocaleDateString(locale)+'</span><button type="button" data-action="delete-feedback" data-id="'+item.id+'">'+t('Remove')+'</button></footer></article>').join('');
 }
 
-function evidenceRows(){const w=state.weather,c=w?.current;return [
+function evidenceRows(){const w=state.weather,c=w?.current,source=priceSourceNames[state.economicsInputs.priceSource]||'User estimate',dated=state.economicsInputs.priceDate?source+' · '+state.economicsInputs.priceDate:source;return [
   ['Air temperature',c?temp(c.temperature):'Unavailable','Current model analysis','Open-Meteo'],
   ['7-day rainfall',w?rain(total(w.daily,'rain')):'Unavailable','Forecast','Open-Meteo'],
   ['Surface moisture',c?moisture(c.soilMoisture):'Unavailable','Modeled 0–1 cm layer','Open-Meteo'],
-  ['Gross margin / ha',state.economics?money(state.economics.perHa.margin):'Not calculated','Entered assumptions','Farmer scenario'],
+  ['Local gross margin / ha',state.economics?money(state.economics.perHa.margin):'Not calculated',dated,state.location.country||'Farmer scenario'],
+  ['Selling deductions',state.economics?money(state.economics.sellingCosts):'Not calculated','Loss, transport and market fee','Entered local assumptions'],
   ['Selected point',state.location.lat.toFixed(4)+', '+state.location.lon.toFixed(4),state.location.method,'Your selection']
 ];}
 function renderReports(){const body=$('#report-data');if(!body)return;body.innerHTML=evidenceRows().map(row=>'<tr>'+row.map(value=>'<td>'+escapeHTML(value)+'</td>').join('')+'</tr>').join('');notifyFieldUpdate();}

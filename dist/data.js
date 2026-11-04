@@ -208,25 +208,40 @@ export function calculateEconomics(input = {}) {
     }
     values[field] = value;
   }
-  const { areaHa, yieldTonnesHa, pricePerTonne, seedCostHa, fertilizerCostHa, waterCostHa, operationsCostHa } = values;
-  const costsHa = seedCostHa + fertilizerCostHa + waterCostHa + operationsCostHa;
-  const revenueHa = yieldTonnesHa * pricePerTonne;
+  for (const [field, fallback, maximum] of [['sellingLossPercent',0,100],['transportCostPerTonne',0,Infinity],['marketFeePercent',0,100]]) {
+    const value = input[field] ?? fallback;
+    if (typeof value !== 'number' || !Number.isFinite(value) || value < 0 || value > maximum) throw new Error(`Enter a valid value for ${field}.`);
+    values[field] = value;
+  }
+  const { areaHa, yieldTonnesHa, pricePerTonne, sellingLossPercent, transportCostPerTonne, marketFeePercent, seedCostHa, fertilizerCostHa, waterCostHa, operationsCostHa } = values;
+  const productionCostsHa = seedCostHa + fertilizerCostHa + waterCostHa + operationsCostHa;
+  const saleableFactor = 1 - sellingLossPercent / 100;
+  const feeFactor = marketFeePercent / 100;
+  const saleableYieldHa = yieldTonnesHa * saleableFactor;
+  const grossRevenueHa = saleableYieldHa * pricePerTonne;
+  const transportHa = saleableYieldHa * transportCostPerTonne;
+  const marketFeeHa = grossRevenueHa * feeFactor;
+  const sellingCostsHa = transportHa + marketFeeHa;
+  const costsHa = productionCostsHa + sellingCostsHa;
   const scenarios = [
     { id: 'conservative', name: 'Conservative', factor: 0.9 },
     { id: 'expected', name: 'Entered assumptions', factor: 1 },
     { id: 'optimistic', name: 'Optimistic', factor: 1.1 }
-  ].map(scenario => ({ id: scenario.id, name: scenario.name,
-    yieldTonnesHa: yieldTonnesHa * scenario.factor, pricePerTonne: pricePerTonne * scenario.factor,
-    revenue: revenueHa * scenario.factor ** 2 * areaHa, cost: costsHa * areaHa,
-    margin: (revenueHa * scenario.factor ** 2 - costsHa) * areaHa,
-    marginHa: revenueHa * scenario.factor ** 2 - costsHa }));
-  return { revenue: revenueHa * areaHa, cost: costsHa * areaHa, margin: (revenueHa - costsHa) * areaHa,
-    perHa: { revenue: revenueHa, cost: costsHa, margin: revenueHa - costsHa },
-    breakEvenPrice: yieldTonnesHa > 0 ? costsHa / yieldTonnesHa : null,
-    breakEvenYield: pricePerTonne > 0 ? costsHa / pricePerTonne : null,
+  ].map(scenario => {
+    const harvestYield=yieldTonnesHa*scenario.factor,saleableYield=harvestYield*saleableFactor,price=pricePerTonne*scenario.factor;
+    const revenue=saleableYield*price,transport=saleableYield*transportCostPerTonne,fee=revenue*feeFactor,cost=productionCostsHa+transport+fee;
+    return { id:scenario.id,name:scenario.name,yieldTonnesHa:harvestYield,pricePerTonne:price,revenue:revenue*areaHa,cost:cost*areaHa,margin:(revenue-cost)*areaHa,marginHa:revenue-cost };
+  });
+  const priceContributionFactor=saleableYieldHa*(1-feeFactor);
+  const yieldContributionPerHarvestTonne=saleableFactor*(pricePerTonne*(1-feeFactor)-transportCostPerTonne);
+  return { revenue: grossRevenueHa * areaHa, cost: costsHa * areaHa, sellingCosts: sellingCostsHa * areaHa, margin: (grossRevenueHa - costsHa) * areaHa,
+    perHa: { revenue: grossRevenueHa, cost: costsHa, sellingCosts: sellingCostsHa, margin: grossRevenueHa - costsHa },
+    saleableYieldTonnesHa:saleableYieldHa,
+    breakEvenPrice: priceContributionFactor > 0 ? (productionCostsHa + transportHa) / priceContributionFactor : null,
+    breakEvenYield: yieldContributionPerHarvestTonne > 0 ? productionCostsHa / yieldContributionPerHarvestTonne : null,
     currency: typeof input.currency === 'string' ? input.currency : 'USD', areaHa, scenarios,
     assumptions: values,
-    limitations: 'Gross margin from entered values only. Unentered land, finance, tax, storage and overhead costs are excluded. Sensitivity scenarios change both yield and price by ±10%; they are not forecasts.' };
+    limitations: 'Local gross margin from entered values only. Unentered land, finance, tax, storage and overhead costs are excluded. Selling loss, transport and market fees use the explicit local assumptions. Sensitivity scenarios change both harvested yield and local sale price by ±10%; they are not forecasts.' };
 }
 
 export function formatWeatherCode(code) {
