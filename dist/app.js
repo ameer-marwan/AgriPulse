@@ -108,6 +108,10 @@ function init() {
   const savedPlansPanel=document.createElement('article');savedPlansPanel.className='panel';
   savedPlansPanel.innerHTML='<div class="panel-heading"><div><span class="eyebrow">SAVED FOR THIS LAND</span><h2>Your rotation library</h2></div></div><div id="saved-plans-list"></div>';
   $('#view-crops').append(savedPlansPanel);
+  const horizon=document.createElement('article');horizon.className='panel season-horizon';horizon.innerHTML='<div class="panel-heading"><div><span class="eyebrow">SEASON HORIZON</span><h2>Plan the next stages</h2></div><span class="pill">PLANNING VIEW</span></div><div id="season-horizon"></div><p class="fine-print">A planning horizon based on your selected rotation. Confirm local planting and harvest dates before acting.</p>';
+  $('#view-crops').insertBefore(horizon,$('#view-crops .data-note'));
+  const satellite=document.createElement('div');satellite.className='satellite-status';satellite.innerHTML='<span class="eyebrow">SATELLITE ANALYSIS</span><b>Boundary context ready</b><p>Satellite basemap is visible. Vegetation-health zones need a connected Sentinel or Landsat index before they can be calculated.</p><a href="https://worldview.earthdata.nasa.gov/" target="_blank" rel="noopener noreferrer">Open NASA Worldview ↗</a>';
+  $('.field-details').insertBefore(satellite,$('.saved-fields'));
   $('[data-map-layer="terrain"]').textContent='Street map';
   state.map = createFieldMap($('#field-map'),{
     onSelect:point => selectLocation({...point,id:crypto.randomUUID(),name:'Selected point'},false),
@@ -134,7 +138,7 @@ function init() {
   if(!Object.keys(state.fieldSettings).length){const legacy=read('fieldshift.economics',null);if(legacy)state.fieldSettings[fieldKey()]={economics:legacy};}
   restoreFieldSettings();
   $('#water-record-form').elements.date.value=today(); $('#soil-sample-form').elements.date.value=today();
-  renderEconomics(); renderRotations(); renderCropLibrary(); renderReports(); renderFeedback();
+  renderEconomics(); renderRotations(); renderCropLibrary(); renderReports(); renderFeedback();renderDecisionBriefing();
   navigate(); window.addEventListener('hashchange',navigate);
   initPlanning({getState:()=>state,fieldKey,toast,crops});
   initScenes({getState:()=>state});
@@ -255,7 +259,7 @@ function renderLocation() {
   text('#mapped-area',area?area.toFixed(2)+' ha / '+(area*2.47105).toFixed(2)+' acres':'No boundary drawn');
   text('#report-area',area?area.toFixed(2)+' hectares':'Point selection');
   $('#field-name-input').value=l.method==='Example location'?'':l.name;
-  renderReports();renderSamples();renderJournal();renderSavedPlans();renderMarketContext();renderFieldHealth();notifyFieldUpdate();
+  renderReports();renderSamples();renderJournal();renderSavedPlans();renderMarketContext();renderFieldHealth();renderDecisionBriefing();notifyFieldUpdate();
 }
 function renderFieldHealth(){
   const weather=state.weather?.current,soilRecords=state.samples.filter(sample=>sample.field===fieldKey());
@@ -268,6 +272,27 @@ function renderFieldHealth(){
   text('#field-health-score',overall);text('#health-weather-score',scores.weather+'/100');text('#health-water-score',scores.water+'/100');text('#health-soil-score',scores.soil+'/100');text('#health-profit-score',scores.profit+'/100');
   const ring=$('#field-health-ring');if(ring)ring.style.strokeDashoffset=String(283-(283*overall/100));
   text('#field-health-summary',t(overall>=75?'Your field signals are working together. Keep checking local evidence before acting.':overall>=55?'Your field is steady, with opportunities to improve the weakest signal.':'Your field needs a closer look. Start with the weakest signal before the next decision.'));
+}
+function renderDecisionBriefing(){
+  const host=$('#briefing-alert-list');if(!host)return;
+  const weather=state.weather?.current,week=state.weather?total(state.weather.daily,'rain'):null,samples=state.samples.filter(sample=>sample.field===fieldKey()),source=state.economicsInputs.priceSource;
+  const alerts=[];let move={title:'Add local evidence',copy:'A soil sample and a dated local price make field decisions more reliable.',link:'#/soil',action:'Add soil evidence'};
+  if(!weather)alerts.push({kind:'info',title:'Weather needs a refresh',copy:'Forecast signals are unavailable until the provider returns data.',link:'#/weather'});
+  else {if(number(week)&&week<10)alerts.push({kind:'water',title:'Low rain outlook',copy:'The next 7-day forecast is below 10 mm. Compare it with crop water demand.',link:'#/water'});if(number(weather.temperature)&&weather.temperature>=32)alerts.push({kind:'heat',title:'Heat window',copy:'High temperature is present in the current model. Review sensitive crop stages.',link:'#/weather'});}
+  if(!samples.length)alerts.push({kind:'soil',title:'Local soil evidence missing',copy:'Add a dated pH or organic-carbon record before relying on soil recommendations.',link:'#/soil'});
+  if(source==='estimate')alerts.push({kind:'market',title:'Local price needs verification',copy:'Replace the estimate with a dated farm-gate, contract, cooperative, or wholesale quote.',link:'#/profit'});
+  if(alerts.some(alert=>alert.kind==='water'))move={title:'Review the water window',copy:'Rainfall is limited in the connected forecast. Compare rain with reference demand before scheduling irrigation.',link:'#/water',action:'Open water intelligence'};
+  else if(!samples.length)move={title:'Add a dated soil sample',copy:'A pH or organic-carbon result will make the crop-plan evidence more specific to your land.',link:'#/soil',action:'Add soil sample'};
+  else if(source==='estimate')move={title:'Verify your local price',copy:'Profit is most useful when the price source and date match your actual market.',link:'#/profit',action:'Open profit scenario'};
+  else if(weather)move={title:'Compare the next rotation',copy:'Your core evidence is connected. Review crop diversity, water access, and current soil pH together.',link:'#/crops',action:'Open crop planner'};
+  const connected=[!!weather,samples.length>0,source!=='estimate',!!state.location.boundary].filter(Boolean).length;
+  text('#briefing-date','Updated '+new Date().toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'}));text('#briefing-next-title',move.title);text('#briefing-next-copy',move.copy);const link=$('#briefing-next-link');link.href=move.link;link.childNodes[0].textContent=move.action+' ';
+  text('#briefing-evidence-score',connected+'/4');text('#briefing-evidence-copy',connected===4?'Weather, local soil, dated price, and a mapped boundary are connected.':(4-connected)+' evidence connection'+(4-connected===1?'':'s')+' still need attention.');
+  text('#briefing-alert-count',alerts.length+' '+(alerts.length===1?'ALERT':'ALERTS'));host.innerHTML=alerts.length?alerts.map(alert=>'<a class="briefing-alert '+alert.kind+'" href="'+alert.link+'"><i>'+(alert.kind==='water'?'⌁':alert.kind==='soil'?'◒':alert.kind==='heat'?'☀':alert.kind==='market'?'↗':'•')+'</i><span><b>'+escapeHTML(alert.title)+'</b><small>'+escapeHTML(alert.copy)+'</small></span><em>→</em></a>').join(''):'<div class="briefing-clear"><span>✓</span><div><b>No urgent signal</b><small>Connected data does not show a threshold alert right now.</small></div></div>';
+}
+function renderSeasonHorizon(){
+  const host=$('#season-horizon');if(!host)return;const plan=state.rotationOptions.find(item=>item.id===state.selectedPlan),current=crops.find(item=>item.id===$('#current-crop')?.value),sequence=[current,...(plan?.sequence||[]).map(id=>crops.find(item=>item.id===id))].filter(Boolean).slice(0,3),start=new Date();
+  host.innerHTML=sequence.map((crop,index)=>{const date=new Date(start);date.setMonth(date.getMonth()+index*4);return '<div class="season-stage"><span class="season-stage-date">'+date.toLocaleDateString(undefined,{month:'short',year:'numeric'})+'</span><i>♧</i><b>'+escapeHTML(crop.name)+'</b><small>'+escapeHTML(index===0?'Current crop · observe conditions':index===1?'Rotation window · confirm local fit':'Later path · validate market and timing')+'</small></div>'}).join('<span class="season-stage-arrow">→</span>');
 }
 function clearNasa(){
   state.nasaController?.abort();state.nasa=null;
@@ -328,7 +353,7 @@ function resetWeather(status){
   $('#full-forecast').innerHTML='<p class="empty">'+(status==='loading'?'Loading seven-day outlook…':'Forecast unavailable.')+'</p>';
   $('#hourly-chart').innerHTML='<p class="empty">'+(status==='loading'?'Loading hourly data…':'Hourly data unavailable.')+'</p>';
   $('#water-chart').innerHTML='<p class="empty">'+(status==='loading'?'Loading water signals…':'Water signals unavailable.')+'</p>';
-  renderReports();renderFieldHealth();notifyFieldUpdate();
+  renderReports();renderFieldHealth();renderDecisionBriefing();notifyFieldUpdate();
 }
 function renderWeather(){
   const w=state.weather;if(!w)return;const c=w.current;
@@ -344,7 +369,7 @@ function renderWeather(){
   $('.weather-glyph').textContent=c.weatherCode===0?'☀':c.weatherCode>=51?'☂':'☁';
   $('#home-forecast').innerHTML=w.daily.slice(0,4).map((d,i)=>'<div class="forecast-item"><span class="forecast-date">'+(i===0?'Today':dateShort(d.date))+'</span><span>'+glyph(d)+'</span><span class="forecast-temp">'+temp(d.high)+'</span><span class="forecast-rain">'+rain(d.rain)+'</span></div>').join('');
   $('#full-forecast').innerHTML=w.daily.map((d,i)=>'<div class="day-card"><span class="day">'+(i===0?'Today':dateShort(d.date))+'</span><span class="wx">'+glyph(d)+'</span><strong>'+temp(d.high)+'<small>'+temp(d.low)+'</small></strong><span class="rain">'+rain(d.rain)+'</span></div>').join('');
-  renderHourlyChart();renderWaterChart();renderReports();renderFieldHealth();notifyFieldUpdate();
+  renderHourlyChart();renderWaterChart();renderReports();renderFieldHealth();renderDecisionBriefing();notifyFieldUpdate();
 }
 function renderHourlyChart(){
   const w=state.weather;if(!w)return;
@@ -355,7 +380,7 @@ function renderHourlyChart(){
   let line='',inSegment=false;points.forEach((p,i)=>{if(!number(p.temperature)){inSegment=false;return;}line+=(inSegment?' L':' M')+x(i).toFixed(1)+' '+y(temperatureValue(p.temperature)).toFixed(1);inSegment=true;});
   const grid=[min,(min+max)/2,max].map(n=>'<path class="chart-grid" d="M'+left+' '+y(n)+'H'+(width-right)+'"/><text class="axis-label" x="1" y="'+(y(n)+3)+'">'+Math.round(n)+'°</text>').join('');
   const labels=points.filter((p,i)=>i%5===0).map(p=>{const i=points.indexOf(p);return '<text class="axis-label" x="'+x(i)+'" y="'+(height-5)+'" text-anchor="middle">'+p.time.slice(11,16)+'</text>';}).join('');
-  $('#hourly-chart').innerHTML='<svg viewBox="0 0 '+width+' '+height+'" role="img" aria-label="Next 24 hours temperature chart in '+(state.preferences.units==='imperial'?'Fahrenheit':'Celsius')+'">'+grid+'<path class="temp-line" d="'+line+'"/>'+labels+'</svg>';
+  const chart=$('#hourly-chart');chart.innerHTML='<svg viewBox="0 0 '+width+' '+height+'" role="img" aria-label="Next 24 hours temperature chart in '+(state.preferences.units==='imperial'?'Fahrenheit':'Celsius')+'">'+grid+'<path class="temp-line" d="'+line+'"/>'+labels+'</svg><div class="chart-detail">Tap the chart to inspect the closest hourly modeled temperature.</div>';chart.querySelector('svg').addEventListener('click',event=>{const rect=event.currentTarget.getBoundingClientRect(),index=Math.max(0,Math.min(points.length-1,Math.round(((event.clientX-rect.left)/rect.width*(width-left-right)+left-left)/((width-left-right)/Math.max(1,points.length-1))))),point=points[index];chart.querySelector('.chart-detail').textContent=point?.time?.replace('T',' ')+' · '+(number(point?.temperature)?temp(point.temperature):'Unavailable')+' · modeled hourly temperature';});
 }
 function renderWaterChart(){
   const days=state.weather?.daily;if(!days?.length)return;
@@ -364,7 +389,7 @@ function renderWaterChart(){
   const y=n=>height-bottom-n/max*(height-bottom-top);
   const grid=[0,max/2,max].map(v=>'<path class="chart-grid" d="M'+left+' '+y(v)+'H690"/><text class="axis-label" x="0" y="'+(y(v)+3)+'">'+(state.preferences.units==='imperial'?(v/25.4).toFixed(2):v.toFixed(1))+'</text>').join('');
   const bars=days.map((d,i)=>{const x=left+i*step+step/2;let shape='';if(number(d.rain))shape+='<rect x="'+(x-16)+'" y="'+y(d.rain)+'" width="13" height="'+(height-bottom-y(d.rain))+'" rx="2" fill="#7eb4b4" stroke="none"><title>'+d.date+' rain '+rain(d.rain)+'</title></rect>';if(number(d.et0))shape+='<rect x="'+(x+3)+'" y="'+y(d.et0)+'" width="13" height="'+(height-bottom-y(d.et0))+'" rx="2" fill="#c7b16c" stroke="none"><title>'+d.date+' ET0 '+rain(d.et0)+'</title></rect>';return shape+'<text class="axis-label" x="'+x+'" y="'+(height-4)+'" text-anchor="middle">'+dateShort(d.date)+'</text>';}).join('');
-  $('#water-chart').innerHTML='<svg viewBox="0 0 '+width+' '+height+'" role="img" aria-label="Daily rainfall and reference evapotranspiration, '+(state.preferences.units==='imperial'?'inches':'millimeters')+'">'+grid+bars+'</svg>';
+  const chart=$('#water-chart');chart.innerHTML='<svg viewBox="0 0 '+width+' '+height+'" role="img" aria-label="Daily rainfall and reference evapotranspiration, '+(state.preferences.units==='imperial'?'inches':'millimeters')+'">'+grid+bars+'</svg><div class="chart-detail">Tap a day to inspect forecast rain and reference ET₀.</div>';chart.querySelector('svg').addEventListener('click',event=>{const rect=event.currentTarget.getBoundingClientRect(),index=Math.max(0,Math.min(days.length-1,Math.floor((event.clientX-rect.left)/rect.width*days.length))),day=days[index];chart.querySelector('.chart-detail').textContent=day?.date+' · Rain '+rain(day?.rain)+' · Reference ET₀ '+rain(day?.et0)+' · forecast/model inputs';});
 }
 
 function renderRotations(){
@@ -378,7 +403,7 @@ function renderRotations(){
   const current=crops.find(c=>c.id===$('#current-crop').value)??crops[0];
   const steps=[{name:current.name,label:'CURRENT CROP',kind:current.family},...plan.sequence.slice(0,2).map((id,i)=>({name:crops.find(c=>c.id===id)?.name??id,label:'SEASON '+(i+1),kind:crops.find(c=>c.id===id)?.type??''}))];
   $('#rotation-preview').innerHTML=steps.map((c,i)=>(i?'<span class="rotation-arrow">→</span>':'')+'<div class="rotation-step"><span class="crop-symbol">'+(i?'♧':'♧')+'</span><span class="eyebrow">'+c.label+'</span><strong>'+escapeHTML(c.name)+'</strong><small>'+escapeHTML(c.kind)+'</small></div>').join('');
-  persistFieldSettings();notifyFieldUpdate();
+  renderSeasonHorizon();renderDecisionBriefing();persistFieldSettings();notifyFieldUpdate();
 }
 function renderCropLibrary(filter=''){$('#crop-library').innerHTML=crops.filter(c=>(c.name+' '+c.family+' '+c.type).toLowerCase().includes(filter.toLowerCase())).map(c=>'<article class="crop-library-card"><span class="eyebrow">'+escapeHTML(c.family.toUpperCase())+'</span><h3>'+escapeHTML(c.name)+'</h3><p>'+escapeHTML(c.notes)+'</p><div class="crop-traits"><span>'+escapeHTML(c.season)+'</span><span>pH '+c.phMin+'–'+c.phMax+'</span><span>'+escapeHTML(c.waterDemand)+' demand</span></div><a href="'+escapeHTML(c.reference)+'" target="_blank" rel="noreferrer">FAO crop reference ↗</a></article>').join('')||'<p class="empty">No matching crops.</p>';replaceArrowGlyphs();}
 function savePlan(){const plan=state.rotationOptions.find(p=>p.id===state.selectedPlan);if(!plan)return;state.plans.push({...plan,id:crypto.randomUUID(),pathId:plan.id,field:fieldKey(),location:{...state.location},savedAt:new Date().toISOString(),economics:{...state.economicsInputs},planner:{...state.fieldSettings[fieldKey()]?.planner}});write('fieldshift.plans',state.plans);addJournal('Rotation plan saved',plan.name);renderSavedPlans();notifyFieldUpdate();toast('Plan and assumptions saved in this browser');}
@@ -400,7 +425,7 @@ function renderEconomics(){
   const form=$('#economics-form'),reviewed=state.fieldSettings[fieldKey()]?.economicsReviewed,source=form?.elements.priceSource?.value||state.economicsInputs.priceSource;
   text('#economics-status',reviewed&&source!=='estimate'?t('LOCAL MARKET INPUTS'):t('VERIFY LOCAL PRICE'));
   try {const data=Object.fromEntries(new FormData(form));const inputs=Object.fromEntries(Object.entries(data).map(([key,value])=>[key,economicsTextFields.has(key)?value:Number(value)]));state.economics=calculateEconomics(inputs);state.economicsInputs=inputs;persistFieldSettings();const e=state.economics,locale=({en:'en-US',fr:'fr-FR',ar:'ar-SA'})[currentLanguage()]||'en-US';
-    text('#profit-total',money(e.margin));text('#profit-per-ha',money(e.perHa.margin)+' '+t('per hectare')+' · '+e.areaHa.toLocaleString(locale)+' ha');text('[data-stat="margin"]',money(e.perHa.margin));text('#profit-revenue',money(e.revenue));text('#profit-cost',money(e.cost));text('#profit-selling-costs',money(e.sellingCosts));text('#break-even-price',number(e.breakEvenPrice)?money(e.breakEvenPrice)+' / t':t('Not defined for these inputs'));text('#break-even-yield',number(e.breakEvenYield)?e.breakEvenYield.toFixed(2)+' t/ha':t('Not defined for these inputs'));renderFieldHealth();
+    text('#profit-total',money(e.margin));text('#profit-per-ha',money(e.perHa.margin)+' '+t('per hectare')+' · '+e.areaHa.toLocaleString(locale)+' ha');text('[data-stat="margin"]',money(e.perHa.margin));text('#profit-revenue',money(e.revenue));text('#profit-cost',money(e.cost));text('#profit-selling-costs',money(e.sellingCosts));text('#break-even-price',number(e.breakEvenPrice)?money(e.breakEvenPrice)+' / t':t('Not defined for these inputs'));text('#break-even-yield',number(e.breakEvenYield)?e.breakEvenYield.toFixed(2)+' t/ha':t('Not defined for these inputs'));renderFieldHealth();renderDecisionBriefing();
     const max=Math.max(1,...e.scenarios.map(s=>Math.abs(s.margin)));
     $('#profit-scenarios').innerHTML=e.scenarios.map((s,i)=>'<div class="scenario-row"><span>'+escapeHTML(t(s.name))+'<small>'+t(i===0?'Local yield and price −10%':i===2?'Local yield and price +10%':'Your local yield and price')+'</small></span><div class="scenario-bar"><i style="width:'+Math.max(3,Math.abs(s.margin)/max*100)+'%"></i></div><strong>'+money(s.margin)+'</strong></div>').join('');renderMarketContext();renderReports();
   }catch(error){toast(error.message);}
