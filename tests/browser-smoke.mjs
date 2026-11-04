@@ -33,7 +33,7 @@ try {
   await page.locator('.sidebar').evaluate(el => { el.scrollTop = el.scrollHeight; });
   assert.equal(await page.locator('.side-nav [data-route="feedback"]').isVisible(), true, 'Last navigation options remain reachable');
   await page.setViewportSize({width:1440,height:1080});
-  for (const route of ['map','weather','soil','water','crops','profit','reports','explore','learn','feedback','settings','about','overview']) {
+  for (const route of ['map','weather','soil','water','crops','profit','reports','explore','feedback','settings','about','overview']) {
     await page.goto(origin+'/#/'+route, {waitUntil:'domcontentloaded'});
     await page.waitForTimeout(250);
     assert.equal(await page.locator('#view-'+route).isVisible(), true, route+' route visible');
@@ -59,14 +59,13 @@ try {
   await page.locator('#economics-form [name="transportCostPerTonne"]').fill('0');
   await page.locator('#economics-form [name="marketFeePercent"]').fill('0');
   await page.locator('#economics-form button').last().click();
-  await page.goto(origin+'/#/learn');
-  const resourceLinks = await page.locator('#view-learn .learn-resource-link').evaluateAll(links => links.map(link => ({href:link.href,target:link.target,rel:link.rel})));
+  await page.goto(origin+'/#/explore');
+  const resourceLinks = await page.locator('#view-explore .learn-resource-link').evaluateAll(links => links.map(link => ({href:link.href,target:link.target,rel:link.rel})));
   assert.equal(resourceLinks.length,3,'Three agriculture resources are available');
   assert.match(resourceLinks[0].href,/saudi-agriculture\.com/);
   assert.match(resourceLinks[1].href,/nasaharvest\.org/);
   assert.match(resourceLinks[2].href,/earth\.google\.com/);
   assert.ok(resourceLinks.every(link => link.target==='_blank' && link.rel.includes('noopener')),'Resources open safely in new tabs');
-  await page.goto(origin+'/#/explore');
   assert.equal(await page.locator('#view-explore .world-feature').count(),2,'China and Saudi Arabia are featured');
   assert.equal(await page.locator('#view-explore .world-story').count(),3,'Three additional agriculture examples are shown');
   assert.match(await page.locator('#view-explore').innerText(),/\$1\.65 trillion/,'China estimate is visible');
@@ -87,8 +86,8 @@ try {
   assert.equal(await page.locator('body').evaluate(el=>el.classList.contains('light')), true);
   await page.locator('#appearance').selectOption('dark');
   await page.locator('#language').selectOption('fr');
-  await page.goto(origin+'/#/learn');
-  assert.match(await page.locator('#view-learn h1').innerText(),/En savoir plus sur l’agriculture/,'Agriculture hub follows the selected language');
+  await page.goto(origin+'/#/explore');
+  assert.match(await page.locator('#view-explore h1').innerText(),/Explorer/,'Combined Explore hub follows the selected language');
   await page.goto(origin+'/#/settings');
   await page.locator('#language').selectOption('en');
   await page.goto(origin+'/#/feedback');
@@ -122,11 +121,11 @@ try {
   await page.waitForTimeout(400);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth), false, 'No mobile overflow');
   await page.screenshot({path:'/tmp/fieldshift-mobile.png',fullPage:true});
-  for (const route of ['map','weather','soil','water','crops','profit','reports','explore','learn','feedback','settings','about']) {
+  for (const route of ['map','weather','soil','water','crops','profit','reports','explore','feedback','settings','about']) {
     await page.goto(origin+'/#/'+route, {waitUntil:'domcontentloaded'});
     await page.waitForTimeout(150);
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth), false, route+' has no mobile overflow');
   }
   assert.deepEqual(errors, [], 'No uncaught application errors');
-  console.log('PASS: startup, 13 routes, world agriculture explore, resources, profit, saved sample, feedback, theme, desktop/mobile overflow.');
+  console.log('PASS: startup, 12 routes, combined Explore hub, resources, profit, saved sample, feedback, theme, desktop/mobile overflow.');
 } finally { await browser.close(); }

@@ -32,6 +32,13 @@ Object.assign(translations.ar,{
 });
 
 Object.assign(translations.fr,{
+  'TRUSTED RESOURCES':'RESSOURCES FIABLES','Continue exploring with Saudi agriculture, NASA Earth observation, and a global view of changing land.':'Poursuivez votre exploration avec l’agriculture saoudienne, l’observation de la Terre par la NASA et une vision mondiale des terres en évolution.'
+});
+Object.assign(translations.ar,{
+  'TRUSTED RESOURCES':'مصادر موثوقة','Continue exploring with Saudi agriculture, NASA Earth observation, and a global view of changing land.':'واصل الاستكشاف مع الزراعة السعودية ورصد الأرض من ناسا ورؤية عالمية للأراضي المتغيرة.'
+});
+
+Object.assign(translations.fr,{
   'Comments & feedback':'Commentaires et avis','COMMENTS & FEEDBACK':'COMMENTAIRES ET AVIS','Help FieldShift grow.':'Aidez FieldShift à progresser.','Share an idea, report a problem, or tell us what works well.':'Partagez une idée, signalez un problème ou dites-nous ce qui fonctionne bien.','SAVED ON THIS DEVICE':'ENREGISTRÉ SUR CET APPAREIL','YOUR MESSAGE':'VOTRE MESSAGE','What would you like us to know?':'Que souhaitez-vous nous dire ?','Name (optional)':'Nom (facultatif)','Your name':'Votre nom','Feedback type':'Type de commentaire','Idea':'Idée','Problem':'Problème','Question':'Question','Compliment':'Compliment','Overall rating':'Note globale','Excellent':'Excellent','Good':'Bien','Okay':'Correct','Needs work':'À améliorer','Poor':'Insuffisant','Comment':'Commentaire','Write your feedback here…':'Écrivez votre commentaire ici…','Save feedback':'Enregistrer le commentaire','YOUR FEEDBACK':'VOS COMMENTAIRES','Comments from this device':'Commentaires de cet appareil','No comments yet':'Aucun commentaire pour le moment','Your ideas and observations will appear here after you submit the form.':'Vos idées et observations apparaîtront ici après l’envoi du formulaire.','Remove':'Supprimer'
 });
 Object.assign(translations.ar,{
