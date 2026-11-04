@@ -2,7 +2,7 @@ import {fetchWeather, searchPlaces, fetchNasa, crops, recommendRotations, calcul
 import {createFieldMap, polygonAreaHa, validatePolygon, polygonReferencePoint} from './geo.js';
 import {initPlanning} from './planning.js';
 import {initScenes} from './scenes.js';
-import {initI18n} from './i18n.js';
+import {initI18n,t,currentLanguage} from './i18n.js';
 import {initIntro} from './intro.js';
 import {workspaceStorage} from './storage.js';
 
@@ -17,6 +17,10 @@ const example = {lat:38.46,lon:-98.25,name:'Central Kansas',method:'Example loca
 const validPoint = loc => loc && number(loc.lat) && number(loc.lon) && Math.abs(loc.lat) <= 90 && Math.abs(loc.lon) <= 180;
 const savedLocation = read('fieldshift.location', null);
 const defaultEconomics = {currency:'USD',areaHa:1,yieldTonnesHa:3,pricePerTonne:350,seedCostHa:120,fertilizerCostHa:180,waterCostHa:80,operationsCostHa:220};
+// Fixed planning-rate reference: every entry is the number of currency units per USD.
+// These values make scenarios comparable; they are not live market exchange rates.
+const currencyPerUsd = {USD:1,EUR:.92,GBP:.79,INR:83.1,KES:129,EGP:50,SAR:3.75};
+const currencyFields = ['pricePerTonne','seedCostHa','fertilizerCostHa','waterCostHa','operationsCostHa'];
 const state = {
   location:validPoint(savedLocation) ? savedLocation : {...example},
   preferences:read('fieldshift.preferences',{theme:'dark',units:'metric',language:'en'}),
@@ -34,7 +38,7 @@ const temperatureValue = n => state.preferences.units === 'imperial' ? n * 9 / 5
 const temp = n => number(n) ? Math.round(temperatureValue(n))+'°'+(state.preferences.units === 'imperial'?'F':'C') : '—';
 const rain = n => number(n) ? (state.preferences.units === 'imperial' ? (n/25.4).toFixed(2)+' in' : n.toFixed(1)+' mm') : '—';
 const wind = n => number(n) ? (state.preferences.units === 'imperial' ? Math.round(n*0.621371)+' mph' : Math.round(n)+' km/h') : '—';
-const money = (n, currency = state.economicsInputs.currency) => number(n) ? new Intl.NumberFormat('en',{style:'currency',currency,maximumFractionDigits:0}).format(n) : '—';
+const money = (n, currency = state.economicsInputs.currency) => number(n) ? new Intl.NumberFormat(({en:'en-US',fr:'fr-FR',ar:'ar-SA'})[currentLanguage()]||'en-US',{style:'currency',currency,maximumFractionDigits:0}).format(n) : '—';
 const moisture = n => number(n) ? (n*100).toFixed(0)+'%' : '—';
 const dateShort = date => new Date(date+'T12:00:00').toLocaleDateString('en',{weekday:'short'});
 const today = () => new Date().toISOString().slice(0,10);
@@ -86,7 +90,7 @@ function init() {
   $('main').insertBefore(exploreView,$('.app-footer'));
   const learnView=document.createElement('section');learnView.className='view';learnView.id='view-learn';learnView.hidden=true;learnView.innerHTML='<div class="page-heading learn-heading"><div><span class="eyebrow">AGRICULTURE RESOURCES</span><h1>Learn more about agriculture<span>.</span></h1><p>Explore trusted platforms for Saudi agriculture, Earth observation, and a global view of our changing land.</p></div><span class="learn-heading-mark" aria-hidden="true">↗</span></div><div class="learn-resources"><article class="panel learn-card learn-ksa"><span class="learn-card-number">01</span><div class="icon-box lime"><svg><use href="#i-leaf"/></svg></div><span class="eyebrow">SAUDI ARABIA</span><h2>KSA Agriculture</h2><p>Discover Saudi agriculture, industry events, technologies, and initiatives supporting the Kingdom’s farming sector.</p><a class="button learn-resource-link" href="https://saudi-agriculture.com/" target="_blank" rel="noopener noreferrer">Open KSA Agriculture <span aria-hidden="true">↗</span></a></article><article class="panel learn-card learn-nasa"><span class="learn-card-number">02</span><div class="icon-box blue"><svg><use href="#i-globe"/></svg></div><span class="eyebrow">EARTH OBSERVATION</span><h2>NASA Harvest</h2><p>Explore NASA’s global agriculture and food-security program, connecting satellite Earth observations with practical decisions.</p><a class="button learn-resource-link" href="https://www.nasaharvest.org" target="_blank" rel="noopener noreferrer">Open NASA Harvest <span aria-hidden="true">↗</span></a></article><article class="panel learn-card learn-earth"><span class="learn-card-number">03</span><div class="icon-box amber"><svg><use href="#i-map"/></svg></div><span class="eyebrow">EXPLORE THE PLANET</span><h2>Google Earth</h2><p>Travel across the globe, inspect landscapes, and understand the geographic context around farms and fields.</p><a class="button learn-resource-link" href="https://earth.google.com/web/@0,-1.38870016,0a,22251752.77375655d,35y,0h,0t,0r/data=CgRCAggBMikKJwolCiExM0FFVHlOV21hSXJSMUxBZjZvdy1Da05iczc1dHFhX3cgAToDCgEwQgIIAEoHCJvAuHEQAQ" target="_blank" rel="noopener noreferrer">Open Google Earth <span aria-hidden="true">↗</span></a></article></div><aside class="learn-note"><span>✦</span><p><b>Keep learning beyond your field.</b> These websites open in a new tab, so your FieldShift workspace stays exactly where you left it.</p></aside>';
   $('main').insertBefore(learnView,$('.app-footer'));
-  const feedbackView=document.createElement('section');feedbackView.className='view';feedbackView.id='view-feedback';feedbackView.hidden=true;feedbackView.innerHTML='<div class="page-heading"><div><span class="eyebrow">COMMENTS & FEEDBACK</span><h1>Help FieldShift grow<span>.</span></h1><p>Share an idea, report a problem, or tell us what works well.</p></div><span class="pill">SAVED ON THIS DEVICE</span></div><div class="feedback-layout"><form id="feedback-form" class="panel feedback-form"><div class="panel-heading"><div><span class="eyebrow">YOUR MESSAGE</span><h2>What would you like us to know?</h2></div></div><label>Name (optional)<input name="name" maxlength="60" placeholder="Your name"></label><div class="form-grid"><label>Feedback type<select name="category"><option value="Idea">Idea</option><option value="Problem">Problem</option><option value="Question">Question</option><option value="Compliment">Compliment</option></select></label><label>Overall rating<select name="rating"><option value="5">5 · Excellent</option><option value="4">4 · Good</option><option value="3">3 · Okay</option><option value="2">2 · Needs work</option><option value="1">1 · Poor</option></select></label></div><label>Comment<textarea name="comment" minlength="10" maxlength="1000" required placeholder="Write your feedback here…"></textarea></label><button class="button full" type="submit">Save feedback</button><p class="fine-print">Feedback is stored only in this browser and is included when you download the workspace backup.</p></form><article class="panel feedback-history"><div class="panel-heading"><div><span class="eyebrow">YOUR FEEDBACK</span><h2>Comments from this device</h2></div><span class="pill" id="feedback-count">0 COMMENTS</span></div><div id="feedback-list"></div></article></div>';
+  const feedbackView=document.createElement('section');feedbackView.className='view';feedbackView.id='view-feedback';feedbackView.hidden=true;feedbackView.innerHTML='<div class="page-heading"><div><span class="eyebrow">COMMENTS & FEEDBACK</span><h1>Help FieldShift grow<span>.</span></h1><p>Share an idea, report a problem, or tell us what works well.</p></div><span class="pill">SAVED FEEDBACK</span></div><div class="feedback-layout"><form id="feedback-form" class="panel feedback-form"><div class="panel-heading"><div><span class="eyebrow">YOUR MESSAGE</span><h2>What would you like us to know?</h2></div></div><label>Name (optional)<input name="name" maxlength="60" placeholder="Your name"></label><div class="form-grid"><label>Feedback type<select name="category"><option value="Idea">Idea</option><option value="Problem">Problem</option><option value="Question">Question</option><option value="Compliment">Compliment</option></select></label><label>Overall rating<select name="rating"><option value="5">5 · Excellent</option><option value="4">4 · Good</option><option value="3">3 · Okay</option><option value="2">2 · Needs work</option><option value="1">1 · Poor</option></select></label></div><label>Comment<textarea name="comment" minlength="10" maxlength="1000" required placeholder="Write your feedback here…"></textarea></label><button class="button full" type="submit">Save feedback</button><p class="fine-print">Feedback is included when you download the workspace backup.</p></form><article class="panel feedback-history"><div class="panel-heading"><div><span class="eyebrow">YOUR FEEDBACK</span><h2>Recent feedback</h2></div><span class="pill" id="feedback-count">0 COMMENTS</span></div><div id="feedback-list"></div></article></div>';
   $('main').insertBefore(feedbackView,$('.app-footer'));
   replaceArrowGlyphs();
   const savedPlansPanel=document.createElement('article');savedPlansPanel.className='panel';
@@ -122,7 +126,7 @@ function init() {
   navigate(); window.addEventListener('hashchange',navigate);
   initPlanning({getState:()=>state,fieldKey,toast,crops});
   initScenes({getState:()=>state});
-  initI18n({preferences:state.preferences,save:preferences => write('fieldshift.preferences',preferences),rerender:() => { renderLocation(); renderRotations(); renderReports(); }});
+  initI18n({preferences:state.preferences,save:preferences => write('fieldshift.preferences',preferences),rerender:() => { renderLocation(); renderRotations(); renderReports(); renderEconomics(); renderFeedback(); }});
   window.__fieldshiftIntro ||= initIntro({language:state.preferences.language});
   loadWeather(); state.ready=true;
 }
@@ -164,7 +168,7 @@ function bindEvents() {
       'export-csv':exportCSV,
       print:() => window.print(),
       nasa:loadNasa,
-      'delete-feedback':() => {state.feedback=state.feedback.filter(item=>item.id!==action.dataset.id);write('fieldshift.feedback',state.feedback);renderFeedback();toast('Feedback removed from this device');},
+      'delete-feedback':() => {state.feedback=state.feedback.filter(item=>item.id!==action.dataset.id);write('fieldshift.feedback',state.feedback);renderFeedback();toast(t('Feedback removed.'));},
       'reset-location':() => {selectLocation({...example});toast('Example location restored');},
       backup:() => download('fieldshift-workspace.json',JSON.stringify({schemaVersion:3,fields:state.fields,location:state.location,samples:state.samples,journal:state.journal,plans:state.plans,feedback:state.feedback,fieldSettings:state.fieldSettings,seasons:read('fieldshift.seasons.v1',{})},null,2),'application/json')
     };
@@ -175,6 +179,7 @@ function bindEvents() {
   $('#place-search-form').addEventListener('submit',searchLocation);
   $('#geojson-import').addEventListener('change',importBoundary);
   $('#economics-form').addEventListener('submit',event => {event.preventDefault();state.fieldSettings[fieldKey()]={...state.fieldSettings[fieldKey()],economicsReviewed:true};renderEconomics();toast('Economics scenario updated');});
+  $('#economics-form').elements.currency.addEventListener('change',convertCurrency);
   $('#soil-sample-form').addEventListener('submit',saveSample);
   $('#water-record-form').addEventListener('submit',saveWater);
   $('#feedback-form').addEventListener('submit',saveFeedback);
@@ -188,6 +193,20 @@ function bindEvents() {
   $$('.location-dialog-content').forEach(form => form.addEventListener('keydown',event => {if(event.key==='Escape')form.closest('dialog').close();}));
 }
 function setMapModeButtons(mode) {$$('[data-map-mode]').forEach(b => b.classList.toggle('selected',b.dataset.mapMode===mode));}
+function convertCurrency(event){
+  const form=$('#economics-form'),next=event.target.value,previous=state.economicsInputs.currency||'USD';
+  if(next===previous)return;
+  const factor=(currencyPerUsd[next]||1)/(currencyPerUsd[previous]||1);
+  for(const name of currencyFields){
+    const input=form.elements[name],value=Number(input.value);
+    if(!Number.isFinite(value))continue;
+    input.value=String(Math.round(value*factor*100)/100);
+  }
+  state.economicsInputs={...state.economicsInputs,currency:next};
+  state.fieldSettings[fieldKey()]={...state.fieldSettings[fieldKey()],economicsReviewed:true};
+  renderEconomics();
+  toast(t('Converted at the planning reference rate.'));
+}
 function applyPreferences() {
   document.body.classList.toggle('light',state.preferences.theme==='light');
   $('#appearance').value=state.preferences.theme;$('#weather-units').value=state.preferences.units;
@@ -336,8 +355,8 @@ function renderSavedPlans(){
 }
 function renderEconomics(){
   text('#economics-status',state.fieldSettings[fieldKey()]?.economicsReviewed?'REVIEWED ASSUMPTIONS':'EXAMPLE ASSUMPTIONS · EDIT FOR YOUR LAND');
-  try {const data=Object.fromEntries(new FormData($('#economics-form')));const inputs=Object.fromEntries(Object.entries(data).map(([key,value])=>[key,key==='currency'?value:Number(value)]));state.economics=calculateEconomics(inputs);state.economicsInputs=inputs;persistFieldSettings();const e=state.economics;
-    text('#profit-total',money(e.margin));text('#profit-per-ha',money(e.perHa.margin)+' per hectare · '+e.areaHa.toLocaleString()+' ha');text('[data-stat="margin"]',money(e.perHa.margin));text('#profit-revenue',money(e.revenue));text('#profit-cost',money(e.cost));text('#break-even-price',number(e.breakEvenPrice)?money(e.breakEvenPrice)+' / t':'Not defined at zero yield');text('#break-even-yield',number(e.breakEvenYield)?e.breakEvenYield.toFixed(2)+' t/ha':'Not defined at zero price');
+  try {const data=Object.fromEntries(new FormData($('#economics-form')));const inputs=Object.fromEntries(Object.entries(data).map(([key,value])=>[key,key==='currency'?value:Number(value)]));state.economics=calculateEconomics(inputs);state.economicsInputs=inputs;persistFieldSettings();const e=state.economics,locale=({en:'en-US',fr:'fr-FR',ar:'ar-SA'})[currentLanguage()]||'en-US';
+    text('#profit-total',money(e.margin));text('#profit-per-ha',money(e.perHa.margin)+' '+t('per hectare')+' · '+e.areaHa.toLocaleString(locale)+' ha');text('[data-stat="margin"]',money(e.perHa.margin));text('#profit-revenue',money(e.revenue));text('#profit-cost',money(e.cost));text('#break-even-price',number(e.breakEvenPrice)?money(e.breakEvenPrice)+' / t':t('Not defined at zero yield'));text('#break-even-yield',number(e.breakEvenYield)?e.breakEvenYield.toFixed(2)+' t/ha':t('Not defined at zero price'));
     const max=Math.max(1,...e.scenarios.map(s=>Math.abs(s.margin)));
     $('#profit-scenarios').innerHTML=e.scenarios.map((s,i)=>'<div class="scenario-row"><span>'+escapeHTML(s.name)+'<small>'+(i===0?'Yield and price −10%':i===2?'Yield and price +10%':'Your entered yield and price')+'</small></span><div class="scenario-bar"><i style="width:'+Math.max(3,Math.abs(s.margin)/max*100)+'%"></i></div><strong>'+money(s.margin)+'</strong></div>').join('');renderReports();
   }catch(error){toast(error.message);}
@@ -358,13 +377,14 @@ function saveFeedback(event){
   const data=Object.fromEntries(new FormData(event.target)),comment=String(data.comment||'').trim(),name=String(data.name||'').trim();
   if(comment.length<10)return toast('Please write at least 10 characters.');
   state.feedback.unshift({id:crypto.randomUUID(),name:name||'Anonymous',category:String(data.category||'Idea'),rating:Number(data.rating)||5,comment,createdAt:new Date().toISOString()});
-  state.feedback=state.feedback.slice(0,50);write('fieldshift.feedback',state.feedback);event.target.reset();renderFeedback();toast('Thank you. Your feedback was saved on this device.');
+  state.feedback=state.feedback.slice(0,50);write('fieldshift.feedback',state.feedback);event.target.reset();renderFeedback();toast(t('Feedback saved. Thank you.'));
 }
 function renderFeedback(){
   const host=$('#feedback-list');if(!host)return;
-  text('#feedback-count',state.feedback.length+' '+(state.feedback.length===1?'COMMENT':'COMMENTS'));
-  if(!state.feedback.length){host.innerHTML='<div class="feedback-empty"><span>✦</span><h3>No comments yet</h3><p>Your ideas and observations will appear here after you submit the form.</p></div>';return;}
-  host.innerHTML=state.feedback.map(item=>'<article class="feedback-entry"><div class="feedback-entry-head"><span class="pill">'+escapeHTML(item.category)+'</span><span class="feedback-stars" aria-label="'+item.rating+' out of 5">'+'★'.repeat(item.rating)+'<i>'+'★'.repeat(5-item.rating)+'</i></span></div><p>'+escapeHTML(item.comment)+'</p><footer><span><b>'+escapeHTML(item.name)+'</b> · '+new Date(item.createdAt).toLocaleDateString()+'</span><button type="button" data-action="delete-feedback" data-id="'+item.id+'">Remove</button></footer></article>').join('');
+  text('#feedback-count',state.feedback.length+' '+t(state.feedback.length===1?'COMMENT':'COMMENTS'));
+  if(!state.feedback.length){host.innerHTML='<div class="feedback-empty"><span>✦</span><h3>'+t('No feedback yet')+'</h3><p>'+t('Your ideas and observations will appear here after you submit the form.')+'</p></div>';return;}
+  const locale=({en:'en-US',fr:'fr-FR',ar:'ar-SA'})[currentLanguage()]||'en-US';
+  host.innerHTML=state.feedback.map(item=>'<article class="feedback-entry"><div class="feedback-entry-head"><span class="pill">'+escapeHTML(t(item.category))+'</span><span class="feedback-stars" aria-label="'+item.rating+' '+escapeHTML(t('out of 5'))+'">'+'★'.repeat(item.rating)+'<i>'+'★'.repeat(5-item.rating)+'</i></span></div><p>'+escapeHTML(item.comment)+'</p><footer><span><b>'+escapeHTML(item.name)+'</b> · '+new Date(item.createdAt).toLocaleDateString(locale)+'</span><button type="button" data-action="delete-feedback" data-id="'+item.id+'">'+t('Remove')+'</button></footer></article>').join('');
 }
 
 function evidenceRows(){const w=state.weather,c=w?.current;return [

@@ -43,6 +43,12 @@ try {
   await page.locator('[name="yieldTonnesHa"]').fill('4');
   await page.locator('#economics-form button[type="submit"], #economics-form button').last().click();
   assert.match(await page.locator('#profit-total').innerText(), /800/, 'Profit recalculates from entered values');
+  await page.locator('#economics-form [name="currency"]').selectOption('SAR');
+  assert.equal(await page.locator('#economics-form [name="pricePerTonne"]').inputValue(), '1312.5', 'USD sale price converts to SAR at 3.75');
+  assert.equal(await page.locator('#economics-form [name="seedCostHa"]').inputValue(), '450', 'USD costs convert to SAR at 3.75');
+  assert.match(await page.locator('#profit-total').innerText(), /3[,.\u00a0\u202f]?000/, 'Profit converts to SAR');
+  await page.locator('#economics-form [name="currency"]').selectOption('USD');
+  assert.equal(await page.locator('#economics-form [name="pricePerTonne"]').inputValue(), '350', 'Switching back restores the USD amount');
   await page.goto(origin+'/#/learn');
   const resourceLinks = await page.locator('#view-learn .learn-resource-link').evaluateAll(links => links.map(link => ({href:link.href,target:link.target,rel:link.rel})));
   assert.equal(resourceLinks.length,3,'Three agriculture resources are available');
@@ -84,6 +90,14 @@ try {
   assert.match(await page.locator('#feedback-list').innerText(),/regional crop references/,'Feedback is rendered');
   await page.reload();
   assert.match(await page.locator('#feedback-list').innerText(),/regional crop references/,'Feedback persists on this device');
+  await page.goto(origin+'/#/settings');
+  await page.locator('#language').selectOption('fr');
+  await page.goto(origin+'/#/feedback');
+  assert.match(await page.locator('#view-feedback').innerText(),/Avis récents/,'Feedback heading follows the selected language');
+  assert.match(await page.locator('#view-feedback').innerText(),/Aidez FieldShift à progresser/,'Feedback hero follows the selected language');
+  assert.doesNotMatch(await page.locator('#view-feedback').innerText(),/device/i,'Feedback avoids device-specific wording');
+  await page.goto(origin+'/#/settings');
+  await page.locator('#language').selectOption('en');
   await page.goto(origin+'/#/overview');
   await page.screenshot({path:'/tmp/fieldshift-desktop.png',fullPage:true});
   await page.setViewportSize({width:390,height:844});
