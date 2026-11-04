@@ -26,7 +26,7 @@ const countryCurrencies = {'Saudi Arabia':'SAR','United States':'USD','United St
 const priceSourceNames={estimate:'User estimate',farmgate:'Farm-gate quote',cooperative:'Cooperative or contract',wholesale:'Wholesale market quote',benchmark:'Published benchmark'};
 const state = {
   location:validPoint(savedLocation) ? savedLocation : {...example},
-  preferences:read('fieldshift.preferences',{theme:'dark',units:'metric',language:'en'}),
+  preferences:read('fieldshift.preferences',{theme:'auto',units:'metric',language:'en'}),
   fields:read('fieldshift.fields',[]),samples:read('fieldshift.samples',[]),journal:read('fieldshift.journal',[]),
   feedback:read('fieldshift.feedback',[]),
   plans:read('fieldshift.plans',[]),weather:null,nasa:null,economics:null,rotationOptions:[],selectedPlan:'soil',
@@ -34,7 +34,7 @@ const state = {
   fieldSettings:read('fieldshift.fieldSettings',{}),
   economicsInputs:{...defaultEconomics}
 };
-let toastTimer;
+let toastTimer,themeClock;
 function toast(message) { text('#toast',message); $('#toast').classList.add('visible'); clearTimeout(toastTimer); toastTimer = setTimeout(() => $('#toast').classList.remove('visible'),3400); }
 const icon = name => '<svg aria-hidden="true"><use href="#i-'+name+'"/></svg>';
 const temperatureValue = n => state.preferences.units === 'imperial' ? n * 9 / 5 + 32 : n;
@@ -127,7 +127,7 @@ function init() {
   });
   state.map.setLocation(state.location);
   if(state.location.boundary)state.map.setBoundary(state.location.boundary);
-  bindEvents(); applyPreferences(); renderLocation(); renderSamples(); renderFields(); renderJournal();
+  bindEvents(); applyPreferences();clearInterval(themeClock);themeClock=setInterval(()=>{if(state.preferences.theme==='auto')applyPreferences();},60000); renderLocation(); renderSamples(); renderFields(); renderJournal();
   const cropOptions = crops.filter(c => c.type !== 'cover').map(c => '<option value="'+c.id+'">'+escapeHTML(c.name)+'</option>').join('');
   $('#current-crop').innerHTML = cropOptions;
   // Migrate earlier browser-local economics only to the field selected at upgrade.
@@ -166,7 +166,7 @@ function bindEvents() {
       location:() => $('#location-dialog').showModal(),
       'close-dialog':() => action.closest('dialog')?.close(),
       explore:() => {location.hash='/map';},
-      theme:() => {state.preferences.theme=state.preferences.theme==='light'?'dark':'light';applyPreferences();},
+      theme:() => {const active=resolvedTheme();state.preferences.theme=active==='light'?'dark':'light';applyPreferences();},
       coordinates:useCoordinates,
       geolocation:useDeviceLocation,
       draw:() => {state.map.startDrawing();setMapModeButtons('map');},
@@ -233,10 +233,16 @@ function convertCurrency(event){
   toast(t('Converted at the planning reference rate.'));
 }
 function applyPreferences() {
-  document.body.classList.toggle('light',state.preferences.theme==='light');
-  $('#appearance').value=state.preferences.theme;$('#weather-units').value=state.preferences.units;
+  const theme=resolvedTheme();
+  document.body.classList.toggle('light',theme==='light');document.documentElement.dataset.theme=theme;
+  $('#appearance').value=['auto','dark','light'].includes(state.preferences.theme)?state.preferences.theme:'auto';$('#weather-units').value=state.preferences.units;
+  text('#appearance-help',state.preferences.theme==='auto'?(theme==='light'?'Automatic is using Daylight right now. It will switch to Forest dark at 19:00.':'Automatic is using Forest dark right now. It will switch to Daylight at 07:00.'):'Manual appearance is active. Choose Automatic to follow local time.');
   text('[data-temp-unit]',state.preferences.units==='imperial'?'°F':'°C');
   write('fieldshift.preferences',state.preferences);
+}
+function resolvedTheme(){
+  if(state.preferences.theme==='light'||state.preferences.theme==='dark')return state.preferences.theme;
+  const hour=new Date().getHours();return hour>=7&&hour<19?'light':'dark';
 }
 function renderLocation() {
   const l=state.location;
