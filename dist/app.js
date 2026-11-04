@@ -67,11 +67,11 @@ function restoreFieldSettings(){
 }
 
 function init() {
-  // The guided assistant and the transient top-bar data badge were removed
-  // from the product interface by request.
-  $('#view-assistant')?.remove();
-  $('.advisor-link')?.remove();
+  // The transient top-bar data badge is intentionally removed.
   $('.system-status')?.remove();
+  const assistantLink=document.createElement('a');assistantLink.href='#/assistant';assistantLink.dataset.route='assistant';assistantLink.innerHTML='<svg><use href="#i-spark"/></svg>FieldShift Assistant';$('.side-nav').append(assistantLink);
+  const assistantView=document.createElement('section');assistantView.className='view assistant-view';assistantView.id='view-assistant';assistantView.hidden=true;assistantView.innerHTML='<div class="page-heading"><div><span class="eyebrow">OPEN-ENDED AI</span><h1>FieldShift Assistant<span>.</span></h1><p>Ask anything. When you ask about your field, it can use the live and local evidence currently connected here.</p></div><span class="pill">PRIVATE SERVER CONNECTION</span></div><div class="assistant-layout"><article class="panel assistant-chat-panel"><div class="assistant-chat-head"><div><span class="eyebrow">CONVERSATION</span><h2>How can I help?</h2></div><button class="button secondary small" id="assistant-clear" type="button">Clear chat</button></div><div id="assistant-messages" class="assistant-messages" aria-live="polite"></div><form id="assistant-form" class="assistant-composer"><label class="sr-only" for="assistant-input">Ask FieldShift Assistant</label><textarea id="assistant-input" name="message" maxlength="6000" required placeholder="Ask anything — school, science, writing, farming, your field…"></textarea><div><small>Field context is only included when a real field is selected.</small><button class="button" type="submit">Send <svg><use href="#i-arrow"/></svg></button></div></form></article><aside class="panel assistant-context"><span class="eyebrow">WHAT IT CAN SEE</span><h2>Current evidence</h2><div id="assistant-context"></div><p class="fine-print">The assistant can discuss any topic. It does not invent missing field data, and it is not a substitute for a qualified agronomist or other professional.</p></aside></div></section>';
+  $('main').insertBefore(assistantView,$('.app-footer'));
   const feedbackLink=document.createElement('a');feedbackLink.href='#/feedback';feedbackLink.dataset.route='feedback';feedbackLink.innerHTML='<svg><use href="#i-file"/></svg>Comments & feedback';$('.side-nav').append(feedbackLink);
   const aboutLink=document.createElement('a');aboutLink.href='#/about';aboutLink.dataset.route='about';aboutLink.innerHTML='<svg><use href="#i-globe"/></svg>About us';$('.side-nav').append(aboutLink);
   const exploreLink=document.createElement('a');exploreLink.href='#/explore';exploreLink.dataset.route='explore';exploreLink.innerHTML='<svg><use href="#i-globe"/></svg>Explore';$('.side-nav').insertBefore(exploreLink,feedbackLink);
@@ -136,16 +136,17 @@ function init() {
   initPlanning({getState:()=>state,fieldKey,toast,crops});
   initScenes({getState:()=>state});
   initI18n({preferences:state.preferences,save:preferences => write('fieldshift.preferences',preferences),rerender:() => { renderLocation(); renderRotations(); renderReports(); renderEconomics(); renderFeedback(); }});
+  initAssistant();
   window.__fieldshiftIntro ||= initIntro({language:state.preferences.language});
   if(hasLocation())loadWeather();else resetWeather('unselected'); state.ready=true;
 }
 
 function navigate() {
   const candidate = location.hash.replace(/^#\/?/,'').split('?')[0] || 'overview';
-  state.route = ['overview','map','weather','soil','water','crops','profit','reports','explore','feedback','settings','about'].includes(candidate) ? candidate : 'overview';
+  state.route = ['overview','map','weather','soil','water','crops','profit','reports','assistant','explore','feedback','settings','about'].includes(candidate) ? candidate : 'overview';
   $$('.view').forEach(view => {view.hidden=view.id !== 'view-'+state.route;});
   $$('[data-route]').forEach(link => {const active=link.dataset.route===state.route;link.classList.toggle('active',active);if(active)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');});
-  text('#route-name',({overview:'Overview',map:'Field explorer',weather:'Weather',soil:'Soil intelligence',water:'Water',crops:'Crop planner',profit:'Profit & scenarios',reports:'Reports',explore:'Explore',feedback:'Comments & feedback',settings:'Settings',about:'About us'})[state.route]);
+  text('#route-name',({overview:'Overview',map:'Field explorer',weather:'Weather',soil:'Soil intelligence',water:'Water',crops:'Crop planner',profit:'Profit & scenarios',reports:'Reports',assistant:'FieldShift Assistant',explore:'Explore',feedback:'Comments & feedback',settings:'Settings',about:'About us'})[state.route]);
   const target = state.route==='map'?$('#explorer-map-host'):$('#home-map-host');
   target.append($('#map-dock'));
   document.body.classList.remove('menu-open');
@@ -252,7 +253,7 @@ function renderLocation() {
   text('#mapped-area',area?area.toFixed(2)+' ha / '+(area*2.47105).toFixed(2)+' acres':'No boundary drawn');
   text('#report-area',area?area.toFixed(2)+' hectares':'Point selection');
   $('#field-name-input').value=selected?l.name:'';
-  renderReports();renderSamples();renderJournal();renderSavedPlans();renderMarketContext();renderFieldHealth();renderDecisionBriefing();notifyFieldUpdate();
+  renderReports();renderSamples();renderJournal();renderSavedPlans();renderMarketContext();renderFieldHealth();renderDecisionBriefing();renderAssistantContext();notifyFieldUpdate();
 }
 function renderFieldHealth(){
   if(!hasLocation()){
@@ -367,7 +368,7 @@ function renderWeather(){
   $('.weather-glyph').textContent=c.weatherCode===0?'☀':c.weatherCode>=51?'☂':'☁';
   $('#home-forecast').innerHTML=w.daily.slice(0,4).map((d,i)=>'<div class="forecast-item"><span class="forecast-date">'+(i===0?'Today':dateShort(d.date))+'</span><span>'+glyph(d)+'</span><span class="forecast-temp">'+temp(d.high)+'</span><span class="forecast-rain">'+rain(d.rain)+'</span></div>').join('');
   $('#full-forecast').innerHTML=w.daily.map((d,i)=>'<div class="day-card"><span class="day">'+(i===0?'Today':dateShort(d.date))+'</span><span class="wx">'+glyph(d)+'</span><strong>'+temp(d.high)+'<small>'+temp(d.low)+'</small></strong><span class="rain">'+rain(d.rain)+'</span></div>').join('');
-  renderHourlyChart();renderWaterChart();renderReports();renderFieldHealth();renderDecisionBriefing();notifyFieldUpdate();
+  renderHourlyChart();renderWaterChart();renderReports();renderFieldHealth();renderDecisionBriefing();renderAssistantContext();notifyFieldUpdate();
 }
 function renderHourlyChart(){
   const w=state.weather;if(!w)return;
@@ -425,12 +426,12 @@ function renderEconomics(){
   const raw=Object.fromEntries(new FormData(form));
   const needed=['areaHa','yieldTonnesHa','pricePerTonne','sellingLossPercent','transportCostPerTonne','marketFeePercent','seedCostHa','fertilizerCostHa','waterCostHa','operationsCostHa'];
   if(!hasLocation()||source==='none'||needed.some(key=>String(raw[key]??'').trim()==='')){
-    state.economics=null;text('#profit-total','—');text('#profit-per-ha','Enter a selected field, a price source, and every local input.');text('[data-stat="margin"]','—');text('#profit-revenue','—');text('#profit-cost','—');text('#profit-selling-costs','—');text('#break-even-price','—');text('#break-even-yield','—');$('#profit-scenarios').innerHTML='<p class="empty">No profit scenario is calculated until all inputs are entered.</p>';renderFieldHealth();renderDecisionBriefing();renderMarketContext();return;
+    state.economics=null;text('#profit-total','—');text('#profit-per-ha','Enter a selected field, a price source, and every local input.');text('[data-stat="margin"]','—');text('#profit-revenue','—');text('#profit-cost','—');text('#profit-selling-costs','—');text('#break-even-price','—');text('#break-even-yield','—');$('#profit-scenarios').innerHTML='<p class="empty">No profit scenario is calculated until all inputs are entered.</p>';renderFieldHealth();renderDecisionBriefing();renderMarketContext();renderAssistantContext();return;
   }
   try {const inputs=Object.fromEntries(Object.entries(raw).map(([key,value])=>[key,economicsTextFields.has(key)?value:Number(value)]));state.economics=calculateEconomics(inputs);state.economicsInputs=inputs;persistFieldSettings();const e=state.economics,locale=({en:'en-US',fr:'fr-FR',ar:'ar-SA'})[currentLanguage()]||'en-US';
     text('#profit-total',money(e.margin));text('#profit-per-ha',money(e.perHa.margin)+' '+t('per hectare')+' · '+e.areaHa.toLocaleString(locale)+' ha');text('[data-stat="margin"]',money(e.perHa.margin));text('#profit-revenue',money(e.revenue));text('#profit-cost',money(e.cost));text('#profit-selling-costs',money(e.sellingCosts));text('#break-even-price',number(e.breakEvenPrice)?money(e.breakEvenPrice)+' / t':t('Not defined for these inputs'));text('#break-even-yield',number(e.breakEvenYield)?e.breakEvenYield.toFixed(2)+' t/ha':t('Not defined for these inputs'));renderFieldHealth();renderDecisionBriefing();
     const max=Math.max(1,...e.scenarios.map(s=>Math.abs(s.margin)));
-    $('#profit-scenarios').innerHTML=e.scenarios.map((s,i)=>'<div class="scenario-row"><span>'+escapeHTML(t(s.name))+'<small>'+t(i===0?'Local yield and price −10%':i===2?'Local yield and price +10%':'Your local yield and price')+'</small></span><div class="scenario-bar"><i style="width:'+Math.max(3,Math.abs(s.margin)/max*100)+'%"></i></div><strong>'+money(s.margin)+'</strong></div>').join('');renderMarketContext();renderReports();
+    $('#profit-scenarios').innerHTML=e.scenarios.map((s,i)=>'<div class="scenario-row"><span>'+escapeHTML(t(s.name))+'<small>'+t(i===0?'Local yield and price −10%':i===2?'Local yield and price +10%':'Your local yield and price')+'</small></span><div class="scenario-bar"><i style="width:'+Math.max(3,Math.abs(s.margin)/max*100)+'%"></i></div><strong>'+money(s.margin)+'</strong></div>').join('');renderMarketContext();renderReports();renderAssistantContext();
   }catch(error){toast(error.message);}
 }
 function addJournal(title,detail){state.journal.unshift({id:crypto.randomUUID(),title,detail,field:fieldKey(),time:new Date().toISOString()});state.journal=state.journal.slice(0,100);write('fieldshift.journal',state.journal);renderJournal();}
@@ -457,6 +458,20 @@ function renderFeedback(){
   if(!state.feedback.length){host.innerHTML='<div class="feedback-empty"><span>✦</span><h3>'+t('No feedback yet')+'</h3><p>'+t('Your ideas and observations will appear here after you submit the form.')+'</p></div>';return;}
   const locale=({en:'en-US',fr:'fr-FR',ar:'ar-SA'})[currentLanguage()]||'en-US';
   host.innerHTML=state.feedback.map(item=>'<article class="feedback-entry"><div class="feedback-entry-head"><span class="pill">'+escapeHTML(t(item.category))+'</span><span class="feedback-stars" aria-label="'+item.rating+' '+escapeHTML(t('out of 5'))+'">'+'★'.repeat(item.rating)+'<i>'+'★'.repeat(5-item.rating)+'</i></span></div><p>'+escapeHTML(item.comment)+'</p><footer><span><b>'+escapeHTML(item.name)+'</b> · '+new Date(item.createdAt).toLocaleDateString(locale)+'</span><button type="button" data-action="delete-feedback" data-id="'+item.id+'">'+t('Remove')+'</button></footer></article>').join('');
+}
+
+let assistantHistory=[];
+function assistantFieldContext(){
+  const selected=hasLocation(),weather=state.weather?.current,samples=state.samples.filter(sample=>sample.field===fieldKey());
+  return {field:selected?{name:state.location.name,coordinates:{latitude:state.location.lat,longitude:state.location.lon},country:state.location.country||null,boundary_drawn:!!state.location.boundary}:null,weather:weather?{source:'Open-Meteo weather model',valid_time:weather.time,temperature_c:weather.temperature,feels_like_c:weather.feelsLike,humidity_percent:weather.humidity,wind_kmh:weather.wind,soil_moisture_0_to_1cm_model:weather.soilMoisture}:null,soil_records:samples.map(sample=>({date:sample.date,name:sample.name,ph:sample.ph,organic_carbon_percent:sample.carbon,depth_cm:sample.depth,method:sample.method})),economics:state.economics?{currency:state.economics.currency,gross_margin:state.economics.margin,gross_margin_per_hectare:state.economics.perHa.margin,price_source:priceSourceNames[state.economicsInputs.priceSource]||null,quote_date:state.economicsInputs.priceDate||null,notice:'Calculated only from farmer-entered scenario inputs; not a verified market forecast.'}:null,nasa_context:state.nasa?{source:'NASA POWER',year:state.nasa.year,retrieved_at:state.nasa.retrievedAt,notice:state.nasa.limitations}:null};
+}
+function renderAssistantContext(){const host=$('#assistant-context');if(!host)return;const context=assistantFieldContext(),items=[['Field',context.field?context.field.name:'Not selected'],['Weather',context.weather?'Live model connected':'Not connected'],['Soil records',context.soil_records.length?context.soil_records.length+' record(s)':'None'],['Profit scenario',context.economics?'Calculated from your inputs':'Not calculated'],['NASA history',context.nasa_context?'Loaded':'Not loaded']];host.innerHTML=items.map(([name,value])=>'<div class="assistant-context-row"><span>'+escapeHTML(name)+'</span><b>'+escapeHTML(String(value))+'</b></div>').join('');}
+function addAssistantMessage(role,content){const host=$('#assistant-messages');if(!host)return;const article=document.createElement('article');article.className='assistant-message '+role;const label=document.createElement('b');label.textContent=role==='user'?'You':'FieldShift Assistant';const body=document.createElement('p');body.textContent=content;article.append(label,body);host.append(article);host.scrollTop=host.scrollHeight;}
+function initAssistant(){
+  const host=$('#assistant-messages'),form=$('#assistant-form');if(!host||!form)return;renderAssistantContext();
+  addAssistantMessage('assistant','Hi — I can help with almost any question, from schoolwork and writing to weather and your FieldShift evidence. Select a field if you want field-specific context.');
+  form.addEventListener('submit',async event=>{event.preventDefault();const input=form.elements.message,message=String(input.value||'').trim();if(!message)return;input.value='';addAssistantMessage('user',message);const pending=document.createElement('article');pending.className='assistant-message assistant pending';pending.innerHTML='<b>FieldShift Assistant</b><p>Thinking…</p>';host.append(pending);const button=form.querySelector('button');button.disabled=true;try{const response=await fetch('/api/assistant',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({message,history:assistantHistory,fieldContext:assistantFieldContext()})});const data=await response.json();pending.remove();if(!response.ok||!data.answer)throw new Error(data.error||'The assistant could not respond.');addAssistantMessage('assistant',data.answer);assistantHistory.push({role:'user',content:message},{role:'assistant',content:data.answer});assistantHistory=assistantHistory.slice(-12);}catch(error){pending.remove();addAssistantMessage('assistant',error.message||'The assistant could not respond.');}finally{button.disabled=false;input.focus();}});
+  $('#assistant-clear').addEventListener('click',()=>{assistantHistory=[];host.replaceChildren();addAssistantMessage('assistant','Chat cleared. What would you like to explore?');});
 }
 
 function evidenceRows(){const w=state.weather,c=w?.current,source=priceSourceNames[state.economicsInputs.priceSource]||'User estimate',dated=state.economicsInputs.priceDate?source+' · '+state.economicsInputs.priceDate:source;return [
