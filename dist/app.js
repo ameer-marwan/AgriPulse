@@ -249,7 +249,19 @@ function renderLocation() {
   text('#mapped-area',area?area.toFixed(2)+' ha / '+(area*2.47105).toFixed(2)+' acres':'No boundary drawn');
   text('#report-area',area?area.toFixed(2)+' hectares':'Point selection');
   $('#field-name-input').value=l.method==='Example location'?'':l.name;
-  renderReports();renderSamples();renderJournal();renderSavedPlans();renderMarketContext();notifyFieldUpdate();
+  renderReports();renderSamples();renderJournal();renderSavedPlans();renderMarketContext();renderFieldHealth();notifyFieldUpdate();
+}
+function renderFieldHealth(){
+  const weather=state.weather?.current,soilRecords=state.samples.filter(sample=>sample.field===fieldKey());
+  const climate=weather?Math.max(30,Math.min(100,100-Math.max(0,Math.abs((weather.temperature??22)-23)-8)*4-(weather.weatherCode>=80?12:0))):55;
+  const water=weather?Math.max(25,Math.min(100,48+(weather.soilMoisture??.2)*135+Math.min(18,(total(state.weather.daily,'rain')??0)/3))):55;
+  const soil=soilRecords.length?Math.max(35,Math.min(100,72+(soilRecords.some(sample=>number(sample.carbon))?8:0)+(soilRecords.some(sample=>number(sample.ph))?6:0))):55;
+  const margin=state.economics?.perHa?.margin,profit=number(margin)?Math.max(20,Math.min(100,55+Math.max(-35,Math.min(35,margin/20)))):55;
+  const scores={weather:Math.round(climate),water:Math.round(water),soil:Math.round(soil),profit:Math.round(profit)};
+  const overall=Math.round(Object.values(scores).reduce((sum,value)=>sum+value,0)/4);
+  text('#field-health-score',overall);text('#health-weather-score',scores.weather+'/100');text('#health-water-score',scores.water+'/100');text('#health-soil-score',scores.soil+'/100');text('#health-profit-score',scores.profit+'/100');
+  const ring=$('#field-health-ring');if(ring)ring.style.strokeDashoffset=String(283-(283*overall/100));
+  text('#field-health-summary',t(overall>=75?'Your field signals are working together. Keep checking local evidence before acting.':overall>=55?'Your field is steady, with opportunities to improve the weakest signal.':'Your field needs a closer look. Start with the weakest signal before the next decision.'));
 }
 function clearNasa(){
   state.nasaController?.abort();state.nasa=null;
@@ -310,7 +322,7 @@ function resetWeather(status){
   $('#full-forecast').innerHTML='<p class="empty">'+(status==='loading'?'Loading seven-day outlook…':'Forecast unavailable.')+'</p>';
   $('#hourly-chart').innerHTML='<p class="empty">'+(status==='loading'?'Loading hourly data…':'Hourly data unavailable.')+'</p>';
   $('#water-chart').innerHTML='<p class="empty">'+(status==='loading'?'Loading water signals…':'Water signals unavailable.')+'</p>';
-  renderReports();notifyFieldUpdate();
+  renderReports();renderFieldHealth();notifyFieldUpdate();
 }
 function renderWeather(){
   const w=state.weather;if(!w)return;const c=w.current;
@@ -326,7 +338,7 @@ function renderWeather(){
   $('.weather-glyph').textContent=c.weatherCode===0?'☀':c.weatherCode>=51?'☂':'☁';
   $('#home-forecast').innerHTML=w.daily.slice(0,4).map((d,i)=>'<div class="forecast-item"><span class="forecast-date">'+(i===0?'Today':dateShort(d.date))+'</span><span>'+glyph(d)+'</span><span class="forecast-temp">'+temp(d.high)+'</span><span class="forecast-rain">'+rain(d.rain)+'</span></div>').join('');
   $('#full-forecast').innerHTML=w.daily.map((d,i)=>'<div class="day-card"><span class="day">'+(i===0?'Today':dateShort(d.date))+'</span><span class="wx">'+glyph(d)+'</span><strong>'+temp(d.high)+'<small>'+temp(d.low)+'</small></strong><span class="rain">'+rain(d.rain)+'</span></div>').join('');
-  renderHourlyChart();renderWaterChart();renderReports();notifyFieldUpdate();
+  renderHourlyChart();renderWaterChart();renderReports();renderFieldHealth();notifyFieldUpdate();
 }
 function renderHourlyChart(){
   const w=state.weather;if(!w)return;
@@ -382,7 +394,7 @@ function renderEconomics(){
   const form=$('#economics-form'),reviewed=state.fieldSettings[fieldKey()]?.economicsReviewed,source=form?.elements.priceSource?.value||state.economicsInputs.priceSource;
   text('#economics-status',reviewed&&source!=='estimate'?t('LOCAL MARKET INPUTS'):t('VERIFY LOCAL PRICE'));
   try {const data=Object.fromEntries(new FormData(form));const inputs=Object.fromEntries(Object.entries(data).map(([key,value])=>[key,economicsTextFields.has(key)?value:Number(value)]));state.economics=calculateEconomics(inputs);state.economicsInputs=inputs;persistFieldSettings();const e=state.economics,locale=({en:'en-US',fr:'fr-FR',ar:'ar-SA'})[currentLanguage()]||'en-US';
-    text('#profit-total',money(e.margin));text('#profit-per-ha',money(e.perHa.margin)+' '+t('per hectare')+' · '+e.areaHa.toLocaleString(locale)+' ha');text('[data-stat="margin"]',money(e.perHa.margin));text('#profit-revenue',money(e.revenue));text('#profit-cost',money(e.cost));text('#profit-selling-costs',money(e.sellingCosts));text('#break-even-price',number(e.breakEvenPrice)?money(e.breakEvenPrice)+' / t':t('Not defined for these inputs'));text('#break-even-yield',number(e.breakEvenYield)?e.breakEvenYield.toFixed(2)+' t/ha':t('Not defined for these inputs'));
+    text('#profit-total',money(e.margin));text('#profit-per-ha',money(e.perHa.margin)+' '+t('per hectare')+' · '+e.areaHa.toLocaleString(locale)+' ha');text('[data-stat="margin"]',money(e.perHa.margin));text('#profit-revenue',money(e.revenue));text('#profit-cost',money(e.cost));text('#profit-selling-costs',money(e.sellingCosts));text('#break-even-price',number(e.breakEvenPrice)?money(e.breakEvenPrice)+' / t':t('Not defined for these inputs'));text('#break-even-yield',number(e.breakEvenYield)?e.breakEvenYield.toFixed(2)+' t/ha':t('Not defined for these inputs'));renderFieldHealth();
     const max=Math.max(1,...e.scenarios.map(s=>Math.abs(s.margin)));
     $('#profit-scenarios').innerHTML=e.scenarios.map((s,i)=>'<div class="scenario-row"><span>'+escapeHTML(t(s.name))+'<small>'+t(i===0?'Local yield and price −10%':i===2?'Local yield and price +10%':'Your local yield and price')+'</small></span><div class="scenario-bar"><i style="width:'+Math.max(3,Math.abs(s.margin)/max*100)+'%"></i></div><strong>'+money(s.margin)+'</strong></div>').join('');renderMarketContext();renderReports();
   }catch(error){toast(error.message);}
