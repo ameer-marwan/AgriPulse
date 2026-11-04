@@ -13,19 +13,16 @@ const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'
 const number = n => typeof n === 'number' && Number.isFinite(n);
 function read(key, fallback) { try { const value = JSON.parse(workspaceStorage.getItem(key)); return value ?? fallback; } catch { return fallback; } }
 function write(key, value) { try { workspaceStorage.setItem(key, JSON.stringify(value)); } catch { toast('Workspace storage is unavailable. Export a report to keep your work.'); } }
-const example = {lat:38.46,lon:-98.25,name:'Central Kansas',country:'United States',region:'Kansas',method:'Example location',id:'example-kansas',boundary:null};
+const unselected = {lat:0,lon:0,name:'Choose your field',country:'',region:'',method:'Unselected',id:'unselected-field',boundary:null};
 const validPoint = loc => loc && number(loc.lat) && number(loc.lon) && Math.abs(loc.lat) <= 90 && Math.abs(loc.lon) <= 180;
 const savedLocation = read('fieldshift.location', null);
-const defaultEconomics = {currency:'USD',areaHa:1,yieldTonnesHa:3,pricePerTonne:350,sellingLossPercent:0,transportCostPerTonne:0,marketFeePercent:0,seedCostHa:120,fertilizerCostHa:180,waterCostHa:80,operationsCostHa:220,priceSource:'estimate',priceDate:''};
-// Fixed planning-rate reference: every entry is the number of currency units per USD.
-// These values make scenarios comparable; they are not live market exchange rates.
-const currencyPerUsd = {USD:1,EUR:.92,GBP:.79,INR:83.1,KES:129,EGP:50,SAR:3.75,CNY:7.12,BRL:5.05,ZAR:17.7,NGN:1450};
+const defaultEconomics = {currency:'USD',areaHa:null,yieldTonnesHa:null,pricePerTonne:null,sellingLossPercent:null,transportCostPerTonne:null,marketFeePercent:null,seedCostHa:null,fertilizerCostHa:null,waterCostHa:null,operationsCostHa:null,priceSource:'none',priceDate:''};
 const currencyFields = ['pricePerTonne','transportCostPerTonne','seedCostHa','fertilizerCostHa','waterCostHa','operationsCostHa'];
 const economicsTextFields = new Set(['currency','priceSource','priceDate']);
 const countryCurrencies = {'Saudi Arabia':'SAR','United States':'USD','United States of America':'USD','United Kingdom':'GBP','India':'INR','Kenya':'KES','Egypt':'EGP','China':'CNY','Brazil':'BRL','South Africa':'ZAR','Nigeria':'NGN','France':'EUR','Germany':'EUR','Netherlands':'EUR','Spain':'EUR','Italy':'EUR','Portugal':'EUR','Ireland':'EUR','Belgium':'EUR','Austria':'EUR','Greece':'EUR','Finland':'EUR'};
-const priceSourceNames={estimate:'User estimate',farmgate:'Farm-gate quote',cooperative:'Cooperative or contract',wholesale:'Wholesale market quote',benchmark:'Published benchmark'};
+const priceSourceNames={none:'Choose a source',estimate:'User estimate',farmgate:'Farm-gate quote',cooperative:'Cooperative or contract',wholesale:'Wholesale market quote',benchmark:'Published benchmark'};
 const state = {
-  location:validPoint(savedLocation) ? savedLocation : {...example},
+  location:validPoint(savedLocation) && savedLocation?.method !== 'Example location' ? savedLocation : {...unselected},
   preferences:read('fieldshift.preferences',{theme:'auto',units:'metric',language:'en'}),
   fields:read('fieldshift.fields',[]),samples:read('fieldshift.samples',[]),journal:read('fieldshift.journal',[]),
   feedback:read('fieldshift.feedback',[]),
@@ -34,6 +31,7 @@ const state = {
   fieldSettings:read('fieldshift.fieldSettings',{}),
   economicsInputs:{...defaultEconomics}
 };
+const hasLocation = () => validPoint(state.location) && state.location.method !== 'Unselected' && state.location.method !== 'Example location';
 let toastTimer,themeClock;
 function toast(message) { text('#toast',message); $('#toast').classList.add('visible'); clearTimeout(toastTimer); toastTimer = setTimeout(() => $('#toast').classList.remove('visible'),3400); }
 const icon = name => '<svg aria-hidden="true"><use href="#i-'+name+'"/></svg>';
@@ -57,13 +55,8 @@ function restoreFieldSettings(){
   state.economicsInputs={...defaultEconomics,...settings?.economics};
   if(!settings?.economics){
     const suggested=countryCurrencies[state.location.country];
-    if(suggested&&suggested!==state.economicsInputs.currency){
-      const factor=(currencyPerUsd[suggested]||1)/(currencyPerUsd[state.economicsInputs.currency]||1);
-      for(const name of currencyFields)state.economicsInputs[name]=Math.round(Number(state.economicsInputs[name]||0)*factor*100)/100;
-      state.economicsInputs.currency=suggested;
-    }
+    if(suggested)state.economicsInputs.currency=suggested;
   }
-  if(!state.economicsInputs.priceDate)state.economicsInputs.priceDate=today();
   if(state.location.boundary)state.economicsInputs.areaHa=Number(polygonAreaHa(state.location.boundary).toFixed(4));
   Object.entries(state.economicsInputs).forEach(([key,value])=>{if($('#economics-form').elements[key])$('#economics-form').elements[key].value=value;});
   const planner=settings?.planner??{};
@@ -129,7 +122,7 @@ function init() {
     },
     onStatus:status => {text('#drawing-status',status.message);if(status.level==='error' && !status.message.includes('tiles'))toast(status.message);}
   });
-  state.map.setLocation(state.location);
+  if(hasLocation())state.map.setLocation(state.location);
   if(state.location.boundary)state.map.setBoundary(state.location.boundary);
   bindEvents(); applyPreferences();clearInterval(themeClock);themeClock=setInterval(()=>{if(state.preferences.theme==='auto')applyPreferences();},60000); renderLocation(); renderSamples(); renderFields(); renderJournal();
   const cropOptions = crops.filter(c => c.type !== 'cover').map(c => '<option value="'+c.id+'">'+escapeHTML(c.name)+'</option>').join('');
@@ -144,7 +137,7 @@ function init() {
   initScenes({getState:()=>state});
   initI18n({preferences:state.preferences,save:preferences => write('fieldshift.preferences',preferences),rerender:() => { renderLocation(); renderRotations(); renderReports(); renderEconomics(); renderFeedback(); }});
   window.__fieldshiftIntro ||= initIntro({language:state.preferences.language});
-  loadWeather(); state.ready=true;
+  if(hasLocation())loadWeather();else resetWeather('unselected'); state.ready=true;
 }
 
 function navigate() {
@@ -185,7 +178,6 @@ function bindEvents() {
       print:() => window.print(),
       nasa:loadNasa,
       'delete-feedback':() => {state.feedback=state.feedback.filter(item=>item.id!==action.dataset.id);write('fieldshift.feedback',state.feedback);renderFeedback();toast(t('Feedback removed.'));},
-      'reset-location':() => {selectLocation({...example});toast('Example location restored');},
       backup:() => download('fieldshift-workspace.json',JSON.stringify({schemaVersion:3,fields:state.fields,location:state.location,samples:state.samples,journal:state.journal,plans:state.plans,feedback:state.feedback,fieldSettings:state.fieldSettings,seasons:read('fieldshift.seasons.v1',{})},null,2),'application/json')
     };
     try {actions[action.dataset.action]?.();} catch(error){toast(error.message);console.error(error);}
@@ -216,25 +208,25 @@ function renderMarketContext(){
   const source=form.elements.priceSource?.value||state.economicsInputs.priceSource||'estimate';
   const crop=crops.find(item=>item.id===$('#current-crop')?.value);
   const place=[state.location.region,state.location.country].filter(Boolean).join(', ')||state.location.name;
-  text('#market-location',place||'Selected field');text('#market-crop',crop?.name||'Select a crop in Crop planner');text('#market-evidence',t(priceSourceNames[source]||'User estimate'));
-  text('#market-region-note',state.location.country?t('Market context follows the selected land.') : t('Use a place search to identify the country market.'));
+  text('#market-location',hasLocation()?place:'Choose a field');text('#market-crop',crop?.name||'Select a crop in Crop planner');text('#market-evidence',t(priceSourceNames[source]||'Choose a source'));
+  text('#market-region-note',state.location.country?t('Market context follows the selected land.') : t('Select a field before building a market scenario.'));
   const suggested=countryCurrencies[state.location.country],currency=form.elements.currency?.value||state.economicsInputs.currency;
   text('#market-currency-note',suggested&&suggested!==currency?t('Recommended local currency')+': '+suggested:t('Scenario currency')+': '+currency);
 }
-function convertCurrency(event){
+async function convertCurrency(event){
   const form=$('#economics-form'),next=event.target.value,previous=state.economicsInputs.currency||'USD';
   if(next===previous)return;
-  const factor=(currencyPerUsd[next]||1)/(currencyPerUsd[previous]||1);
-  for(const name of currencyFields){
-    const input=form.elements[name],value=Number(input.value);
-    if(!Number.isFinite(value))continue;
-    input.value=String(Math.round(value*factor*100)/100);
-  }
-  state.economicsInputs={...state.economicsInputs,currency:next};
-  state.fieldSettings[fieldKey()]={...state.fieldSettings[fieldKey()],economicsReviewed:true};
-  renderEconomics();
-  renderMarketContext();
-  toast(t('Converted at the planning reference rate.'));
+  const populated=currencyFields.map(name=>Number(form.elements[name].value)).filter(Number.isFinite);
+  if(!populated.length){state.economicsInputs={...state.economicsInputs,currency:next};renderMarketContext();return;}
+  try{
+    text('#market-currency-note','Fetching the latest exchange rate…');
+    const response=await fetch('https://api.frankfurter.app/v1/latest?base='+encodeURIComponent(previous)+'&symbols='+encodeURIComponent(next),{headers:{Accept:'application/json'}});
+    const data=await response.json(),factor=Number(data?.rates?.[next]);
+    if(!response.ok||!Number.isFinite(factor)||factor<=0)throw new Error('No live rate is available for this currency pair.');
+    for(const name of currencyFields){const input=form.elements[name],value=Number(input.value);if(Number.isFinite(value)&&input.value!=='')input.value=String(Math.round(value*factor*100)/100);}
+    state.economicsInputs={...state.economicsInputs,currency:next};renderEconomics();renderMarketContext();
+    text('#market-currency-note','Live exchange rate · '+previous+' → '+next+' · '+data.date);toast('Converted using the latest available exchange rate.');
+  }catch(error){form.elements.currency.value=previous;renderMarketContext();toast(error.message||'Live currency conversion is unavailable.');}
 }
 function applyPreferences() {
   const theme=resolvedTheme();
@@ -250,18 +242,23 @@ function resolvedTheme(){
 }
 function renderLocation() {
   const l=state.location;
-  text('.field-picker>.eyebrow',l.method==='Example location'?'EXAMPLE LOCATION':'ACTIVE LOCATION');
+  const selected=hasLocation();
+  text('.field-picker>.eyebrow',selected?'ACTIVE LOCATION':'FIELD REQUIRED');
   text('[data-field-name]',l.name);
-  text('[data-coordinates]',Math.abs(l.lat).toFixed(4)+'° '+(l.lat>=0?'N':'S')+' · '+Math.abs(l.lon).toFixed(4)+'° '+(l.lon>=0?'E':'W'));
-  text('#selection-type',l.method.toUpperCase());
+  text('[data-coordinates]',selected?Math.abs(l.lat).toFixed(4)+'° '+(l.lat>=0?'N':'S')+' · '+Math.abs(l.lon).toFixed(4)+'° '+(l.lon>=0?'E':'W'):'Choose a point, field boundary, or GeoJSON');
+  text('#selection-type',selected?l.method.toUpperCase():'NO FIELD SELECTED');
   const area = l.boundary ? polygonAreaHa(l.boundary) : null;
   text('#field-area',area?area.toFixed(2)+' ha · drawn boundary':'Point selected · no boundary');
   text('#mapped-area',area?area.toFixed(2)+' ha / '+(area*2.47105).toFixed(2)+' acres':'No boundary drawn');
   text('#report-area',area?area.toFixed(2)+' hectares':'Point selection');
-  $('#field-name-input').value=l.method==='Example location'?'':l.name;
+  $('#field-name-input').value=selected?l.name:'';
   renderReports();renderSamples();renderJournal();renderSavedPlans();renderMarketContext();renderFieldHealth();renderDecisionBriefing();notifyFieldUpdate();
 }
 function renderFieldHealth(){
+  if(!hasLocation()){
+    text('#field-health-score','—');text('#health-weather-score','—');text('#health-water-score','—');text('#health-soil-score','—');text('#health-profit-score','—');
+    text('#field-health-summary','Choose a real field to connect live weather and add your own local evidence.');return;
+  }
   const weather=state.weather?.current,soilRecords=state.samples.filter(sample=>sample.field===fieldKey());
   const climate=weather?Math.max(30,Math.min(100,100-Math.max(0,Math.abs((weather.temperature??22)-23)-8)*4-(weather.weatherCode>=80?12:0))):55;
   const water=weather?Math.max(25,Math.min(100,48+(weather.soilMoisture??.2)*135+Math.min(18,(total(state.weather.daily,'rain')??0)/3))):55;
@@ -280,12 +277,12 @@ function renderDecisionBriefing(){
   if(!weather)alerts.push({kind:'info',title:'Weather needs a refresh',copy:'Forecast signals are unavailable until the provider returns data.',link:'#/weather'});
   else {if(number(week)&&week<10)alerts.push({kind:'water',title:'Low rain outlook',copy:'The next 7-day forecast is below 10 mm. Compare it with crop water demand.',link:'#/water'});if(number(weather.temperature)&&weather.temperature>=32)alerts.push({kind:'heat',title:'Heat window',copy:'High temperature is present in the current model. Review sensitive crop stages.',link:'#/weather'});}
   if(!samples.length)alerts.push({kind:'soil',title:'Local soil evidence missing',copy:'Add a dated pH or organic-carbon record before relying on soil recommendations.',link:'#/soil'});
-  if(source==='estimate')alerts.push({kind:'market',title:'Local price needs verification',copy:'Replace the estimate with a dated farm-gate, contract, cooperative, or wholesale quote.',link:'#/profit'});
+  if(source==='estimate'||source==='none')alerts.push({kind:'market',title:'Local price needs verification',copy:'Add a dated farm-gate, contract, cooperative, wholesale, or benchmark quote.',link:'#/profit'});
   if(alerts.some(alert=>alert.kind==='water'))move={title:'Review the water window',copy:'Rainfall is limited in the connected forecast. Compare rain with reference demand before scheduling irrigation.',link:'#/water',action:'Open water intelligence'};
   else if(!samples.length)move={title:'Add a dated soil sample',copy:'A pH or organic-carbon result will make the crop-plan evidence more specific to your land.',link:'#/soil',action:'Add soil sample'};
-  else if(source==='estimate')move={title:'Verify your local price',copy:'Profit is most useful when the price source and date match your actual market.',link:'#/profit',action:'Open profit scenario'};
+  else if(source==='estimate'||source==='none')move={title:'Verify your local price',copy:'Profit is most useful when the price source and date match your actual market.',link:'#/profit',action:'Open profit scenario'};
   else if(weather)move={title:'Compare the next rotation',copy:'Your core evidence is connected. Review crop diversity, water access, and current soil pH together.',link:'#/crops',action:'Open crop planner'};
-  const connected=[!!weather,samples.length>0,source!=='estimate',!!state.location.boundary].filter(Boolean).length;
+  const connected=[!!weather,samples.length>0,source!=='estimate'&&source!=='none',!!state.location.boundary].filter(Boolean).length;
   text('#briefing-date','Updated '+new Date().toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'}));text('#briefing-next-title',move.title);text('#briefing-next-copy',move.copy);const link=$('#briefing-next-link');link.href=move.link;link.childNodes[0].textContent=move.action+' ';
   text('#briefing-evidence-score',connected+'/4');text('#briefing-evidence-copy',connected===4?'Weather, local soil, dated price, and a mapped boundary are connected.':(4-connected)+' evidence connection'+(4-connected===1?'':'s')+' still need attention.');
   text('#briefing-alert-count',alerts.length+' '+(alerts.length===1?'ALERT':'ALERTS'));host.innerHTML=alerts.length?alerts.map(alert=>'<a class="briefing-alert '+alert.kind+'" href="'+alert.link+'"><i>'+(alert.kind==='water'?'⌁':alert.kind==='soil'?'◒':alert.kind==='heat'?'☀':alert.kind==='market'?'↗':'•')+'</i><span><b>'+escapeHTML(alert.title)+'</b><small>'+escapeHTML(alert.copy)+'</small></span><em>→</em></a>').join(''):'<div class="briefing-clear"><span>✓</span><div><b>No urgent signal</b><small>Connected data does not show a threshold alert right now.</small></div></div>';
@@ -339,6 +336,7 @@ function saveField(){const name=$('#field-name-input').value.trim();if(!name)ret
 function renderFields(){const container=$('#saved-field-list');container.replaceChildren();if(!state.fields.length){container.innerHTML='<p class="empty">No saved fields yet.</p>';return;}for(const field of state.fields){const button=document.createElement('button');button.className='saved-field-button';button.innerHTML=escapeHTML(field.name)+'<small>'+(field.boundary?polygonAreaHa(field.boundary).toFixed(2)+' ha':'Point selection')+'</small>';button.addEventListener('click',()=>selectLocation({...field}));container.append(button);}}
 
 async function loadWeather() {
+  if(!hasLocation()){resetWeather('unselected');return;}
   state.weatherController?.abort();state.weatherController=new AbortController();const request=++state.requestId;
   state.weather=null;resetWeather('loading');
   try {const weather=await fetchWeather(state.location,{signal:state.weatherController.signal});if(request!==state.requestId)return;state.weather=weather;renderWeather();renderRotations();}
@@ -347,10 +345,10 @@ async function loadWeather() {
 }
 function resetWeather(status){
   ['temperature','rainWeek','moisture','etWeek','feelsLike','humidity','wind','timezone','weatherTime','elevation','retrievalShort','retrievedAt'].forEach(key=>text('[data-stat="'+key+'"]','—'));
-  text('[data-weather-status]',status==='loading'?'LOADING':'UNAVAILABLE');
-  text('[data-stat="conditions"]',status==='loading'?'Fetching conditions…':'Unavailable');
-  $('#home-forecast').innerHTML='<p class="empty">'+(status==='loading'?'Fetching the latest forecast…':'The data provider is unavailable.')+'</p>';
-  $('#full-forecast').innerHTML='<p class="empty">'+(status==='loading'?'Loading seven-day outlook…':'Forecast unavailable.')+'</p>';
+  text('[data-weather-status]',status==='loading'?'LOADING':status==='unselected'?'FIELD REQUIRED':'UNAVAILABLE');
+  text('[data-stat="conditions"]',status==='loading'?'Fetching conditions…':status==='unselected'?'Choose a field to load live conditions':'Unavailable');
+  $('#home-forecast').innerHTML='<p class="empty">'+(status==='loading'?'Fetching the latest forecast…':status==='unselected'?'Choose a field to load the live forecast.':'The data provider is unavailable.')+'</p>';
+  $('#full-forecast').innerHTML='<p class="empty">'+(status==='loading'?'Loading seven-day outlook…':status==='unselected'?'Choose a field to load the forecast.':'Forecast unavailable.')+'</p>';
   $('#hourly-chart').innerHTML='<p class="empty">'+(status==='loading'?'Loading hourly data…':'Hourly data unavailable.')+'</p>';
   $('#water-chart').innerHTML='<p class="empty">'+(status==='loading'?'Loading water signals…':'Water signals unavailable.')+'</p>';
   renderReports();renderFieldHealth();renderDecisionBriefing();notifyFieldUpdate();
@@ -423,8 +421,13 @@ function renderSavedPlans(){
 }
 function renderEconomics(){
   const form=$('#economics-form'),reviewed=state.fieldSettings[fieldKey()]?.economicsReviewed,source=form?.elements.priceSource?.value||state.economicsInputs.priceSource;
-  text('#economics-status',reviewed&&source!=='estimate'?t('LOCAL MARKET INPUTS'):t('VERIFY LOCAL PRICE'));
-  try {const data=Object.fromEntries(new FormData(form));const inputs=Object.fromEntries(Object.entries(data).map(([key,value])=>[key,economicsTextFields.has(key)?value:Number(value)]));state.economics=calculateEconomics(inputs);state.economicsInputs=inputs;persistFieldSettings();const e=state.economics,locale=({en:'en-US',fr:'fr-FR',ar:'ar-SA'})[currentLanguage()]||'en-US';
+  text('#economics-status',reviewed&&source!=='estimate'&&source!=='none'?t('LOCAL MARKET INPUTS'):t('LOCAL INPUTS REQUIRED'));
+  const raw=Object.fromEntries(new FormData(form));
+  const needed=['areaHa','yieldTonnesHa','pricePerTonne','sellingLossPercent','transportCostPerTonne','marketFeePercent','seedCostHa','fertilizerCostHa','waterCostHa','operationsCostHa'];
+  if(!hasLocation()||source==='none'||needed.some(key=>String(raw[key]??'').trim()==='')){
+    state.economics=null;text('#profit-total','—');text('#profit-per-ha','Enter a selected field, a price source, and every local input.');text('[data-stat="margin"]','—');text('#profit-revenue','—');text('#profit-cost','—');text('#profit-selling-costs','—');text('#break-even-price','—');text('#break-even-yield','—');$('#profit-scenarios').innerHTML='<p class="empty">No profit scenario is calculated until all inputs are entered.</p>';renderFieldHealth();renderDecisionBriefing();renderMarketContext();return;
+  }
+  try {const inputs=Object.fromEntries(Object.entries(raw).map(([key,value])=>[key,economicsTextFields.has(key)?value:Number(value)]));state.economics=calculateEconomics(inputs);state.economicsInputs=inputs;persistFieldSettings();const e=state.economics,locale=({en:'en-US',fr:'fr-FR',ar:'ar-SA'})[currentLanguage()]||'en-US';
     text('#profit-total',money(e.margin));text('#profit-per-ha',money(e.perHa.margin)+' '+t('per hectare')+' · '+e.areaHa.toLocaleString(locale)+' ha');text('[data-stat="margin"]',money(e.perHa.margin));text('#profit-revenue',money(e.revenue));text('#profit-cost',money(e.cost));text('#profit-selling-costs',money(e.sellingCosts));text('#break-even-price',number(e.breakEvenPrice)?money(e.breakEvenPrice)+' / t':t('Not defined for these inputs'));text('#break-even-yield',number(e.breakEvenYield)?e.breakEvenYield.toFixed(2)+' t/ha':t('Not defined for these inputs'));renderFieldHealth();renderDecisionBriefing();
     const max=Math.max(1,...e.scenarios.map(s=>Math.abs(s.margin)));
     $('#profit-scenarios').innerHTML=e.scenarios.map((s,i)=>'<div class="scenario-row"><span>'+escapeHTML(t(s.name))+'<small>'+t(i===0?'Local yield and price −10%':i===2?'Local yield and price +10%':'Your local yield and price')+'</small></span><div class="scenario-bar"><i style="width:'+Math.max(3,Math.abs(s.margin)/max*100)+'%"></i></div><strong>'+money(s.margin)+'</strong></div>').join('');renderMarketContext();renderReports();
@@ -467,7 +470,7 @@ function evidenceRows(){const w=state.weather,c=w?.current,source=priceSourceNam
 function renderReports(){const body=$('#report-data');if(!body)return;body.innerHTML=evidenceRows().map(row=>'<tr>'+row.map(value=>'<td>'+escapeHTML(value)+'</td>').join('')+'</tr>').join('');notifyFieldUpdate();}
 function download(name,content,type){const url=URL.createObjectURL(new Blob([content],{type}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 function exportCSV(){const rows=[['FieldShift field intelligence report'],['Location',state.location.name],['Retrieved',state.weather?.retrievedAt??'Unavailable'],['Signal','Value','Evidence type','Source'],...evidenceRows()];download('fieldshift-report.csv',rows.map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n'),'text/csv;charset=utf-8');toast('Report downloaded');}
-async function loadNasa(){state.nasaController?.abort();state.nasaController=new AbortController();const key=fieldKey();const container=$('#nasa-result');container.innerHTML='<p class="empty">Requesting historical NASA POWER data…</p>';try{const result=await fetchNasa(state.location,{signal:state.nasaController.signal});if(key!==fieldKey())return;state.nasa=result;const max=Math.max(1,...result.months.map(m=>m.rain??0));container.innerHTML='<span class="eyebrow">'+result.year+' MONTHLY RAINFALL · MM</span><div class="nasa-months">'+result.months.map(m=>'<div class="nasa-month" title="Month '+m.month+': '+(number(m.rain)?m.rain.toFixed(1)+' mm':'Unavailable')+'" style="height:'+(number(m.rain)?Math.max(2,m.rain/max*95):0)+'%"><span>'+m.month+'</span></div>').join('')+'</div><p class="fine-print">'+escapeHTML(result.limitations)+'</p><span class="eyebrow">NASA POWER · RETRIEVED '+new Date(result.retrievedAt).toLocaleDateString()+'</span>';notifyFieldUpdate();}catch(error){if(error.name!=='AbortError'&&key===fieldKey())container.innerHTML='<p class="empty">'+escapeHTML(error.message)+' You can retry using the button.</p>';}}
+async function loadNasa(){const container=$('#nasa-result');if(!hasLocation()){container.innerHTML='<p class="empty">Choose a field before requesting NASA climate context.</p>';return;}state.nasaController?.abort();state.nasaController=new AbortController();const key=fieldKey();container.innerHTML='<p class="empty">Requesting historical NASA POWER data…</p>';try{const result=await fetchNasa(state.location,{signal:state.nasaController.signal});if(key!==fieldKey())return;state.nasa=result;const max=Math.max(1,...result.months.map(m=>m.rain??0));container.innerHTML='<span class="eyebrow">'+result.year+' MONTHLY RAINFALL · MM</span><div class="nasa-months">'+result.months.map(m=>'<div class="nasa-month" title="Month '+m.month+': '+(number(m.rain)?m.rain.toFixed(1)+' mm':'Unavailable')+'" style="height:'+(number(m.rain)?Math.max(2,m.rain/max*95):0)+'%"><span>'+m.month+'</span></div>').join('')+'</div><p class="fine-print">'+escapeHTML(result.limitations)+'</p><span class="eyebrow">NASA POWER · RETRIEVED '+new Date(result.retrievedAt).toLocaleDateString()+'</span>';notifyFieldUpdate();}catch(error){if(error.name!=='AbortError'&&key===fieldKey())container.innerHTML='<p class="empty">'+escapeHTML(error.message)+' You can retry using the button.</p>';}}
 init();
 
 function replaceArrowGlyphs() {

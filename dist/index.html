@@ -1,49 +1,1291 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#101b16"><meta name="description" content="FieldShift connects your land with weather, water, crop rotation, and farm economics."><title>FieldShift</title><link rel="icon" href="assets/logo-new.png" type="image/png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;450;500;550;600;650;700&family=IBM+Plex+Mono:wght@400&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="vendor/maplibre-gl.css"><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="planning.css"><link rel="stylesheet" href="scenes.css"><link rel="stylesheet" href="i18n.css"><link rel="stylesheet" href="intro.css"><link rel="stylesheet" href="intro-real.css"></head>
-<body class="intro-pending">
-<svg class="svg-sprite" xmlns="http://www.w3.org/2000/svg"><defs>
-<symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
-<symbol id="i-map" viewBox="0 0 24 24"><path d="m3 5 6-2 6 2 6-2v16l-6 2-6-2-6 2V5Z M9 3v16m6-14v16"/></symbol>
-<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></symbol>
-<symbol id="i-leaf" viewBox="0 0 24 24"><path d="M5 19C-1 5 10 6 20 3c1 12-3 18-13 14M4 21 16 9"/></symbol>
-<symbol id="i-water" viewBox="0 0 24 24"><path d="M12 3c-2 4-7 7-7 12a7 7 0 0 0 14 0c0-5-5-8-7-12ZM9 16c0 1.7 1 2.5 2 2.5"/></symbol>
-<symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3 10 5-10 5L2 8l10-5ZM3 12l9 5 9-5M3 17l9 5 9-5"/></symbol>
-<symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 3v17h17M8 15v-4m5 4V7m5 8V4"/></symbol>
-<symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H5v18h14V8l-5-5Zm0 0v5h5M8 12h8m-8 4h8"/></symbol>
-<symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3ZM20 2v4m-2-2h4"/></symbol>
-<symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3"/><circle cx="16" cy="17" r="3"/></symbol>
-<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></symbol>
-<symbol id="i-pin" viewBox="0 0 24 24"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 0 1 14 0Z"/><circle cx="12" cy="10" r="2.5"/></symbol>
-<symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></symbol>
-<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></symbol>
-<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
-</defs></svg>
-<a class="skip-link" href="#main">Skip to content</a>
-<aside class="sidebar" id="sidebar"><a class="brand" href="#/overview"><img src="assets/logo-new.png" alt="FieldShift logo"><span>FieldShift</span></a><div class="workspace-label">WORKSPACE</div><nav class="side-nav" aria-label="Main navigation"><a href="#/overview" data-route="overview"><svg><use href="#i-grid"/></svg>Overview</a><a href="#/map" data-route="map"><svg><use href="#i-map"/></svg>Field explorer<span class="nav-badge">3D</span></a><a href="#/weather" data-route="weather"><svg><use href="#i-sun"/></svg>Weather</a><a href="#/soil" data-route="soil"><svg><use href="#i-layers"/></svg>Soil intelligence</a><a href="#/water" data-route="water"><svg><use href="#i-water"/></svg>Water</a><a href="#/crops" data-route="crops"><svg><use href="#i-leaf"/></svg>Crop planner</a><a href="#/profit" data-route="profit"><svg><use href="#i-chart"/></svg>Profit & scenarios</a><a href="#/reports" data-route="reports"><svg><use href="#i-file"/></svg>Reports</a></nav><div class="sidebar-bottom"><a class="advisor-link" href="#/assistant"><svg><use href="#i-spark"/></svg><div>Field assistant<small>Your evidence companion</small></div><span>↗</span></a><a class="settings-link" href="#/settings"><svg><use href="#i-settings"/></svg>Settings</a><div class="operator"><div class="avatar operator-logo"><img src="assets/logo-new.png" alt=""></div><span>Field operator<small>Personal workspace</small></span><span>⋯</span></div></div></aside><button class="sidebar-scrim" data-action="close-menu" aria-label="Close navigation"></button>
-<header class="topbar"><button class="menu-button" data-action="menu" aria-label="Open navigation">☰</button><div class="breadcrumb">Workspace <span>/</span> <b id="route-name">Overview</b></div><div class="topbar-right"><button class="topbar-field" data-action="location" aria-label="Change active field"><svg aria-hidden="true"><use href="#i-pin"/></svg><span data-field-name>Selected land</span></button><span class="system-status"><i></i><span id="connection-label">FIELD WORKSPACE</span></span><button class="theme-button" data-action="theme" aria-label="Toggle theme"><svg><use href="#i-sun"/></svg></button></div></header>
-<main id="main">
-<section class="view" id="view-overview" aria-labelledby="overview-title"><div class="page-heading"><div><span class="eyebrow">YOUR FIELD. A CLEARER PICTURE.</span><h1 id="overview-title">Good decisions start here<span>.</span></h1><p>The conditions that matter. The possibilities ahead.</p></div><button class="field-picker" data-action="location"><span class="eyebrow">ACTIVE LOCATION</span><b><svg><use href="#i-pin"/></svg><span data-field-name>Central Kansas</span><span>⌄</span></b></button></div>
-<div class="field-banner"><div class="banner-art"><svg><use href="#i-leaf"/></svg><span></span></div><div class="banner-copy"><span class="eyebrow">FROM ORBIT TO ACRE</span><h2>A bigger view.<br>A better next season.</h2><p>Explore your land, understand its signals,<br>and make your next move with confidence.</p></div><a class="banner-link" href="#/map">Explore your field <svg><use href="#i-arrow"/></svg></a><span class="photo-note">LANDSCAPE IMAGE · ILLUSTRATIVE</span></div>
-<section class="field-health" aria-labelledby="field-health-title"><div class="health-orbit"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="45"/><circle id="field-health-ring" class="health-ring-value" cx="50" cy="50" r="45"/></svg><div><strong id="field-health-score">—</strong><span>FIELD HEALTH</span></div></div><div class="health-copy"><span class="eyebrow">FIELD HEALTH SIGNAL</span><h2 id="field-health-title">A clear pulse for your next move.</h2><p id="field-health-summary">Connect weather, soil, water and profit inputs to see a balanced field signal.</p></div><div class="health-signals"><a href="#/weather"><i class="health-weather">☀</i><span>Climate<small id="health-weather-score">—</small></span></a><a href="#/soil"><i class="health-soil">◒</i><span>Soil<small id="health-soil-score">—</small></span></a><a href="#/water"><i class="health-water">⌁</i><span>Water<small id="health-water-score">—</small></span></a><a href="#/profit"><i class="health-profit">↗</i><span>Profit<small id="health-profit-score">—</small></span></a></div></section>
-<section class="decision-briefing" aria-labelledby="briefing-title"><header><div><span class="eyebrow">WEEKLY FIELD BRIEFING</span><h2 id="briefing-title">What changed, what matters next.</h2></div><span class="briefing-date" id="briefing-date">Loading briefing…</span></header><div class="briefing-grid"><article class="briefing-next"><span class="eyebrow">RECOMMENDED NEXT MOVE</span><h3 id="briefing-next-title">Checking your field signals…</h3><p id="briefing-next-copy">FieldShift will connect your weather, soil, water and profit evidence here.</p><a id="briefing-next-link" class="button small" href="#/weather">Open signal <svg><use href="#i-arrow"/></svg></a></article><article class="briefing-alerts"><div class="briefing-alert-heading"><span class="eyebrow">SMART ALERTS</span><span class="pill" id="briefing-alert-count">0 ALERTS</span></div><div id="briefing-alert-list"></div></article><article class="briefing-evidence"><span class="eyebrow">DECISION EVIDENCE</span><div class="evidence-score"><b id="briefing-evidence-score">—</b><span>of 4 signals<br>connected</span></div><p id="briefing-evidence-copy">Checking sources…</p><a href="#/reports">Open evidence report ↗</a></article></div></section>
-<div class="metrics"><article class="metric-card"><div class="metric-top"><span class="icon-box lime"><svg><use href="#i-sun"/></svg></span><span class="pill" data-weather-status>LOADING</span></div><span class="metric-label">Current temperature</span><strong data-stat="temperature">—</strong><p data-stat="conditions">Getting field conditions…</p></article><article class="metric-card"><div class="metric-top"><span class="icon-box blue"><svg><use href="#i-water"/></svg></span><span class="pill">FORECAST</span></div><span class="metric-label">Rain in the next 7 days</span><strong data-stat="rainWeek">—</strong><p>Precipitation · selected point</p></article><article class="metric-card"><div class="metric-top"><span class="icon-box green"><svg><use href="#i-layers"/></svg></span><span class="pill">MODEL</span></div><span class="metric-label">Surface soil moisture</span><strong data-stat="moisture">—</strong><p>0–1 cm · shallow model layer</p></article><article class="metric-card"><div class="metric-top"><span class="icon-box amber"><svg><use href="#i-chart"/></svg></span><a href="#/profit" class="text-link">Plan ↗</a></div><span class="metric-label">Gross margin scenario</span><strong data-stat="margin">—</strong><p>Per hectare · editable assumptions</p></article></div>
-<div class="overview-grid"><article class="panel map-card"><div class="panel-heading"><div><span class="eyebrow">FIELD CONTEXT</span><h2>Your land, in focus</h2></div><a class="text-link" href="#/map">Open explorer ↗</a></div><div id="home-map-host"></div><div class="map-footer"><span><i class="status-dot"></i><span data-field-name>Central Kansas</span></span><span id="field-area">Point selected · boundary not drawn</span></div></article><article class="panel weather-card"><div class="panel-heading"><div><span class="eyebrow">LOOKING AHEAD</span><h2>Your weather window</h2></div><a class="text-link" href="#/weather">Full forecast ↗</a></div><div class="weather-current"><div><strong data-stat="temperature">—</strong><span data-stat="conditions">Loading…</span></div><div class="weather-glyph">☀</div></div><div id="home-forecast" class="forecast-list"><p class="empty">Fetching the latest forecast…</p></div><div class="source-foot"><i class="status-dot"></i>Open-Meteo · weather model<span data-stat="retrievalShort">—</span></div></article>
-<article class="panel rotation-card"><div class="panel-heading"><div><span class="eyebrow">THE NEXT SEASON</span><h2>Make room for resilience</h2></div><span class="pill">SCENARIO</span></div><div class="rotation-preview" id="rotation-preview"></div><div class="panel-bottom"><p>Compare crop families, water demand,<br>and the assumptions behind each path.</p><a class="button small" href="#/crops">Build a rotation <svg><use href="#i-arrow"/></svg></a></div></article><article class="panel journal-card"><div class="panel-heading"><div><span class="eyebrow">FIELD JOURNAL</span><h2>Your recent activity</h2></div><svg class="muted"><use href="#i-clock"/></svg></div><div id="journal-list"></div></article></div><div class="overview-bottom"><span><i class="status-dot"></i>CONNECTED TO EARTH. ROOTED IN YOUR LAND.</span><a href="#/reports">Explore data sources ↗</a></div></section>
-<section class="view" id="view-map" hidden><div class="page-heading"><div><span class="eyebrow">FIELD EXPLORER / 01</span><h1>A world of possibilities<span>.</span></h1><p>Find a place. Mark your land. Bring every decision back to it.</p></div><button class="button" data-action="location"><svg><use href="#i-pin"/></svg>Find your field</button></div><div class="explorer-layout"><article class="panel explorer-map-card"><div class="explorer-tools"><div class="segmented"><button class="selected" data-map-mode="map"><svg><use href="#i-map"/></svg>Map</button><button data-map-mode="globe"><svg><use href="#i-globe"/></svg>Globe</button></div><div class="segmented"><button class="selected" data-map-layer="satellite">Satellite</button><button data-map-layer="terrain">Terrain</button></div></div><div id="explorer-map-host"></div><div class="draw-toolbar"><button data-action="draw"><svg><use href="#i-plus"/></svg>Draw boundary</button><button data-action="finish-draw">Finish drawing</button><button data-action="clear-boundary">Clear</button><span id="drawing-status">Tap a location to select a point.</span></div></article><aside class="panel field-details"><span class="eyebrow">SELECTED LAND</span><h2 data-field-name>Central Kansas</h2><span class="pill" id="selection-type">EXAMPLE LOCATION</span><dl><div><dt>Coordinates</dt><dd data-coordinates>38.4600, −98.2500</dd></div><div><dt>Mapped area</dt><dd id="mapped-area">No boundary</dd></div><div><dt>Elevation</dt><dd data-stat="elevation">—</dd></div></dl><label>Field name<input id="field-name-input" placeholder="Give this field a name"></label><button class="button full" data-action="save-field">Save this field</button><label class="file-import">Import GeoJSON<input id="geojson-import" type="file" accept=".json,.geojson,application/geo+json"></label><p class="fine-print">Weather describes the provider’s reference grid at the selected point. Drawing a boundary does not increase the source data’s resolution.</p><div class="saved-fields"><span class="eyebrow">SAVED ON THIS DEVICE</span><div id="saved-field-list"></div></div></aside></div></section>
-<section class="view" id="view-weather" hidden><div class="page-heading"><div><span class="eyebrow">WEATHER INTELLIGENCE / 02</span><h1>See the season’s signals<span>.</span></h1><p data-field-name>Central Kansas</p></div><button class="button secondary" data-action="refresh">Refresh conditions ↻</button></div><div class="weather-feature"><div><span class="eyebrow">CURRENT MODEL ANALYSIS</span><strong data-stat="temperature">—</strong><h2 data-stat="conditions">Loading conditions</h2><p data-stat="weatherTime">Time unavailable</p></div><div class="weather-details"><div>Feels like<strong data-stat="feelsLike">—</strong></div><div>Humidity<strong data-stat="humidity">—</strong></div><div>Wind speed<strong data-stat="wind">—</strong></div><div>Timezone<strong data-stat="timezone">—</strong></div></div></div><article class="panel"><div class="panel-heading"><div><span class="eyebrow">SEVEN DAY FORECAST</span><h2>A window into the week</h2></div><span class="pill">FORECAST</span></div><div id="full-forecast" class="forecast-grid"></div></article><article class="panel chart-panel"><div class="panel-heading"><div><span class="eyebrow">NEXT 24 HOURS</span><h2>Temperature & timing</h2></div><span data-temp-unit>°C</span></div><div id="hourly-chart" class="chart"></div></article><p class="data-note" data-stat="provenance">Open-Meteo · current conditions are model output, not necessarily a station observation.</p></section>
-<section class="view" id="view-soil" hidden><div class="page-heading"><div><span class="eyebrow">SOIL INTELLIGENCE / 03</span><h1>Good plans start below ground<span>.</span></h1><p>Combine regional context with the measurements you know best.</p></div><button class="button" data-action="soil-dialog"><svg><use href="#i-plus"/></svg>Add a soil sample</button></div><div class="soil-layout"><article class="panel soil-cross-section"><span class="eyebrow">NEAR-SURFACE CONDITIONS</span><h2>The top layer tells one part of the story.</h2><div class="soil-art"><div class="grass"></div><span class="layer-label">0–1 cm model layer</span><div class="soil-value"><strong data-stat="moisture">—</strong><small>VOLUMETRIC MOISTURE</small></div><div class="root root-one"></div><div class="root root-two"></div></div><p>Surface moisture responds quickly to weather. It does not represent the water available throughout the root zone.</p><div class="source-foot">Open-Meteo · shallow model estimate</div></article><article class="panel"><div class="panel-heading"><div><span class="eyebrow">LOCAL EVIDENCE</span><h2>Your soil records</h2></div><span class="pill">USER MEASUREMENTS</span></div><div id="soil-samples"></div><div class="insight-note"><svg><use href="#i-leaf"/></svg><p>Start with pH, organic carbon, texture, depth, and a sample date. Keep lab evidence connected to the field it came from.</p></div></article></div></section>
-<section class="view" id="view-water" hidden><div class="page-heading"><div><span class="eyebrow">WATER INTELLIGENCE / 04</span><h1>Every drop has a story<span>.</span></h1><p>Compare incoming rain with reference water demand.</p></div><span class="pill">FORECAST + MODEL ESTIMATES</span></div><div class="metrics three"><article class="metric-card"><span class="icon-box blue"><svg><use href="#i-water"/></svg></span><span class="metric-label">7-day forecast rain</span><strong data-stat="rainWeek">—</strong><p>Precipitation at your selected point</p></article><article class="metric-card"><span class="icon-box amber"><svg><use href="#i-sun"/></svg></span><span class="metric-label">7-day reference ET₀</span><strong data-stat="etWeek">—</strong><p>Reference atmospheric water demand</p></article><article class="metric-card"><span class="icon-box green"><svg><use href="#i-layers"/></svg></span><span class="metric-label">Near-surface moisture</span><strong data-stat="moisture">—</strong><p>0–1 cm model layer</p></article></div><article class="panel"><div class="panel-heading"><div><span class="eyebrow">RAINFALL & DEMAND</span><h2>The week’s water balance</h2></div><div class="chart-legend"><span class="rain-key">Rain</span><span class="et-key">ET₀</span></div></div><div id="water-chart" class="chart water-chart"></div><p class="fine-print">Rain and reference ET₀ are different quantities. This comparison does not calculate crop irrigation requirements or measure groundwater supply.</p></article><article class="panel journal-form-panel"><div><span class="eyebrow">IRRIGATION JOURNAL</span><h2>Record what you apply</h2><p>Your records help put model signals into context.</p></div><form id="water-record-form"><label>Applied water (mm)<input name="amount" type="number" min="0.1" step="0.1" required placeholder="e.g. 15"></label><label>Date<input name="date" type="date" required></label><button class="button">Save record</button></form></article></section>
-<section class="view" id="view-crops" hidden><div class="page-heading"><div><span class="eyebrow">CROP PLANNER / 05</span><h1>Grow possibilities. Build resilience<span>.</span></h1><p>Explore sequences and understand the trade-offs behind each one.</p></div><button class="button secondary" data-action="save-plan">Save selected plan</button></div><article class="panel planner-inputs"><label>Current crop<select id="current-crop"></select></label><label>Water access<select id="irrigation"><option value="rainfed">Rainfed</option><option value="irrigated">Irrigation available</option></select></label><label>Soil pH (if known)<input id="planner-ph" type="number" min="0" max="14" step="0.1" placeholder="Not supplied"></label><label>Planning priority<select id="planning-priority"><option value="soil">Soil cover & diversity</option><option value="water">Water conservation</option><option value="resilience">Climate resilience</option></select></label><button class="button" data-action="compare-plans">Compare paths <svg><use href="#i-arrow"/></svg></button></article><div id="rotation-plans" class="rotation-plans"></div><article class="panel"><div class="panel-heading"><div><span class="eyebrow">KNOW YOUR OPTIONS</span><h2>The crop library</h2></div><input type="search" id="crop-filter" placeholder="Find a crop…" aria-label="Search crop library"></div><div id="crop-library" class="crop-library"></div></article><p class="data-note">General crop traits support exploration. Local planting dates, varieties, soil tests, disease history, and extension advice are needed before choosing a field plan.</p></section>
-<section class="view" id="view-profit" hidden><div class="page-heading"><div><span class="eyebrow">PROFIT & SCENARIOS / 06</span><h1>Make the numbers work for your land<span>.</span></h1><p>Put every assumption in view and see how the margin changes.</p></div><span class="pill" id="economics-status">VERIFY LOCAL PRICE</span></div><div class="market-context" id="market-context"><div><span class="eyebrow">SELECTED MARKET</span><b id="market-location">Selected field</b><small id="market-region-note">Use a place search to identify the country market.</small></div><div><span class="eyebrow">PLANNED CROP</span><b id="market-crop">Selected crop</b><small>Linked to Crop planner</small></div><div><span class="eyebrow">PRICE EVIDENCE</span><b id="market-evidence">User estimate</b><small id="market-currency-note">Enter a local farm-gate or contract quote.</small></div></div><div class="economics-layout"><form id="economics-form" class="panel economics-inputs"><div class="panel-heading"><div><span class="eyebrow">YOUR LOCAL ASSUMPTIONS</span><h2>Build the market scenario</h2></div><select name="currency" aria-label="Currency"><option>USD</option><option>EUR</option><option>GBP</option><option>INR</option><option>KES</option><option>EGP</option><option>SAR</option><option>CNY</option><option>BRL</option><option>ZAR</option><option>NGN</option></select></div><div class="market-evidence-inputs"><label>Price source<select name="priceSource"><option value="estimate">User estimate</option><option value="farmgate">Farm-gate quote</option><option value="cooperative">Cooperative or contract</option><option value="wholesale">Wholesale market quote</option><option value="benchmark">Published benchmark</option></select></label><label>Quote date<input name="priceDate" type="date"></label></div><div class="form-grid"><label>Field area (ha)<input name="areaHa" type="number" min="0.01" step="0.01" value="1" required></label><label>Expected harvested yield (t/ha)<input name="yieldTonnesHa" type="number" min="0" step="0.1" value="3" required></label><label>Local sale price (per tonne)<input name="pricePerTonne" type="number" min="0" step="0.01" value="350" required></label><label>Selling loss (%)<input name="sellingLossPercent" type="number" min="0" max="100" step="0.1" value="0" required></label><label>Transport & handling (per tonne)<input name="transportCostPerTonne" type="number" min="0" step="0.01" value="0" required></label><label>Market / commission fee (%)<input name="marketFeePercent" type="number" min="0" max="100" step="0.1" value="0" required></label><label>Seed cost (per ha)<input name="seedCostHa" type="number" min="0" value="120" required></label><label>Fertilizer (per ha)<input name="fertilizerCostHa" type="number" min="0" value="180" required></label><label>Water cost (per ha)<input name="waterCostHa" type="number" min="0" value="80" required></label><label>Operations (per ha)<input name="operationsCostHa" type="number" min="0" value="220" required></label></div><button class="button full">Update local scenario</button><p class="fine-print">Profit uses the selected field, your dated local price, saleable yield after losses, transport, fees, and the production costs entered here.</p></form><div class="economics-result"><div class="profit-hero"><span class="eyebrow">ESTIMATED LOCAL GROSS MARGIN</span><strong id="profit-total">—</strong><span id="profit-per-ha">— per hectare</span><div class="profit-breakdown"><div>Gross sales<b id="profit-revenue">—</b></div><div>Total costs<b id="profit-cost">—</b></div><div>Selling deductions<b id="profit-selling-costs">—</b></div></div><div class="break-even"><span>Break-even local price<b id="break-even-price">—</b></span><span>Break-even harvested yield<b id="break-even-yield">—</b></span></div></div><article class="panel"><span class="eyebrow">LOCAL PRICE & YIELD SENSITIVITY</span><h2>Room for market uncertainty</h2><div id="profit-scenarios"></div></article></div></div><div class="market-note"><svg><use href="#i-chart"/></svg><p><b>Local evidence matters.</b> Prices differ by country, market, crop grade, buyer, contract, season and date. FieldShift never invents a local price: use a current farm-gate, cooperative, contract or wholesale quote.</p><div class="market-links"><a href="https://www.fao.org/faostat/en/#data/PP" target="_blank" rel="noreferrer">FAOSTAT producer prices ↗</a><a href="https://www.worldbank.org/en/research/commodity-markets" target="_blank" rel="noreferrer">World Bank benchmarks ↗</a></div></div></section>
-<section class="view" id="view-reports" hidden><div class="page-heading"><div><span class="eyebrow">REPORTS & EVIDENCE / 07</span><h1>A clear record of your reasoning<span>.</span></h1><p>Take the evidence, assumptions, and next steps with you.</p></div><div class="button-row"><button class="button secondary" data-action="export-csv">Export CSV</button><button class="button" data-action="print">Print / save PDF <svg><use href="#i-file"/></svg></button></div></div><article class="panel report-summary"><div class="panel-heading"><a class="brand" href="#/overview"><img src="assets/logo-new.png" alt="FieldShift logo"><span>FieldShift</span></a><span class="eyebrow">FIELD INTELLIGENCE REPORT</span></div><h2 data-field-name>Selected field</h2><div class="report-metadata"><span>COORDINATES<b data-coordinates>—</b></span><span>AREA<b id="report-area">Point selection</b></span><span>RETRIEVED<b data-stat="retrievedAt">—</b></span></div><div class="table-scroll"><table><thead><tr><th>Signal</th><th>Value</th><th>Evidence type</th><th>Source</th></tr></thead><tbody id="report-data"></tbody></table></div><div class="report-footnote"><h3>What these values mean</h3><p>Weather and near-surface moisture are model values at a reference grid. A polygon describes your chosen boundary; its area does not make the weather data more precise. Rotation paths use general crop characteristics. Profit uses the assumptions you enter.</p></div></article><article class="panel nasa-panel"><div><span class="eyebrow">NASA EARTH OBSERVATIONS</span><h2>A longer view from space</h2><p>Load historical monthly temperature and rainfall context from NASA POWER for the selected location.</p><button class="button secondary" data-action="nasa">Load NASA climate context ↗</button></div><div id="nasa-result"><span class="empty">Historical data is requested only when you open this analysis.</span></div></article><div class="source-links"><a href="https://open-meteo.com/en/docs" target="_blank" rel="noreferrer">Open-Meteo documentation ↗</a><a href="https://power.larc.nasa.gov/" target="_blank" rel="noreferrer">NASA POWER ↗</a><a href="https://www.fao.org/land-water/databases-and-software/crop-information/en/" target="_blank" rel="noreferrer">FAO crop information ↗</a></div></section>
-<section class="view" id="view-assistant" hidden><div class="page-heading"><div><span class="eyebrow">FIELD ASSISTANT / 08</span><h1>Better questions. Clearer decisions<span>.</span></h1><p>Explore the information in your workspace and the evidence still missing.</p></div><span class="pill">GUIDED EVIDENCE EXPLAINER</span></div><div class="assistant-layout"><article class="panel chat-panel"><div class="chat-heading"><span class="icon-box lime"><svg><use href="#i-spark"/></svg></span><div><b>FieldShift companion</b><small data-field-name>Selected field</small></div></div><div id="chat-messages" class="chat-messages" aria-live="polite"><div class="chat-message assistant-message">Welcome to your field workspace. I can explain the weather, soil moisture, rotation paths, and profit assumptions shown here. What would help with your next decision?<small>Guided mode · OpenAI is not connected to this site yet.</small></div></div><div class="question-chips"><button data-question="What does my soil moisture mean?">Understand soil moisture</button><button data-question="Explain my profit scenario">Review my margin</button><button data-question="What data am I missing?">Find the evidence gaps</button></div><form id="chat-form"><input name="message" placeholder="Ask about your field…" aria-label="Message" required autocomplete="off"><button class="button" aria-label="Send message"><svg><use href="#i-arrow"/></svg></button></form></article><aside class="panel evidence-panel"><span class="eyebrow">IN THE CONTEXT</span><h2>Your current evidence</h2><div id="assistant-evidence"></div><div class="insight-note"><p>Every useful recommendation starts with knowing what is measured, modeled, or still unknown.</p></div></aside></div></section>
-<section class="view" id="view-settings" hidden><div class="page-heading"><div><span class="eyebrow">WORKSPACE PREFERENCES</span><h1>Make this your place<span>.</span></h1><p>Set up the details that make your work feel familiar.</p></div></div><article class="panel settings-panel"><label>Appearance<select id="appearance"><option value="auto">Automatic · follows local time</option><option value="dark">Forest dark</option><option value="light">Daylight</option></select><small class="setting-help" id="appearance-help">Daylight from 7:00 to 18:59 · forest dark at night.</small></label><label>Weather units<select id="weather-units"><option value="metric">Metric · °C, mm, km/h</option><option value="imperial">Imperial · °F, inches, mph</option></select></label><div class="setting-item"><div><b>Device-local workspace</b><p>Fields, journal records, and assumptions are stored in this browser.</p></div><span class="pill">LOCAL</span></div><div class="setting-item"><div><b>Start with the example location</b><p>Restore the clearly identified Central Kansas example point.</p></div><button class="button secondary small" data-action="reset-location">Restore</button></div><div class="setting-item"><div><b>Download workspace</b><p>Keep a JSON backup of your fields and measurements.</p></div><button class="button secondary small" data-action="backup">Download</button></div></article></section>
-<section class="view" id="view-about" hidden><div class="page-heading about-heading"><div><span class="eyebrow">ABOUT FIELD SHIFT</span><h1>Built by students. Grounded in purpose<span>.</span></h1><p>Meet the school and team behind FieldShift.</p></div><img src="assets/logo-new.png" alt="FieldShift logo"></div><div class="about-grid"><article class="panel about-card about-school"><div class="school-profile"><img class="school-logo" src="assets/dunia-alajial-logo.jpg" alt="Dunia Alajial International School logo"><div><span class="eyebrow">OUR SCHOOL</span><h2>Dunia Alajial International School</h2></div></div><p>FieldShift was developed at Dunia Alajial International School, where students turn scientific ideas, technology and teamwork into projects designed to help people and communities.</p><a class="about-learn" href="https://share.google/ZDHDGsGC8tVU8AKJr" target="_blank" rel="noopener noreferrer">Learn more <span aria-hidden="true">↗</span></a></article><article class="panel about-card about-team"><span class="eyebrow">OUR TEAM</span><h2>The Tech Team</h2><p>The Tech Team created the FieldShift experience—from the visual identity and interface to the field planning tools that connect Earth observations with practical farm decisions.</p></article></div></section>
-<footer class="app-footer"><span>FIELD SHIFT / EARTH SCIENCE × AGRICULTURE</span><span>Built for the 2026 NASA Space Apps Challenge</span></footer>
-</main>
-<div id="map-dock"><div id="field-map" aria-label="Interactive field map"></div><button class="map-expand" data-action="explore"><svg><use href="#i-globe"/></svg><span>Map & globe</span>↗</button></div>
-<nav class="mobile-nav" aria-label="Mobile navigation"><a href="#/overview" data-route="overview"><svg><use href="#i-grid"/></svg>Home</a><a href="#/explore" data-route="explore"><svg><use href="#i-globe"/></svg>Explore</a><a href="#/weather" data-route="weather"><svg><use href="#i-sun"/></svg>Weather</a><a href="#/crops" data-route="crops"><svg><use href="#i-leaf"/></svg>Crops</a><button data-action="menu"><span>•••</span>More</button></nav>
-<dialog id="location-dialog"><form id="place-search-form" class="location-dialog-content"><button type="button" class="dialog-close" data-action="close-dialog" aria-label="Close">×</button><span class="eyebrow">FIND YOUR LAND</span><h2>Where do you grow?</h2><p>Search a place, enter coordinates, or start with your location.</p><label>Place name<input name="query" type="search" placeholder="Town, region, or agricultural area" required autofocus></label><button class="button full">Search places <svg><use href="#i-arrow"/></svg></button><div id="search-results" aria-live="polite"></div><div class="dialog-divider">OR SELECT A POINT</div><div class="form-grid"><label>Latitude<input id="latitude-input" type="number" step="any" min="-90" max="90" placeholder="e.g. −1.29"></label><label>Longitude<input id="longitude-input" type="number" step="any" min="-180" max="180" placeholder="e.g. 36.82"></label></div><button type="button" class="button secondary full" data-action="coordinates">Use coordinates</button><button type="button" class="location-link" data-action="geolocation"><svg><use href="#i-pin"/></svg>Use my current location</button><p class="fine-print">Location access is optional and requested only when you tap this button.</p></form></dialog>
-<dialog id="soil-dialog"><form id="soil-sample-form" class="location-dialog-content"><button type="button" class="dialog-close" data-action="close-dialog" aria-label="Close">×</button><span class="eyebrow">ADD LOCAL EVIDENCE</span><h2>A sample from your soil.</h2><div class="form-grid"><label class="span-two">Sample name<input name="name" required maxlength="80" placeholder="North field · laboratory sample"></label><label>Collection date<input name="date" type="date" required></label><label>Depth (cm)<input name="depth" type="number" min="0.1" step="0.1" required></label><label>pH<input name="ph" type="number" min="0" max="14" step="0.1"></label><label>Organic carbon (%)<input name="carbon" type="number" min="0" max="100" step="0.1"></label><label class="span-two">Source / method<input name="method" required placeholder="Laboratory name or field method"></label></div><button class="button full">Save sample to this field</button></form></dialog><div class="toast" id="toast" role="status"></div>
-<script src="vendor/maplibre-gl.js"></script><script type="module" src="app.js"></script>
-</body></html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#101b16" />
+    <meta
+      name="description"
+      content="FieldShift connects your land with weather, water, crop rotation, and farm economics."
+    />
+    <title>FieldShift</title>
+    <link rel="icon" href="assets/logo-new.png" type="image/png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;450;500;550;600;650;700&family=IBM+Plex+Mono:wght@400&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="vendor/maplibre-gl.css" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="planning.css" />
+    <link rel="stylesheet" href="scenes.css" />
+    <link rel="stylesheet" href="i18n.css" />
+    <link rel="stylesheet" href="intro.css" />
+    <link rel="stylesheet" href="intro-real.css" />
+  </head>
+  <body class="intro-pending">
+    <svg class="svg-sprite" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <symbol id="i-grid" viewBox="0 0 24 24">
+          <rect x="3" y="3" width="7" height="7" rx="1.5" />
+          <rect x="14" y="3" width="7" height="7" rx="1.5" />
+          <rect x="3" y="14" width="7" height="7" rx="1.5" />
+          <rect x="14" y="14" width="7" height="7" rx="1.5" />
+        </symbol>
+        <symbol id="i-map" viewBox="0 0 24 24">
+          <path d="m3 5 6-2 6 2 6-2v16l-6 2-6-2-6 2V5Z M9 3v16m6-14v16" />
+        </symbol>
+        <symbol id="i-sun" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="4" />
+          <path
+            d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"
+          />
+        </symbol>
+        <symbol id="i-leaf" viewBox="0 0 24 24">
+          <path d="M5 19C-1 5 10 6 20 3c1 12-3 18-13 14M4 21 16 9" />
+        </symbol>
+        <symbol id="i-water" viewBox="0 0 24 24">
+          <path
+            d="M12 3c-2 4-7 7-7 12a7 7 0 0 0 14 0c0-5-5-8-7-12ZM9 16c0 1.7 1 2.5 2 2.5"
+          />
+        </symbol>
+        <symbol id="i-layers" viewBox="0 0 24 24">
+          <path d="m12 3 10 5-10 5L2 8l10-5ZM3 12l9 5 9-5M3 17l9 5 9-5" />
+        </symbol>
+        <symbol id="i-chart" viewBox="0 0 24 24">
+          <path d="M4 3v17h17M8 15v-4m5 4V7m5 8V4" />
+        </symbol>
+        <symbol id="i-file" viewBox="0 0 24 24">
+          <path d="M14 3H5v18h14V8l-5-5Zm0 0v5h5M8 12h8m-8 4h8" />
+        </symbol>
+        <symbol id="i-spark" viewBox="0 0 24 24">
+          <path
+            d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3ZM20 2v4m-2-2h4"
+          />
+        </symbol>
+        <symbol id="i-settings" viewBox="0 0 24 24">
+          <path d="M4 7h16M4 17h16" />
+          <circle cx="9" cy="7" r="3" />
+          <circle cx="16" cy="17" r="3" />
+        </symbol>
+        <symbol id="i-arrow" viewBox="0 0 24 24">
+          <path d="M4 12h16m-6-6 6 6-6 6" />
+        </symbol>
+        <symbol id="i-pin" viewBox="0 0 24 24">
+          <path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 0 1 14 0Z" />
+          <circle cx="12" cy="10" r="2.5" />
+        </symbol>
+        <symbol id="i-globe" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="9" />
+          <ellipse cx="12" cy="12" rx="4" ry="9" />
+          <path d="M3 12h18" />
+        </symbol>
+        <symbol id="i-plus" viewBox="0 0 24 24">
+          <path d="M12 4v16M4 12h16" />
+        </symbol>
+        <symbol id="i-clock" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 7v5l3 2" />
+        </symbol>
+      </defs>
+    </svg>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#/overview"
+        ><img src="assets/logo-new.png" alt="FieldShift logo" /><span
+          >FieldShift</span
+        ></a
+      >
+      <div class="workspace-label">WORKSPACE</div>
+      <nav class="side-nav" aria-label="Main navigation">
+        <a href="#/overview" data-route="overview"
+          ><svg><use href="#i-grid" /></svg>Overview</a
+        ><a href="#/map" data-route="map"
+          ><svg><use href="#i-map" /></svg>Field explorer<span class="nav-badge"
+            >3D</span
+          ></a
+        ><a href="#/weather" data-route="weather"
+          ><svg><use href="#i-sun" /></svg>Weather</a
+        ><a href="#/soil" data-route="soil"
+          ><svg><use href="#i-layers" /></svg>Soil intelligence</a
+        ><a href="#/water" data-route="water"
+          ><svg><use href="#i-water" /></svg>Water</a
+        ><a href="#/crops" data-route="crops"
+          ><svg><use href="#i-leaf" /></svg>Crop planner</a
+        ><a href="#/profit" data-route="profit"
+          ><svg><use href="#i-chart" /></svg>Profit & scenarios</a
+        ><a href="#/reports" data-route="reports"
+          ><svg><use href="#i-file" /></svg>Reports</a
+        >
+      </nav>
+      <div class="sidebar-bottom">
+        <a class="advisor-link" href="#/assistant"
+          ><svg><use href="#i-spark" /></svg>
+          <div>Field assistant<small>Your evidence companion</small></div>
+          <span>↗</span></a
+        ><a class="settings-link" href="#/settings"
+          ><svg><use href="#i-settings" /></svg>Settings</a
+        >
+        <div class="operator">
+          <div class="avatar operator-logo">
+            <img src="assets/logo-new.png" alt="" />
+          </div>
+          <span>Field operator<small>Personal workspace</small></span
+          ><span>⋯</span>
+        </div>
+      </div>
+    </aside>
+    <button
+      class="sidebar-scrim"
+      data-action="close-menu"
+      aria-label="Close navigation"
+    ></button>
+    <header class="topbar">
+      <button
+        class="menu-button"
+        data-action="menu"
+        aria-label="Open navigation"
+      >
+        ☰
+      </button>
+      <div class="breadcrumb">
+        Workspace <span>/</span> <b id="route-name">Overview</b>
+      </div>
+      <div class="topbar-right">
+        <button
+          class="topbar-field"
+          data-action="location"
+          aria-label="Change active field"
+        >
+          <svg aria-hidden="true"><use href="#i-pin" /></svg
+          ><span data-field-name>Selected land</span></button
+        ><span class="system-status"
+          ><i></i><span id="connection-label">FIELD WORKSPACE</span></span
+        ><button
+          class="theme-button"
+          data-action="theme"
+          aria-label="Toggle theme"
+        >
+          <svg><use href="#i-sun" /></svg>
+        </button>
+      </div>
+    </header>
+    <main id="main">
+      <section class="view" id="view-overview" aria-labelledby="overview-title">
+        <div class="page-heading">
+          <div>
+            <span class="eyebrow">YOUR FIELD. A CLEARER PICTURE.</span>
+            <h1 id="overview-title">Good decisions start here<span>.</span></h1>
+            <p>The conditions that matter. The possibilities ahead.</p>
+          </div>
+          <button class="field-picker" data-action="location">
+            <span class="eyebrow">ACTIVE LOCATION</span
+            ><b
+              ><svg><use href="#i-pin" /></svg
+              ><span data-field-name>Choose your field</span><span>⌄</span></b
+            >
+          </button>
+        </div>
+        <div class="field-banner">
+          <div class="banner-art">
+            <svg><use href="#i-leaf" /></svg><span></span>
+          </div>
+          <div class="banner-copy">
+            <span class="eyebrow">FROM ORBIT TO ACRE</span>
+            <h2>A bigger view.<br />A better next season.</h2>
+            <p>
+              Explore your land, understand its signals,<br />and make your next
+              move with confidence.
+            </p>
+          </div>
+          <a class="banner-link" href="#/map"
+            >Explore your field <svg><use href="#i-arrow" /></svg></a
+          ><span class="photo-note">LANDSCAPE IMAGE · ILLUSTRATIVE</span>
+        </div>
+        <section class="field-health" aria-labelledby="field-health-title">
+          <div class="health-orbit">
+            <svg viewBox="0 0 100 100" aria-hidden="true">
+              <circle cx="50" cy="50" r="45" />
+              <circle
+                id="field-health-ring"
+                class="health-ring-value"
+                cx="50"
+                cy="50"
+                r="45"
+              />
+            </svg>
+            <div>
+              <strong id="field-health-score">—</strong
+              ><span>FIELD HEALTH</span>
+            </div>
+          </div>
+          <div class="health-copy">
+            <span class="eyebrow">FIELD HEALTH SIGNAL</span>
+            <h2 id="field-health-title">A clear pulse for your next move.</h2>
+            <p id="field-health-summary">
+              Connect weather, soil, water and profit inputs to see a balanced
+              field signal.
+            </p>
+          </div>
+          <div class="health-signals">
+            <a href="#/weather"
+              ><i class="health-weather">☀</i
+              ><span>Climate<small id="health-weather-score">—</small></span></a
+            ><a href="#/soil"
+              ><i class="health-soil">◒</i
+              ><span>Soil<small id="health-soil-score">—</small></span></a
+            ><a href="#/water"
+              ><i class="health-water">⌁</i
+              ><span>Water<small id="health-water-score">—</small></span></a
+            ><a href="#/profit"
+              ><i class="health-profit">↗</i
+              ><span>Profit<small id="health-profit-score">—</small></span></a
+            >
+          </div>
+        </section>
+        <section class="decision-briefing" aria-labelledby="briefing-title">
+          <header>
+            <div>
+              <span class="eyebrow">WEEKLY FIELD BRIEFING</span>
+              <h2 id="briefing-title">What changed, what matters next.</h2>
+            </div>
+            <span class="briefing-date" id="briefing-date"
+              >Loading briefing…</span
+            >
+          </header>
+          <div class="briefing-grid">
+            <article class="briefing-next">
+              <span class="eyebrow">RECOMMENDED NEXT MOVE</span>
+              <h3 id="briefing-next-title">Checking your field signals…</h3>
+              <p id="briefing-next-copy">
+                FieldShift will connect your weather, soil, water and profit
+                evidence here.
+              </p>
+              <a id="briefing-next-link" class="button small" href="#/weather"
+                >Open signal <svg><use href="#i-arrow" /></svg
+              ></a>
+            </article>
+            <article class="briefing-alerts">
+              <div class="briefing-alert-heading">
+                <span class="eyebrow">SMART ALERTS</span
+                ><span class="pill" id="briefing-alert-count">0 ALERTS</span>
+              </div>
+              <div id="briefing-alert-list"></div>
+            </article>
+            <article class="briefing-evidence">
+              <span class="eyebrow">DECISION EVIDENCE</span>
+              <div class="evidence-score">
+                <b id="briefing-evidence-score">—</b
+                ><span>of 4 signals<br />connected</span>
+              </div>
+              <p id="briefing-evidence-copy">Checking sources…</p>
+              <a href="#/reports">Open evidence report ↗</a>
+            </article>
+          </div>
+        </section>
+        <div class="metrics">
+          <article class="metric-card">
+            <div class="metric-top">
+              <span class="icon-box lime"
+                ><svg><use href="#i-sun" /></svg></span
+              ><span class="pill" data-weather-status>LOADING</span>
+            </div>
+            <span class="metric-label">Current temperature</span
+            ><strong data-stat="temperature">—</strong>
+            <p data-stat="conditions">Getting field conditions…</p>
+          </article>
+          <article class="metric-card">
+            <div class="metric-top">
+              <span class="icon-box blue"
+                ><svg><use href="#i-water" /></svg></span
+              ><span class="pill">FORECAST</span>
+            </div>
+            <span class="metric-label">Rain in the next 7 days</span
+            ><strong data-stat="rainWeek">—</strong>
+            <p>Precipitation · selected point</p>
+          </article>
+          <article class="metric-card">
+            <div class="metric-top">
+              <span class="icon-box green"
+                ><svg><use href="#i-layers" /></svg></span
+              ><span class="pill">MODEL</span>
+            </div>
+            <span class="metric-label">Surface soil moisture</span
+            ><strong data-stat="moisture">—</strong>
+            <p>0–1 cm · shallow model layer</p>
+          </article>
+          <article class="metric-card">
+            <div class="metric-top">
+              <span class="icon-box amber"
+                ><svg><use href="#i-chart" /></svg></span
+              ><a href="#/profit" class="text-link">Plan ↗</a>
+            </div>
+            <span class="metric-label">Gross margin scenario</span
+            ><strong data-stat="margin">—</strong>
+            <p>Per hectare · editable assumptions</p>
+          </article>
+        </div>
+        <div class="overview-grid">
+          <article class="panel map-card">
+            <div class="panel-heading">
+              <div>
+                <span class="eyebrow">FIELD CONTEXT</span>
+                <h2>Your land, in focus</h2>
+              </div>
+              <a class="text-link" href="#/map">Open explorer ↗</a>
+            </div>
+            <div id="home-map-host"></div>
+            <div class="map-footer">
+              <span
+                ><i class="status-dot"></i
+                ><span data-field-name>Choose your field</span></span
+              ><span id="field-area">Point selected · boundary not drawn</span>
+            </div>
+          </article>
+          <article class="panel weather-card">
+            <div class="panel-heading">
+              <div>
+                <span class="eyebrow">LOOKING AHEAD</span>
+                <h2>Your weather window</h2>
+              </div>
+              <a class="text-link" href="#/weather">Full forecast ↗</a>
+            </div>
+            <div class="weather-current">
+              <div>
+                <strong data-stat="temperature">—</strong
+                ><span data-stat="conditions">Loading…</span>
+              </div>
+              <div class="weather-glyph">☀</div>
+            </div>
+            <div id="home-forecast" class="forecast-list">
+              <p class="empty">Fetching the latest forecast…</p>
+            </div>
+            <div class="source-foot">
+              <i class="status-dot"></i>Open-Meteo · weather model<span
+                data-stat="retrievalShort"
+                >—</span
+              >
+            </div>
+          </article>
+          <article class="panel rotation-card">
+            <div class="panel-heading">
+              <div>
+                <span class="eyebrow">THE NEXT SEASON</span>
+                <h2>Make room for resilience</h2>
+              </div>
+              <span class="pill">SCENARIO</span>
+            </div>
+            <div class="rotation-preview" id="rotation-preview"></div>
+            <div class="panel-bottom">
+              <p>
+                Compare crop families, water demand,<br />and the assumptions
+                behind each path.
+              </p>
+              <a class="button small" href="#/crops"
+                >Build a rotation <svg><use href="#i-arrow" /></svg
+              ></a>
+            </div>
+          </article>
+          <article class="panel journal-card">
+            <div class="panel-heading">
+              <div>
+                <span class="eyebrow">FIELD JOURNAL</span>
+                <h2>Your recent activity</h2>
+              </div>
+              <svg class="muted"><use href="#i-clock" /></svg>
+            </div>
+            <div id="journal-list"></div>
+          </article>
+        </div>
+        <div class="overview-bottom">
+          <span
+            ><i class="status-dot"></i>CONNECTED TO EARTH. ROOTED IN YOUR
+            LAND.</span
+          ><a href="#/reports">Explore data sources ↗</a>
+        </div>
+      </section>
+      <section class="view" id="view-map" hidden>
+        <div class="page-heading">
+          <div>
+            <span class="eyebrow">FIELD EXPLORER / 01</span>
+            <h1>A world of possibilities<span>.</span></h1>
+            <p>
+              Find a place. Mark your land. Bring every decision back to it.
+            </p>
+          </div>
+          <button class="button" data-action="location">
+            <svg><use href="#i-pin" /></svg>Find your field
+          </button>
+        </div>
+        <div class="explorer-layout">
+          <article class="panel explorer-map-card">
+            <div class="explorer-tools">
+              <div class="segmented">
+                <button class="selected" data-map-mode="map">
+                  <svg><use href="#i-map" /></svg>Map</button
+                ><button data-map-mode="globe">
+                  <svg><use href="#i-globe" /></svg>Globe
+                </button>
+              </div>
+              <div class="segmented">
+                <button class="selected" data-map-layer="satellite">
+                  Satellite</button
+                ><button data-map-layer="terrain">Terrain</button>
+              </div>
+            </div>
+            <div id="explorer-map-host"></div>
+            <div class="draw-toolbar">
+              <button data-action="draw">
+                <svg><use href="#i-plus" /></svg>Draw boundary</button
+              ><button data-action="finish-draw">Finish drawing</button
+              ><button data-action="clear-boundary">Clear</button
+              ><span id="drawing-status"
+                >Tap a location to select a point.</span
+              >
+            </div>
+          </article>
+          <aside class="panel field-details">
+            <span class="eyebrow">SELECTED LAND</span>
+            <h2 data-field-name>Choose your field</h2>
+            <span class="pill" id="selection-type">NO FIELD SELECTED</span>
+            <dl>
+              <div>
+                <dt>Coordinates</dt>
+                <dd data-coordinates>38.4600, −98.2500</dd>
+              </div>
+              <div>
+                <dt>Mapped area</dt>
+                <dd id="mapped-area">No boundary</dd>
+              </div>
+              <div>
+                <dt>Elevation</dt>
+                <dd data-stat="elevation">—</dd>
+              </div>
+            </dl>
+            <label
+              >Field name<input
+                id="field-name-input"
+                placeholder="Give this field a name" /></label
+            ><button class="button full" data-action="save-field">
+              Save this field</button
+            ><label class="file-import"
+              >Import GeoJSON<input
+                id="geojson-import"
+                type="file"
+                accept=".json,.geojson,application/geo+json"
+            /></label>
+            <p class="fine-print">
+              Weather describes the provider’s reference grid at the selected
+              point. Drawing a boundary does not increase the source data’s
+              resolution.
+            </p>
+            <div class="saved-fields">
+              <span class="eyebrow">SAVED ON THIS DEVICE</span>
+              <div id="saved-field-list"></div>
+            </div>
+          </aside>
+        </div>
+      </section>
+      <section class="view" id="view-weather" hidden>
+        <div class="page-heading">
+          <div>
+            <span class="eyebrow">WEATHER INTELLIGENCE / 02</span>
+            <h1>See the season’s signals<span>.</span></h1>
+            <p data-field-name>Choose your field</p>
+          </div>
+          <button class="button secondary" data-action="refresh">
+            Refresh conditions ↻
+          </button>
+        </div>
+        <div class="weather-feature">
+          <div>
+            <span class="eyebrow">CURRENT MODEL ANALYSIS</span
+            ><strong data-stat="temperature">—</strong>
+            <h2 data-stat="conditions">Loading conditions</h2>
+            <p data-stat="weatherTime">Time unavailable</p>
+          </div>
+          <div class="weather-details">
+            <div>Feels like<strong data-stat="feelsLike">—</strong></div>
+            <div>Humidity<strong data-stat="humidity">—</strong></div>
+            <div>Wind speed<strong data-stat="wind">—</strong></div>
+            <div>Timezone<strong data-stat="timezone">—</strong></div>
+          </div>
+        </div>
+        <article class="panel">
+          <div class="panel-heading">
+            <div>
+              <span class="eyebrow">SEVEN DAY FORECAST</span>
+              <h2>A window into the week</h2>
+            </div>
+            <span class="pill">FORECAST</span>
+          </div>
+          <div id="full-forecast" class="forecast-grid"></div>
+        </article>
+        <article class="panel chart-panel">
+          <div class="panel-heading">
+            <div>
+              <span class="eyebrow">NEXT 24 HOURS</span>
+              <h2>Temperature & timing</h2>
+            </div>
+            <span data-temp-unit>°C</span>
+          </div>
+          <div id="hourly-chart" class="chart"></div>
+        </article>
+        <p class="data-note" data-stat="provenance">
+          Open-Meteo · current conditions are model output, not necessarily a
+          station observation.
+        </p>
+      </section>
+      <section class="view" id="view-soil" hidden>
+        <div class="page-heading">
+          <div>
+            <span class="eyebrow">SOIL INTELLIGENCE / 03</span>
+            <h1>Good plans start below ground<span>.</span></h1>
+            <p>Combine regional context with the measurements you know best.</p>
+          </div>
+          <button class="button" data-action="soil-dialog">
+            <svg><use href="#i-plus" /></svg>Add a soil sample
+          </button>
+        </div>
+        <div class="soil-layout">
+          <article class="panel soil-cross-section">
+            <span class="eyebrow">NEAR-SURFACE CONDITIONS</span>
+            <h2>The top layer tells one part of the story.</h2>
+            <div class="soil-art">
+              <div class="grass"></div>
+              <span class="layer-label">0–1 cm model layer</span>
+              <div class="soil-value">
+                <strong data-stat="moisture">—</strong
+                ><small>VOLUMETRIC MOISTURE</small>
+              </div>
+              <div class="root root-one"></div>
+              <div class="root root-two"></div>
+            </div>
+            <p>
+              Surface moisture responds quickly to weather. It does not
+              represent the water available throughout the root zone.
+            </p>
+            <div class="source-foot">Open-Meteo · shallow model estimate</div>
+          </article>
+          <article class="panel">
+            <div class="panel-heading">
+              <div>
+                <span class="eyebrow">LOCAL EVIDENCE</span>
+                <h2>Your soil records</h2>
+              </div>
+              <span class="pill">USER MEASUREMENTS</span>
+            </div>
+            <div id="soil-samples"></div>
+            <div class="insight-note">
+              <svg><use href="#i-leaf" /></svg>
+              <p>
+                Start with pH, organic carbon, texture, depth, and a sample
+                date. Keep lab evidence connected to the field it came from.
+              </p>
+            </div>
+          </article>
+        </div>
+      </section>
+      <section class="view" id="view-water" hidden>
+        <div class="page-heading">
+          <div>
+            <span class="eyebrow">WATER INTELLIGENCE / 04</span>
+            <h1>Every drop has a story<span>.</span></h1>
+            <p>Compare incoming rain with reference water demand.</p>
+          </div>
+          <span class="pill">FORECAST + MODEL ESTIMATES</span>
+        </div>
+        <div class="metrics three">
+          <article class="metric-card">
+            <span class="icon-box blue"
+              ><svg><use href="#i-water" /></svg></span
+            ><span class="metric-label">7-day forecast rain</span
+            ><strong data-stat="rainWeek">—</strong>
+            <p>Precipitation at your selected point</p>
+          </article>
+          <article class="metric-card">
+            <span class="icon-box amber"
+              ><svg><use href="#i-sun" /></svg></span
+            ><span class="metric-label">7-day reference ET₀</span
+            ><strong data-stat="etWeek">—</strong>
+            <p>Reference atmospheric water demand</p>
+          </article>
+          <article class="metric-card">
+            <span class="icon-box green"
+              ><svg><use href="#i-layers" /></svg></span
+            ><span class="metric-label">Near-surface moisture</span
+            ><strong data-stat="moisture">—</strong>
+            <p>0–1 cm model layer</p>
+          </article>
+        </div>
+        <article class="panel">
+          <div class="panel-heading">
+            <div>
+              <span class="eyebrow">RAINFALL & DEMAND</span>
+              <h2>The week’s water balance</h2>
+            </div>
+            <div class="chart-legend">
+              <span class="rain-key">Rain</span><span class="et-key">ET₀</span>
+            </div>
+          </div>
+          <div id="water-chart" class="chart water-chart"></div>
+          <p class="fine-print">
+            Rain and reference ET₀ are different quantities. This comparison
+            does not calculate crop irrigation requirements or measure
+            groundwater supply.
+          </p>
+        </article>
+        <article class="panel journal-form-panel">
+          <div>
+            <span class="eyebrow">IRRIGATION JOURNAL</span>
+            <h2>Record what you apply</h2>
+            <p>Your records help put model signals into context.</p>
+          </div>
+          <form id="water-record-form">
+            <label
+              >Applied water (mm)<input
+                name="amount"
+                type="number"
+                min="0.1"
+                step="0.1"
+                required
+                placeholder="e.g. 15" /></label
+            ><label>Date<input name="date" type="date" required /></label
+            ><button class="button">Save record</button>
+          </form>
+        </article>
+      </section>
+      <section class="view" id="view-crops" hidden>
+        <div class="page-heading">
+          <div>
+            <span class="eyebrow">CROP PLANNER / 05</span>
+            <h1>Grow possibilities. Build resilience<span>.</span></h1>
+            <p>
+              Explore sequences and understand the trade-offs behind each one.
+            </p>
+          </div>
+          <button class="button secondary" data-action="save-plan">
+            Save selected plan
+          </button>
+        </div>
+        <article class="panel planner-inputs">
+          <label>Current crop<select id="current-crop"></select></label
+          ><label
+            >Water access<select id="irrigation">
+              <option value="rainfed">Rainfed</option>
+              <option value="irrigated">Irrigation available</option>
+            </select></label
+          ><label
+            >Soil pH (if known)<input
+              id="planner-ph"
+              type="number"
+              min="0"
+              max="14"
+              step="0.1"
+              placeholder="Not supplied" /></label
+          ><label
+            >Planning priority<select id="planning-priority">
+              <option value="soil">Soil cover & diversity</option>
+              <option value="water">Water conservation</option>
+              <option value="resilience">Climate resilience</option>
+            </select></label
+          ><button class="button" data-action="compare-plans">
+            Compare paths <svg><use href="#i-arrow" /></svg>
+          </button>
+        </article>
+        <div id="rotation-plans" class="rotation-plans"></div>
+        <article class="panel">
+          <div class="panel-heading">
+            <div>
+              <span class="eyebrow">KNOW YOUR OPTIONS</span>
+              <h2>The crop library</h2>
+            </div>
+            <input
+              type="search"
+              id="crop-filter"
+              placeholder="Find a crop…"
+              aria-label="Search crop library"
+            />
+          </div>
+          <div id="crop-library" class="crop-library"></div>
+        </article>
+        <p class="data-note">
+          General crop traits support exploration. Local planting dates,
+          varieties, soil tests, disease history, and extension advice are
+          needed before choosing a field plan.
+        </p>
+      </section>
+      <section class="view" id="view-profit" hidden>
+        <div class="page-heading">
+          <div>
+            <span class="eyebrow">PROFIT & SCENARIOS / 06</span>
+            <h1>Make the numbers work for your land<span>.</span></h1>
+            <p>Put every assumption in view and see how the margin changes.</p>
+          </div>
+          <span class="pill" id="economics-status">VERIFY LOCAL PRICE</span>
+        </div>
+        <div class="market-context" id="market-context">
+          <div>
+            <span class="eyebrow">SELECTED MARKET</span
+            ><b id="market-location">Selected field</b
+            ><small id="market-region-note"
+              >Use a place search to identify the country market.</small
+            >
+          </div>
+          <div>
+            <span class="eyebrow">PLANNED CROP</span
+            ><b id="market-crop">Selected crop</b
+            ><small>Linked to Crop planner</small>
+          </div>
+          <div>
+            <span class="eyebrow">PRICE EVIDENCE</span
+            ><b id="market-evidence">User estimate</b
+            ><small id="market-currency-note"
+              >Enter a local farm-gate or contract quote.</small
+            >
+          </div>
+        </div>
+        <div class="economics-layout">
+          <form id="economics-form" class="panel economics-inputs">
+            <div class="panel-heading">
+              <div>
+                <span class="eyebrow">YOUR LOCAL ASSUMPTIONS</span>
+                <h2>Build the market scenario</h2>
+              </div>
+              <select name="currency" aria-label="Currency">
+                <option>USD</option>
+                <option>EUR</option>
+                <option>GBP</option>
+                <option>INR</option>
+                <option>KES</option>
+                <option>EGP</option>
+                <option>SAR</option>
+                <option>CNY</option>
+                <option>BRL</option>
+                <option>ZAR</option>
+                <option>NGN</option>
+              </select>
+            </div>
+            <div class="market-evidence-inputs">
+              <label
+                >Price source<select name="priceSource" required>
+                  <option value="none" selected>Choose a source</option>
+                  <option value="estimate">User estimate</option>
+                  <option value="farmgate">Farm-gate quote</option>
+                  <option value="cooperative">Cooperative or contract</option>
+                  <option value="wholesale">Wholesale market quote</option>
+                  <option value="benchmark">Published benchmark</option>
+                </select></label
+              ><label>Quote date<input name="priceDate" type="date" /></label>
+            </div>
+            <div class="form-grid">
+              <label
+                >Field area (ha)<input
+                  name="areaHa"
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  required /></label
+              ><label
+                >Expected harvested yield (t/ha)<input
+                  name="yieldTonnesHa"
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  required /></label
+              ><label
+                >Local sale price (per tonne)<input
+                  name="pricePerTonne"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  required /></label
+              ><label
+                >Selling loss (%)<input
+                  name="sellingLossPercent"
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.1"
+                  required /></label
+              ><label
+                >Transport & handling (per tonne)<input
+                  name="transportCostPerTonne"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  required /></label
+              ><label
+                >Market / commission fee (%)<input
+                  name="marketFeePercent"
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.1"
+                  required /></label
+              ><label
+                >Seed cost (per ha)<input
+                  name="seedCostHa"
+                  type="number"
+                  min="0"
+                  required /></label
+              ><label
+                >Fertilizer (per ha)<input
+                  name="fertilizerCostHa"
+                  type="number"
+                  min="0"
+                  required /></label
+              ><label
+                >Water cost (per ha)<input
+                  name="waterCostHa"
+                  type="number"
+                  min="0"
+                  required /></label
+              ><label
+                >Operations (per ha)<input
+                  name="operationsCostHa"
+                  type="number"
+                  min="0"
+                  required
+              /></label>
+            </div>
+            <button class="button full">Update local scenario</button>
+            <p class="fine-print">
+              Profit uses the selected field, your dated local price, saleable
+              yield after losses, transport, fees, and the production costs
+              entered here.
+            </p>
+          </form>
+          <div class="economics-result">
+            <div class="profit-hero">
+              <span class="eyebrow">ESTIMATED LOCAL GROSS MARGIN</span
+              ><strong id="profit-total">—</strong
+              ><span id="profit-per-ha">— per hectare</span>
+              <div class="profit-breakdown">
+                <div>Gross sales<b id="profit-revenue">—</b></div>
+                <div>Total costs<b id="profit-cost">—</b></div>
+                <div>Selling deductions<b id="profit-selling-costs">—</b></div>
+              </div>
+              <div class="break-even">
+                <span>Break-even local price<b id="break-even-price">—</b></span
+                ><span
+                  >Break-even harvested yield<b id="break-even-yield"
+                    >—</b
+                  ></span
+                >
+              </div>
+            </div>
+            <article class="panel">
+              <span class="eyebrow">LOCAL PRICE & YIELD SENSITIVITY</span>
+              <h2>Room for market uncertainty</h2>
+              <div id="profit-scenarios"></div>
+            </article>
+          </div>
+        </div>
+        <div class="market-note">
+          <svg><use href="#i-chart" /></svg>
+          <p>
+            <b>Local evidence matters.</b> Prices differ by country, market,
+            crop grade, buyer, contract, season and date. FieldShift never
+            invents a local price: use a current farm-gate, cooperative,
+            contract or wholesale quote.
+          </p>
+          <div class="market-links">
+            <a
+              href="https://www.fao.org/faostat/en/#data/PP"
+              target="_blank"
+              rel="noreferrer"
+              >FAOSTAT producer prices ↗</a
+            ><a
+              href="https://www.worldbank.org/en/research/commodity-markets"
+              target="_blank"
+              rel="noreferrer"
+              >World Bank benchmarks ↗</a
+            >
+          </div>
+        </div>
+      </section>
+      <section class="view" id="view-reports" hidden>
+        <div class="page-heading">
+          <div>
+            <span class="eyebrow">REPORTS & EVIDENCE / 07</span>
+            <h1>A clear record of your reasoning<span>.</span></h1>
+            <p>Take the evidence, assumptions, and next steps with you.</p>
+          </div>
+          <div class="button-row">
+            <button class="button secondary" data-action="export-csv">
+              Export CSV</button
+            ><button class="button" data-action="print">
+              Print / save PDF <svg><use href="#i-file" /></svg>
+            </button>
+          </div>
+        </div>
+        <article class="panel report-summary">
+          <div class="panel-heading">
+            <a class="brand" href="#/overview"
+              ><img src="assets/logo-new.png" alt="FieldShift logo" /><span
+                >FieldShift</span
+              ></a
+            ><span class="eyebrow">FIELD INTELLIGENCE REPORT</span>
+          </div>
+          <h2 data-field-name>Selected field</h2>
+          <div class="report-metadata">
+            <span>COORDINATES<b data-coordinates>—</b></span
+            ><span>AREA<b id="report-area">Point selection</b></span
+            ><span>RETRIEVED<b data-stat="retrievedAt">—</b></span>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Signal</th>
+                  <th>Value</th>
+                  <th>Evidence type</th>
+                  <th>Source</th>
+                </tr>
+              </thead>
+              <tbody id="report-data"></tbody>
+            </table>
+          </div>
+          <div class="report-footnote">
+            <h3>What these values mean</h3>
+            <p>
+              Weather and near-surface moisture are model values at a reference
+              grid. A polygon describes your chosen boundary; its area does not
+              make the weather data more precise. Rotation paths use general
+              crop characteristics. Profit uses the assumptions you enter.
+            </p>
+          </div>
+        </article>
+        <article class="panel nasa-panel">
+          <div>
+            <span class="eyebrow">NASA EARTH OBSERVATIONS</span>
+            <h2>A longer view from space</h2>
+            <p>
+              Load historical monthly temperature and rainfall context from NASA
+              POWER for the selected location.
+            </p>
+            <button class="button secondary" data-action="nasa">
+              Load NASA climate context ↗
+            </button>
+          </div>
+          <div id="nasa-result">
+            <span class="empty"
+              >Historical data is requested only when you open this
+              analysis.</span
+            >
+          </div>
+        </article>
+        <div class="source-links">
+          <a
+            href="https://open-meteo.com/en/docs"
+            target="_blank"
+            rel="noreferrer"
+            >Open-Meteo documentation ↗</a
+          ><a
+            href="https://power.larc.nasa.gov/"
+            target="_blank"
+            rel="noreferrer"
+            >NASA POWER ↗</a
+          ><a
+            href="https://www.fao.org/land-water/databases-and-software/crop-information/en/"
+            target="_blank"
+            rel="noreferrer"
+            >FAO crop information ↗</a
+          >
+        </div>
+      </section>
+      <section class="view" id="view-assistant" hidden>
+        <div class="page-heading">
+          <div>
+            <span class="eyebrow">FIELD ASSISTANT / 08</span>
+            <h1>Better questions. Clearer decisions<span>.</span></h1>
+            <p>
+              Explore the information in your workspace and the evidence still
+              missing.
+            </p>
+          </div>
+          <span class="pill">GUIDED EVIDENCE EXPLAINER</span>
+        </div>
+        <div class="assistant-layout">
+          <article class="panel chat-panel">
+            <div class="chat-heading">
+              <span class="icon-box lime"
+                ><svg><use href="#i-spark" /></svg
+              ></span>
+              <div>
+                <b>FieldShift companion</b
+                ><small data-field-name>Selected field</small>
+              </div>
+            </div>
+            <div id="chat-messages" class="chat-messages" aria-live="polite">
+              <div class="chat-message assistant-message">
+                Welcome to your field workspace. I can explain the weather, soil
+                moisture, rotation paths, and profit assumptions shown here.
+                What would help with your next decision?<small
+                  >Guided mode · OpenAI is not connected to this site
+                  yet.</small
+                >
+              </div>
+            </div>
+            <div class="question-chips">
+              <button data-question="What does my soil moisture mean?">
+                Understand soil moisture</button
+              ><button data-question="Explain my profit scenario">
+                Review my margin</button
+              ><button data-question="What data am I missing?">
+                Find the evidence gaps
+              </button>
+            </div>
+            <form id="chat-form">
+              <input
+                name="message"
+                placeholder="Ask about your field…"
+                aria-label="Message"
+                required
+                autocomplete="off"
+              /><button class="button" aria-label="Send message">
+                <svg><use href="#i-arrow" /></svg>
+              </button>
+            </form>
+          </article>
+          <aside class="panel evidence-panel">
+            <span class="eyebrow">IN THE CONTEXT</span>
+            <h2>Your current evidence</h2>
+            <div id="assistant-evidence"></div>
+            <div class="insight-note">
+              <p>
+                Every useful recommendation starts with knowing what is
+                measured, modeled, or still unknown.
+              </p>
+            </div>
+          </aside>
+        </div>
+      </section>
+      <section class="view" id="view-settings" hidden>
+        <div class="page-heading">
+          <div>
+            <span class="eyebrow">WORKSPACE PREFERENCES</span>
+            <h1>Make this your place<span>.</span></h1>
+            <p>Set up the details that make your work feel familiar.</p>
+          </div>
+        </div>
+        <article class="panel settings-panel">
+          <label
+            >Appearance<select id="appearance">
+              <option value="auto">Automatic · follows local time</option>
+              <option value="dark">Forest dark</option>
+              <option value="light">Daylight</option></select
+            ><small class="setting-help" id="appearance-help"
+              >Daylight from 7:00 to 18:59 · forest dark at night.</small
+            ></label
+          ><label
+            >Weather units<select id="weather-units">
+              <option value="metric">Metric · °C, mm, km/h</option>
+              <option value="imperial">Imperial · °F, inches, mph</option>
+            </select></label
+          >
+          <div class="setting-item">
+            <div>
+              <b>Device-local workspace</b>
+              <p>
+                Fields, journal records, and assumptions are stored in this
+                browser.
+              </p>
+            </div>
+            <span class="pill">LOCAL</span>
+          </div>
+          <div class="setting-item">
+            <div>
+              <b>Download workspace</b>
+              <p>Keep a JSON backup of your fields and measurements.</p>
+            </div>
+            <button class="button secondary small" data-action="backup">
+              Download
+            </button>
+          </div>
+        </article>
+      </section>
+      <section class="view" id="view-about" hidden>
+        <div class="page-heading about-heading">
+          <div>
+            <span class="eyebrow">ABOUT FIELD SHIFT</span>
+            <h1>Built by students. Grounded in purpose<span>.</span></h1>
+            <p>Meet the school and team behind FieldShift.</p>
+          </div>
+          <img src="assets/logo-new.png" alt="FieldShift logo" />
+        </div>
+        <div class="about-grid">
+          <article class="panel about-card about-school">
+            <div class="school-profile">
+              <img
+                class="school-logo"
+                src="assets/dunia-alajial-logo.jpg"
+                alt="Dunia Alajial International School logo"
+              />
+              <div>
+                <span class="eyebrow">OUR SCHOOL</span>
+                <h2>Dunia Alajial International School</h2>
+              </div>
+            </div>
+            <p>
+              FieldShift was developed at Dunia Alajial International School,
+              where students turn scientific ideas, technology and teamwork into
+              projects designed to help people and communities.
+            </p>
+            <a
+              class="about-learn"
+              href="https://share.google/ZDHDGsGC8tVU8AKJr"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Learn more <span aria-hidden="true">↗</span></a
+            >
+          </article>
+          <article class="panel about-card about-team">
+            <span class="eyebrow">OUR TEAM</span>
+            <h2>The Tech Team</h2>
+            <p>
+              The Tech Team created the FieldShift experience—from the visual
+              identity and interface to the field planning tools that connect
+              Earth observations with practical farm decisions.
+            </p>
+          </article>
+        </div>
+      </section>
+      <footer class="app-footer">
+        <span>FIELD SHIFT / EARTH SCIENCE × AGRICULTURE</span
+        ><span>Built for the 2026 NASA Space Apps Challenge</span>
+      </footer>
+    </main>
+    <div id="map-dock">
+      <div id="field-map" aria-label="Interactive field map"></div>
+      <button class="map-expand" data-action="explore">
+        <svg><use href="#i-globe" /></svg><span>Map & globe</span>↗
+      </button>
+    </div>
+    <nav class="mobile-nav" aria-label="Mobile navigation">
+      <a href="#/overview" data-route="overview"
+        ><svg><use href="#i-grid" /></svg>Home</a
+      ><a href="#/explore" data-route="explore"
+        ><svg><use href="#i-globe" /></svg>Explore</a
+      ><a href="#/weather" data-route="weather"
+        ><svg><use href="#i-sun" /></svg>Weather</a
+      ><a href="#/crops" data-route="crops"
+        ><svg><use href="#i-leaf" /></svg>Crops</a
+      ><button data-action="menu"><span>•••</span>More</button>
+    </nav>
+    <dialog id="location-dialog">
+      <form id="place-search-form" class="location-dialog-content">
+        <button
+          type="button"
+          class="dialog-close"
+          data-action="close-dialog"
+          aria-label="Close"
+        >
+          ×</button
+        ><span class="eyebrow">FIND YOUR LAND</span>
+        <h2>Where do you grow?</h2>
+        <p>Search a place, enter coordinates, or start with your location.</p>
+        <label
+          >Place name<input
+            name="query"
+            type="search"
+            placeholder="Town, region, or agricultural area"
+            required
+            autofocus /></label
+        ><button class="button full">
+          Search places <svg><use href="#i-arrow" /></svg>
+        </button>
+        <div id="search-results" aria-live="polite"></div>
+        <div class="dialog-divider">OR SELECT A POINT</div>
+        <div class="form-grid">
+          <label
+            >Latitude<input
+              id="latitude-input"
+              type="number"
+              step="any"
+              min="-90"
+              max="90"
+              placeholder="e.g. −1.29" /></label
+          ><label
+            >Longitude<input
+              id="longitude-input"
+              type="number"
+              step="any"
+              min="-180"
+              max="180"
+              placeholder="e.g. 36.82"
+          /></label>
+        </div>
+        <button
+          type="button"
+          class="button secondary full"
+          data-action="coordinates"
+        >
+          Use coordinates</button
+        ><button type="button" class="location-link" data-action="geolocation">
+          <svg><use href="#i-pin" /></svg>Use my current location
+        </button>
+        <p class="fine-print">
+          Location access is optional and requested only when you tap this
+          button.
+        </p>
+      </form>
+    </dialog>
+    <dialog id="soil-dialog">
+      <form id="soil-sample-form" class="location-dialog-content">
+        <button
+          type="button"
+          class="dialog-close"
+          data-action="close-dialog"
+          aria-label="Close"
+        >
+          ×</button
+        ><span class="eyebrow">ADD LOCAL EVIDENCE</span>
+        <h2>A sample from your soil.</h2>
+        <div class="form-grid">
+          <label class="span-two"
+            >Sample name<input
+              name="name"
+              required
+              maxlength="80"
+              placeholder="North field · laboratory sample" /></label
+          ><label
+            >Collection date<input name="date" type="date" required /></label
+          ><label
+            >Depth (cm)<input
+              name="depth"
+              type="number"
+              min="0.1"
+              step="0.1"
+              required /></label
+          ><label
+            >pH<input
+              name="ph"
+              type="number"
+              min="0"
+              max="14"
+              step="0.1" /></label
+          ><label
+            >Organic carbon (%)<input
+              name="carbon"
+              type="number"
+              min="0"
+              max="100"
+              step="0.1" /></label
+          ><label class="span-two"
+            >Source / method<input
+              name="method"
+              required
+              placeholder="Laboratory name or field method"
+          /></label>
+        </div>
+        <button class="button full">Save sample to this field</button>
+      </form>
+    </dialog>
+    <div class="toast" id="toast" role="status"></div>
+    <script src="vendor/maplibre-gl.js"></script>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
