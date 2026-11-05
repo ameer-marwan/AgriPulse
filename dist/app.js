@@ -434,7 +434,7 @@ function init() {
     language: state.preferences.language,
   });
   if (hasLocation()) loadWeather();
-  else resetWeather("unselected");
+  else {resetWeather("unselected");requestAutoLocation();}
   state.ready = true;
 }
 
@@ -1144,6 +1144,10 @@ function useCoordinates() {
   selectLocation(point);
   $("#location-dialog").close();
   toast("Coordinates selected");
+}
+function requestAutoLocation(){
+  if(!navigator.geolocation)return;
+  navigator.geolocation.getCurrentPosition(position=>{if(!hasLocation())selectLocation({lat:position.coords.latitude,lon:position.coords.longitude,name:'My current location',method:'Device location'});},()=>{}, {enableHighAccuracy:false,timeout:15000,maximumAge:60000});
 }
 function useDeviceLocation() {
   if (!navigator.geolocation)

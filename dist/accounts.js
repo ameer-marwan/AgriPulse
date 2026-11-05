@@ -18,7 +18,8 @@ export async function initAccounts({ toast }) {
   $('main').insertBefore(view, $('.app-footer'));
   const operator = $('.operator');
   if (operator) { const name = operator.querySelector('span'); if (name) name.innerHTML = 'My account<small>' + esc(user?.name || 'Guest farmer') + '</small>'; operator.style.cursor = 'pointer'; operator.setAttribute('role','link');operator.tabIndex=0;operator.addEventListener('click', () => location.hash = '/account');operator.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();location.hash='/account';}}); }
-  const statusPill = document.createElement('a'); statusPill.className = 'account-sync-pill'; statusPill.href = '#/account'; $('.topbar-right')?.prepend(statusPill);
+  const statusPill = document.createElement('a'); statusPill.className = 'account-sync-pill'; statusPill.href = '#/account';statusPill.hidden=true;
+  const profile=document.createElement('a');profile.className='topbar-profile';profile.href='#/account';profile.setAttribute('aria-label','Open my account');profile.innerHTML=user?.avatar?'<img src="'+esc(user.avatar)+'" alt="">':'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="9" cy="10" r=".8" fill="currentColor"/><circle cx="15" cy="10" r=".8" fill="currentColor"/><path d="M8 14c1 2 3 3 4 3s3-1 4-3"/></svg>';$('.topbar-right')?.replaceChildren(profile,statusPill);
   function renderStatus() {
     const status = workspaceStorage.status;
     statusPill.dataset.status = status.state;
