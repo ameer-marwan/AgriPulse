@@ -2247,7 +2247,7 @@ function initAssistant() {
   if (!host || !form) return;
   addAssistantMessage(
     "assistant",
-    "Hi! Ask me anything. The first message downloads the Gemma 2 9B AI model (about 5.8 GB) to your device. It requires WebGPU and roughly 8.4 GB of graphics memory, so many phones cannot run it.",
+    "Welcome to FieldShift AI.",
   );
   let engine;
   form.addEventListener("submit", async (event) => {
