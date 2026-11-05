@@ -71,20 +71,20 @@ export async function handleAccountApi(request,env) {
     if(path==='/api/auth/guest'&&method==='POST'){await revokeSession(request,env);return withCookies(json({user:null,guest:true,googleConfigured:googleConfigured(env)}),[cookie(SESSION_COOKIE,'',0),cookie(GUEST_COOKIE,randomToken(12))]);}
     if(path==='/api/auth/logout'&&method==='POST'){await revokeSession(request,env);return withCookies(json({user:null,guest:false}),[cookie(SESSION_COOKIE,'',0),cookie(GUEST_COOKIE,'',0)]);}
     if((path==='/api/auth/signup'||path==='/api/auth/login')&&method==='POST'){
-      const body=await readBody(request),address=email(body.email),password=body.password;
+      const body=await readBody(request),raw=String(body.username||body.email||'').trim(),username=/^[a-zA-Z0-9_.-]{3,32}$/.test(raw)?raw.toLowerCase():null,address=raw.includes('@')?email(raw):(username?username+'@fieldshift.local':null),password=body.password;
       await limit(request,env,path, '', path.endsWith('signup')?10:40);
-      if(!address||typeof password!=='string'||password.length<10||password.length>256)return json({error:'Enter a valid email and a password between 10 and 256 characters.'},400);
+      if(!address||typeof password!=='string'||password.length<3||password.length>256)return json({error:'Enter a username of 3–32 letters, numbers, dots, dashes or underscores, and a password of at least 3 characters.'},400);
       await limit(request,env,path+':email',address,10);
       let user;
       if(path.endsWith('signup')){
-        if(!validName(body.name))return json({error:'Choose a name between 2 and 60 characters.'},400);
+        const name=body.name||raw;if(!validName(name))return json({error:'Choose a valid username.'},400);
         const salt=randomToken(16),hash=await passwordHash(password,salt);
-        user={id:crypto.randomUUID(),email:address,name:body.name.trim(),provider:'email',avatar:'',created_at:new Date().toISOString()};
-        try{await env.DB.prepare('INSERT INTO fs_users(id,email,name,password_hash,salt,provider,avatar,created_at) VALUES (?,?,?,?,?,?,?,?)').bind(user.id,user.email,user.name,hash,salt,user.provider,'',user.created_at).run();}catch(error){if(String(error.message).includes('UNIQUE'))return json({error:'An account already uses this email. Please sign in.'},409);throw error;}
+        user={id:crypto.randomUUID(),email:address,name:name.trim(),provider:'email',avatar:'',created_at:new Date().toISOString()};
+        try{await env.DB.prepare('INSERT INTO fs_users(id,email,name,password_hash,salt,provider,avatar,created_at) VALUES (?,?,?,?,?,?,?,?)').bind(user.id,user.email,user.name,hash,salt,user.provider,'',user.created_at).run();}catch(error){if(String(error.message).includes('UNIQUE'))return json({error:'This username is already taken. Please choose another.'},409);throw error;}
       }else{
         user=await env.DB.prepare('SELECT * FROM fs_users WHERE email=?').bind(address).first();
         const actual=await passwordHash(password,user?.salt||'fieldshift-dummy-salt');
-        if(!user?.password_hash||!equal(actual,user.password_hash))return json({error:'The email or password is incorrect.'},401);
+        if(!user?.password_hash||!equal(actual,user.password_hash))return json({error:'The username or password is incorrect.'},401);
       }
       await revokeSession(request,env);
       return withCookies(json({user:userView(user),guest:false,googleConfigured:googleConfigured(env)}),[await createSession(env,user),cookie(GUEST_COOKIE,'',0)]);

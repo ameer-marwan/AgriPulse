@@ -11,12 +11,11 @@ if(portable)await context.route(origin+'/',route=>route.fulfill({contentType:'te
 await context.addInitScript(()=>sessionStorage.setItem('fieldshift.intro.skip-auto','1'));
 const page=await context.newPage(),errors=[];
 page.on('pageerror',error=>errors.push(error.message));
-const address='qa-'+Date.now()+'@example.test',password='FieldShift testing password 47';
+const address='qa-'+Date.now(),password='xyz';
 let cleanup=false;
 try{
   await page.goto(origin+'/#/account',{waitUntil:'domcontentloaded'});
   await page.locator('[data-auth-tab="signup"]').click();
-  await page.locator('#account-auth-form [name="name"]').fill('QA farmer');
   await page.locator('#account-auth-form [name="email"]').fill(address);
   await page.locator('#account-auth-form [name="password"]').fill(password);
   await page.locator('#account-submit').click();

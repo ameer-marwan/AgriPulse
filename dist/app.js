@@ -2292,14 +2292,14 @@ function initAssistant() {
       const status = $("#assistant-status");
       if (!navigator.gpu) throw new Error("This browser or device does not support WebGPU, which this on-device model needs. Try a current WebGPU-compatible browser and device.");
       if (!aiEngine) {
-        status.textContent = "Loading Gemma 2 9B. The first download is about 5.8 GB; please keep this page open.";
+        status.textContent = "Loading the fast AI model (about 5.8 GB on first use). Please keep this page open.";
         const webllm = await import("https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.80/+esm");
         aiEngine = await webllm.CreateMLCEngine(AI_MODEL, {initProgressCallback: progress => {status.textContent = progress.text || "Loading the AI model…";}});
       }
       status.textContent = "AI ready · running on your device";
-      const data = await aiEngine.chat.completions.create({messages:[{role:"system",content:"You are FieldShift AI, a helpful general assistant. Answer open-ended questions clearly. Never invent farm data. State uncertainty and encourage local expert advice for important farming decisions. Field data provided by the app: "+JSON.stringify(assistantFieldContext())},...assistantHistory.slice(-4).map(item=>({...item,content:item.content.slice(0,1200)})),{role:"user",content:message}],temperature:0.7,max_tokens:768});
+      const stream = await aiEngine.chat.completions.create({messages:[{role:"system",content:"You are FieldShift AI, a helpful general assistant. Answer clearly and concisely. Never invent farm data. Field data: "+JSON.stringify(assistantFieldContext())},...assistantHistory.slice(-2).map(item=>({...item,content:item.content.slice(0,800)})),{role:"user",content:message}],temperature:0.7,max_tokens:256,stream:true});
+      let answer='';for await(const chunk of stream){answer+=chunk.choices?.[0]?.delta?.content||'';pending.querySelector('p').textContent=answer||'Thinking…';host.scrollTop=host.scrollHeight;}answer=answer.trim();
       pending.remove();
-      const answer = data.choices?.[0]?.message?.content?.trim();
       if (!answer) throw new Error("The model returned an empty response. Please try again.");
       addAssistantMessage("assistant", answer);
       assistantHistory.push(
@@ -2310,7 +2310,7 @@ function initAssistant() {
       write('fieldshift.ai.history',assistantHistory);
     } catch (error) {
       pending.remove();
-      $("#assistant-status").textContent = "AI unavailable or the model download failed. This 5.8 GB model needs WebGPU and about 8.4 GB of graphics memory. Check your device, free storage, and connection.";
+      $("#assistant-status").textContent = "AI unavailable or download failed. Check WebGPU support, free storage, and your connection.";
       addAssistantMessage(
         "assistant",
         error.message || "The assistant could not respond.",
