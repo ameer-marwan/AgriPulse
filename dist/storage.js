@@ -56,6 +56,9 @@ export const workspaceStorage = {
 export const storageReady = (async () => {
   try {
     session = await api('/api/auth/session');
+    if (session.user && sessionStorage.getItem('fieldshift.session.verified') !== '1') {
+      session = await api('/api/auth/guest', { method: 'POST', body: '{}' });
+    }
     if (session.user) {
       const workspace = await api('/api/workspace');
       importEntries(workspace.data); revision = Number(workspace.revision) || 0;
