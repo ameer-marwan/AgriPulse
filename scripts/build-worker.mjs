@@ -13,4 +13,5 @@ if(!template.includes('__PAGE_BASE64__'))throw new Error('Worker HTML placeholde
 await writeFile(resolve(output,'dist/server/index.js'),accountApi.replace(/^export /gm,'')+'\n'+template.replace('__PAGE_BASE64__',html.toString('base64')));
 await cp(resolve(root,'.openai/hosting.json'),resolve(output,'.openai/hosting.json'));
 await cp(resolve(root,'migrations'),resolve(output,'migrations'),{recursive:true});
+await cp(resolve(root,'drizzle'),resolve(output,'drizzle'),{recursive:true});
 console.log('Worker artifact: '+output);
