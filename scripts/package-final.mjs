@@ -11,7 +11,7 @@ const scriptSafe=s=>s.replace(/<\/script/gi,'<\\/script');
 let html=await read('dist/index.html');
 const logo=await dataUri('dist/assets/logo-new.png','image/png');
 const landscape=await dataUri('dist/assets/field-landscape.jpg','image/jpeg');
-let css=(await Promise.all(['dist/vendor/maplibre-gl.css','dist/styles.css','dist/planning.css','dist/scenes.css','dist/i18n.css','dist/intro.css','dist/intro-real.css','dist/accounts.css'].map(read))).join('\n');
+let css=(await Promise.all(['dist/vendor/maplibre-gl.css','dist/styles.css','dist/planning.css','dist/scenes.css','dist/i18n.css','dist/intro.css','dist/intro-real.css','dist/accounts.css','dist/field-controls.css'].map(read))).join('\n');
 css=css.replaceAll("url('assets/field-landscape.jpg')",'url("'+landscape+'")');
 for (const name of ['sea','forest','sky-clear','sky-clouds','sky-storm']) {
   const asset = await dataUri('dist/assets/'+name+'.jpg','image/jpeg');

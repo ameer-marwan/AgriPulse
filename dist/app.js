@@ -257,6 +257,12 @@ function restoreFieldSettings() {
 function init() {
   // The transient top-bar data badge is intentionally removed.
   $(".system-status")?.remove();
+  for(const route of ['overview','weather','soil','water','crops','profit','reports']){
+    const view=$('#view-'+route),heading=view?.querySelector('.page-heading');if(!heading)continue;
+    const bar=document.createElement('section');bar.className='field-data-controls';bar.setAttribute('aria-label','Field data controls');
+    bar.innerHTML='<div><span class="eyebrow">YOUR SELECTED LAND</span><strong data-context-field>Choose your field</strong><p data-context-status role="status">Choose a place to load its weather, rainfall, water demand and modeled surface moisture.</p></div><div class="field-data-actions"><button class="button" type="button" data-action="location" data-context-select>Choose field</button><button class="button secondary" type="button" data-action="geolocation">Use my location</button><button class="button secondary" type="button" data-action="refresh" data-context-refresh hidden>Refresh data ↻</button></div>';
+    heading.after(bar);
+  }
   $("#view-assistant")?.remove();
   $(".advisor-link")?.remove();
   const assistantLink = document.createElement("a");
@@ -515,8 +521,8 @@ function bindEvents() {
       "finish-draw": () => state.map.finishDrawing(),
       "clear-boundary": () => state.map.clearBoundary(),
       "save-field": saveField,
-      refresh: () => loadWeather(),
-      "soil-dialog": () => $("#soil-dialog").showModal(),
+      refresh: () => hasLocation()?loadWeather(true):$('#location-dialog').showModal(),
+      "soil-dialog": () => hasLocation()?$("#soil-dialog").showModal():$('#location-dialog').showModal(),
       "compare-plans": () => {
         renderRotations();
         toast("Rotation comparisons updated");
@@ -740,6 +746,7 @@ function resolvedTheme() {
 function renderLocation() {
   const l = state.location;
   const selected = hasLocation();
+  renderFieldDataControls();
   text(
     ".field-picker>.eyebrow",
     selected ? "ACTIVE LOCATION" : "FIELD REQUIRED",
@@ -766,7 +773,7 @@ function renderLocation() {
     "#field-area",
     area
       ? area.toFixed(2) + " ha · drawn boundary"
-      : "Point selected · no boundary",
+      : selected?"Point selected · no boundary":"Choose a field to begin",
   );
   text(
     "#mapped-area",
@@ -1190,6 +1197,7 @@ async function importBoundary(event) {
   }
 }
 function saveField() {
+  if(!hasLocation())return $('#location-dialog').showModal();
   const name = $("#field-name-input").value.trim();
   if (!name) return toast("Give your field a name first.");
   state.location.name = name;
@@ -1226,7 +1234,16 @@ function renderFields() {
   }
 }
 
-async function loadWeather() {
+function renderFieldDataControls(status=state.weather?'ready':'idle',error=''){
+  const selected=hasLocation();
+  text('[data-context-field]',selected?state.location.name:'Choose your field to get started');
+  text('[data-context-select]',selected?'Change field':'Choose field');
+  $$('[data-context-refresh]').forEach(button=>{button.hidden=!selected;button.disabled=status==='loading';});
+  $$('.field-data-controls').forEach(bar=>{bar.dataset.status=selected?status:'unselected';});
+  const place=selected?state.location.lat.toFixed(4)+', '+state.location.lon.toFixed(4):'';
+  text('[data-context-status]',!selected?'Choose a place, use your location, or draw a boundary. Weather, Water and Soil will update together.':status==='loading'?'Loading the latest forecast and water signals for '+place+'…':status==='error'?error+' Try Refresh data, or choose another field.':state.weather?'Connected · '+place+' · '+state.weather.source+' · retrieved '+new Date(state.weather.retrievedAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'Selected point: '+place+'. Refresh data to connect weather and water signals.');
+}
+async function loadWeather(force=false) {
   if (!hasLocation()) {
     resetWeather("unselected");
     return;
@@ -1239,6 +1256,7 @@ async function loadWeather() {
   try {
     const weather = await fetchWeather(state.location, {
       signal: state.weatherController.signal,
+      force,
     });
     if (request !== state.requestId) return;
     state.weather = weather;
@@ -1247,6 +1265,7 @@ async function loadWeather() {
   } catch (error) {
     if (error.name === "AbortError" || request !== state.requestId) return;
     resetWeather("error");
+    renderFieldDataControls('error',error.message);
     text('[data-stat="conditions"]', "Data unavailable");
     text("#connection-label", "PROVIDER UNAVAILABLE");
     text(
@@ -1262,6 +1281,7 @@ async function loadWeather() {
   renderReports();
 }
 function resetWeather(status) {
+  renderFieldDataControls(status);
   [
     "temperature",
     "rainWeek",
@@ -1312,13 +1332,13 @@ function resetWeather(status) {
     '<p class="empty">' +
     (status === "loading"
       ? "Loading hourly data…"
-      : "Hourly data unavailable.") +
+      : status==='unselected'?'Choose a field above to load hourly temperature.':"Hourly data unavailable.") +
     "</p>";
   $("#water-chart").innerHTML =
     '<p class="empty">' +
     (status === "loading"
       ? "Loading water signals…"
-      : "Water signals unavailable.") +
+      : status==='unselected'?'Choose a field above to load rainfall and reference water demand.':"Water signals unavailable.") +
     "</p>";
   renderReports();
   renderFieldHealth();
@@ -1328,6 +1348,7 @@ function resetWeather(status) {
 function renderWeather() {
   const w = state.weather;
   if (!w) return;
+  renderFieldDataControls('ready');
   const c = w.current;
   text('[data-stat="temperature"]', temp(c.temperature));
   text('[data-stat="conditions"]', formatWeatherCode(c.weatherCode));
@@ -1752,6 +1773,7 @@ function renderCropLibrary(filter = "") {
   replaceArrowGlyphs();
 }
 function savePlan() {
+  if(!hasLocation())return $('#location-dialog').showModal();
   const plan = state.rotationOptions.find((p) => p.id === state.selectedPlan);
   if (!plan) return;
   state.plans.push({
@@ -1986,6 +2008,7 @@ function renderJournal() {
 }
 function saveSample(event) {
   event.preventDefault();
+  if(!hasLocation())return $('#location-dialog').showModal();
   const data = Object.fromEntries(new FormData(event.target));
   if (data.ph === "" && data.carbon === "")
     return toast("Enter pH or organic carbon for this sample.");
@@ -2071,6 +2094,7 @@ function renderSamples() {
 }
 function saveWater(event) {
   event.preventDefault();
+  if(!hasLocation())return $('#location-dialog').showModal();
   const data = Object.fromEntries(new FormData(event.target));
   addJournal(
     "Irrigation applied",

@@ -40,12 +40,12 @@ function arrayValue(record, property, index) {
   return Array.isArray(record?.[property]) ? number(record[property][index]) : null;
 }
 
-export async function fetchWeather(point, { signal } = {}) {
+export async function fetchWeather(point, { signal, force = false } = {}) {
   const { lat, lon } = coordinates(point);
   const key = `weather:${lat},${lon}`;
   const saved = cache.get(key);
   if (signal?.aborted) throw new DOMException('Request cancelled', 'AbortError');
-  if (saved && Date.now() - saved.at < 15 * 60 * 1000) return { ...saved.value, cached: true };
+  if (!force && saved && Date.now() - saved.at < 15 * 60 * 1000) return { ...saved.value, cached: true };
   const query = new URLSearchParams({
     latitude: lat, longitude: lon,
     current: 'temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code,is_day',
