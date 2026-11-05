@@ -23,7 +23,7 @@ export default {
       headers: {
         'content-type': 'text/html; charset=utf-8',
         'cache-control': 'no-cache',
-        'content-security-policy': "default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' https: data: blob:; connect-src 'self' https:; frame-ancestors 'self'; base-uri 'self'; form-action 'self'",
+        'content-security-policy': "default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.jsdelivr.net; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' https: data: blob:; connect-src 'self' https:; frame-ancestors 'self'; base-uri 'self'; form-action 'self'",
         'referrer-policy': 'strict-origin-when-cross-origin',
         'x-content-type-options': 'nosniff',
       },

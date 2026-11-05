@@ -253,6 +253,19 @@ function restoreFieldSettings() {
 function init() {
   // The transient top-bar data badge is intentionally removed.
   $(".system-status")?.remove();
+  $("#view-assistant")?.remove();
+  $(".advisor-link")?.remove();
+  const assistantLink = document.createElement("a");
+  assistantLink.href = "#/assistant";
+  assistantLink.dataset.route = "assistant";
+  assistantLink.innerHTML = '<svg><use href="#i-spark"/></svg>FieldShift AI';
+  $(".side-nav").append(assistantLink);
+  const assistantView = document.createElement("section");
+  assistantView.className = "view assistant-view";
+  assistantView.id = "view-assistant";
+  assistantView.hidden = true;
+  assistantView.innerHTML = '<div class="page-heading"><div><span class="eyebrow">YOUR FIELD SHIFT COMPANION</span><h1>Ask anything<span>.</span></h1><p>Talk about your field, school, science, writing, or whatever is on your mind.</p></div></div><div class="assistant-layout" style="grid-template-columns:1fr"><article class="panel assistant-chat-panel"><div class="assistant-chat-head"><div><span class="eyebrow">FIELD SHIFT AI · ON DEVICE</span><h2>What can I help you explore?</h2></div><button class="button secondary small" id="assistant-clear" type="button">Clear chat</button></div><div id="assistant-messages" class="assistant-messages" aria-live="polite"></div><form id="assistant-form" class="assistant-composer"><label class="sr-only" for="assistant-input">Your message</label><textarea id="assistant-input" name="message" maxlength="4000" required placeholder="Ask anything…"></textarea><div><small id="assistant-status">Runs on your device. First use downloads an AI model (about 700 MB) and requires WebGPU.</small><button class="button" type="submit">Send <svg><use href="#i-arrow"/></svg></button></div></form></article></div>';
+  $("main").insertBefore(assistantView, $(".app-footer"));
   const feedbackLink = document.createElement("a");
   feedbackLink.href = "#/feedback";
   feedbackLink.dataset.route = "feedback";
@@ -403,6 +416,7 @@ function init() {
       renderFeedback();
     },
   });
+  initAssistant();
   window.__fieldshiftIntro ||= initIntro({
     language: state.preferences.language,
   });
@@ -423,6 +437,7 @@ function navigate() {
     "crops",
     "profit",
     "reports",
+    "assistant",
     "explore",
     "feedback",
     "settings",
@@ -450,6 +465,7 @@ function navigate() {
       crops: "Crop planner",
       profit: "Profit & scenarios",
       reports: "Reports",
+      assistant: "FieldShift AI",
       explore: "Explore",
       feedback: "Comments & feedback",
       settings: "Settings",
@@ -2229,11 +2245,11 @@ function initAssistant() {
   const host = $("#assistant-messages"),
     form = $("#assistant-form");
   if (!host || !form) return;
-  renderAssistantContext();
   addAssistantMessage(
     "assistant",
-    "Hi — I can help with almost any question, from schoolwork and writing to weather and your FieldShift evidence. Select a field if you want field-specific context.",
+    "Hi! Ask me anything. On your first message, I’ll download a small AI model to this device. It requires a compatible WebGPU browser and around 700 MB of data.",
   );
+  let engine;
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const input = form.elements.message,
@@ -2248,27 +2264,27 @@ function initAssistant() {
     const button = form.querySelector("button");
     button.disabled = true;
     try {
-      const response = await fetch("/api/assistant", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          message,
-          history: assistantHistory,
-          fieldContext: assistantFieldContext(),
-        }),
-      });
-      const data = await response.json();
+      const status = $("#assistant-status");
+      if (!navigator.gpu) throw new Error("This browser or device does not support WebGPU, which this on-device model needs. Try a current WebGPU-compatible browser and device.");
+      if (!engine) {
+        status.textContent = "Loading AI model. The first download is about 700 MB; please keep this page open.";
+        const webllm = await import("https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.80/+esm");
+        engine = await webllm.CreateMLCEngine("Llama-3.2-1B-Instruct-q4f32_1-MLC", {initProgressCallback: progress => {status.textContent = progress.text || "Loading the AI model…";}});
+      }
+      status.textContent = "AI ready · running on your device";
+      const data = await engine.chat.completions.create({messages:[{role:"system",content:"You are FieldShift AI, a helpful general assistant. Answer open-ended questions clearly. Never invent farm data. State uncertainty and encourage local expert advice for important farming decisions. Field data provided by the app: "+JSON.stringify(assistantFieldContext())},...assistantHistory,{role:"user",content:message}],temperature:0.7,max_tokens:512});
       pending.remove();
-      if (!response.ok || !data.answer)
-        throw new Error(data.error || "The assistant could not respond.");
-      addAssistantMessage("assistant", data.answer);
+      const answer = data.choices?.[0]?.message?.content?.trim();
+      if (!answer) throw new Error("The model returned an empty response. Please try again.");
+      addAssistantMessage("assistant", answer);
       assistantHistory.push(
         { role: "user", content: message },
-        { role: "assistant", content: data.answer },
+        { role: "assistant", content: answer },
       );
       assistantHistory = assistantHistory.slice(-12);
     } catch (error) {
       pending.remove();
+      $("#assistant-status").textContent = "AI unavailable on this device or the model download failed. Check WebGPU support, free storage, and your connection, then try again.";
       addAssistantMessage(
         "assistant",
         error.message || "The assistant could not respond.",
