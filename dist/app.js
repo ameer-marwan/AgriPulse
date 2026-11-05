@@ -2291,6 +2291,17 @@ function addAssistantMessage(role, content) {
   host.append(article);
   host.scrollTop = host.scrollHeight;
 }
+function instantAssistantReply(message) {
+  const q = message.toLowerCase();
+  const field = state.selectedField?.name || "your field";
+  if (/weather|rain|temperature|forecast|wind/.test(q)) return `For ${field}, open Weather to see the live forecast, rainfall, wind, and evapotranspiration. I can help you turn those readings into a planting or irrigation decision.`;
+  if (/water|irrigat|drought|moisture/.test(q)) return `Open Water for the latest water balance. Start with the current soil moisture and recent rainfall, then adjust irrigation in small steps and review the result after the next reading.`;
+  if (/soil|ph|nitrogen|fertil/.test(q)) return `Open Soil to review pH, moisture, and nutrients. Keep a baseline sample, change one input at a time, and use the crop planner to compare rotations that protect soil health.`;
+  if (/profit|price|money|cost|sell|revenue/.test(q)) return `Open Profit to enter your local selling price, yield, area, and costs. FieldShift calculates revenue, costs, and margin from your numbers instead of assuming every market pays the same.`;
+  if (/crop|rotation|plant|wheat|corn|rice/.test(q)) return `Open Crop planner to compare rotations. A strong plan balances expected margin with water demand, soil recovery, and the weather outlook for ${field}.`;
+  if (/nasa|satellite|earth|space/.test(q)) return `FieldShift combines NASA POWER climate history with live weather and your local field inputs. Open NASA data to inspect the source and time range behind each insight.`;
+  return `I’m ready to help with ${field}. Try asking about weather, water, soil, crop rotation, profit, or NASA data. I’ll use the values in your workspace when they are available.`;
+}
 function initAssistant() {
   const host = $("#assistant-messages"),
     form = $("#assistant-form");
@@ -2308,28 +2319,27 @@ function initAssistant() {
     if (!message) return;
     input.value = "";
     addAssistantMessage("user", message);
-    const pending = document.createElement("article");
-    pending.className = "assistant-message assistant pending";
-    pending.innerHTML = "<b>FieldShift Assistant</b><p>Thinking…</p>";
-    host.append(pending);
+    const instant = instantAssistantReply(message);
+    addAssistantMessage("assistant", instant);
+    assistantHistory.push({ role: "user", content: message }, { role: "assistant", content: instant });
+    assistantHistory = assistantHistory.slice(-12);
+    write('fieldshift.ai.history',assistantHistory);
     const button = form.querySelector("button");
     button.disabled = true;
     aiBusy=true;
     $('#assistant-clear').disabled=true;
     try {
       const status = $("#assistant-status");
-      if (!navigator.gpu) throw new Error("This browser or device does not support WebGPU, which this on-device model needs. Try a current WebGPU-compatible browser and device.");
-      if (!aiEngine) {
-        status.textContent = "Loading the fast AI model (about 5.8 GB on first use). Please keep this page open.";
-        const webllm = await import("https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.80/+esm");
-        aiEngine = await webllm.CreateMLCEngine(AI_MODEL, {initProgressCallback: progress => {status.textContent = progress.text || "Loading the AI model…";}});
+      if (!navigator.gpu || !aiEngine) {
+        $("#assistant-status").textContent = "Instant guidance is ready. Enable WebGPU in a desktop browser to load the deeper on-device model.";
+        return;
       }
       status.textContent = "AI ready · running on your device";
       const stream = await aiEngine.chat.completions.create({messages:[{role:"system",content:"You are FieldShift AI, a helpful general assistant. Answer clearly and concisely. Never invent farm data. Field data: "+JSON.stringify(assistantFieldContext())},...assistantHistory.slice(-2).map(item=>({...item,content:item.content.slice(0,800)})),{role:"user",content:message}],temperature:0.7,max_tokens:256,stream:true});
       let answer='';for await(const chunk of stream){answer+=chunk.choices?.[0]?.delta?.content||'';pending.querySelector('p').textContent=answer||'Thinking…';host.scrollTop=host.scrollHeight;}answer=answer.trim();
-      pending.remove();
       if (!answer) throw new Error("The model returned an empty response. Please try again.");
-      addAssistantMessage("assistant", answer);
+      const latest = host.lastElementChild;
+      if (latest?.classList.contains("assistant")) latest.querySelector("p").textContent = answer;
       assistantHistory.push(
         { role: "user", content: message },
         { role: "assistant", content: answer },
@@ -2337,12 +2347,8 @@ function initAssistant() {
       assistantHistory = assistantHistory.slice(-12);
       write('fieldshift.ai.history',assistantHistory);
     } catch (error) {
-      pending.remove();
       $("#assistant-status").textContent = "AI unavailable or download failed. Check WebGPU support, free storage, and your connection.";
-      addAssistantMessage(
-        "assistant",
-        error.message || "The assistant could not respond.",
-      );
+      // Keep the instant answer visible; never leave the user staring at a spinner.
     } finally {
       button.disabled = false;
       aiBusy=false;
