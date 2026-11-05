@@ -122,11 +122,7 @@
         >
       </nav>
       <div class="sidebar-bottom">
-        <a class="advisor-link" href="#/assistant"
-          ><svg><use href="#i-spark" /></svg>
-          <div>Field assistant<small>Your evidence companion</small></div>
-          <span>↗</span></a
-        ><a class="settings-link" href="#/settings"
+        <a class="settings-link" href="#/settings"
           ><svg><use href="#i-settings" /></svg>Settings</a
         >
         <div class="operator">
@@ -998,73 +994,6 @@
           >
         </div>
       </section>
-      <section class="view" id="view-assistant" hidden>
-        <div class="page-heading">
-          <div>
-            <span class="eyebrow">FIELD ASSISTANT / 08</span>
-            <h1>Better questions. Clearer decisions<span>.</span></h1>
-            <p>
-              Explore the information in your workspace and the evidence still
-              missing.
-            </p>
-          </div>
-          <span class="pill">GUIDED EVIDENCE EXPLAINER</span>
-        </div>
-        <div class="assistant-layout">
-          <article class="panel chat-panel">
-            <div class="chat-heading">
-              <span class="icon-box lime"
-                ><svg><use href="#i-spark" /></svg
-              ></span>
-              <div>
-                <b>FieldShift companion</b
-                ><small data-field-name>Selected field</small>
-              </div>
-            </div>
-            <div id="chat-messages" class="chat-messages" aria-live="polite">
-              <div class="chat-message assistant-message">
-                Welcome to your field workspace. I can explain the weather, soil
-                moisture, rotation paths, and profit assumptions shown here.
-                What would help with your next decision?<small
-                  >Guided mode · OpenAI is not connected to this site
-                  yet.</small
-                >
-              </div>
-            </div>
-            <div class="question-chips">
-              <button data-question="What does my soil moisture mean?">
-                Understand soil moisture</button
-              ><button data-question="Explain my profit scenario">
-                Review my margin</button
-              ><button data-question="What data am I missing?">
-                Find the evidence gaps
-              </button>
-            </div>
-            <form id="chat-form">
-              <input
-                name="message"
-                placeholder="Ask about your field…"
-                aria-label="Message"
-                required
-                autocomplete="off"
-              /><button class="button" aria-label="Send message">
-                <svg><use href="#i-arrow" /></svg>
-              </button>
-            </form>
-          </article>
-          <aside class="panel evidence-panel">
-            <span class="eyebrow">IN THE CONTEXT</span>
-            <h2>Your current evidence</h2>
-            <div id="assistant-evidence"></div>
-            <div class="insight-note">
-              <p>
-                Every useful recommendation starts with knowing what is
-                measured, modeled, or still unknown.
-              </p>
-            </div>
-          </aside>
-        </div>
-      </section>
       <section class="view" id="view-settings" hidden>
         <div class="page-heading">
           <div>
@@ -1096,15 +1025,6 @@
               </p>
             </div>
             <a class="pill" href="#/account">MY ACCOUNT</a>
-          </div>
-          <div class="setting-item ai-settings-note">
-            <div>
-              <b>FieldShift AI</b>
-              <p>
-                Gemma 2 9B runs on your device. Its first download is about 5.8 GB and it needs WebGPU plus approximately 8.4 GB of graphics memory. AI model files remain on this device; conversations save with your account, or only in this tab for guests.
-              </p>
-            </div>
-            <span class="pill">ON DEVICE</span>
           </div>
           <div class="setting-item">
             <div>

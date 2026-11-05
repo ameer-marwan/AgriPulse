@@ -263,21 +263,6 @@ function init() {
     bar.innerHTML='<div><span class="eyebrow">YOUR SELECTED LAND</span><strong data-context-field>Choose your field</strong><p data-context-status role="status">Choose a place to load its weather, rainfall, water demand and modeled surface moisture.</p></div><div class="field-data-actions"><button class="button" type="button" data-action="location" data-context-select>Choose field</button><button class="button secondary" type="button" data-action="geolocation">Use my location</button><button class="button secondary" type="button" data-action="refresh" data-context-refresh hidden>Refresh data ↻</button></div>';
     heading.after(bar);
   }
-  $("#view-assistant")?.remove();
-  $(".advisor-link")?.remove();
-  const assistantLink = document.createElement("a");
-  assistantLink.href = "#/assistant";
-  assistantLink.dataset.route = "assistant";
-  assistantLink.innerHTML = '<svg><use href="#i-spark"/></svg>FieldShift AI';
-  $(".side-nav").append(assistantLink);
-  const assistantView = document.createElement("section");
-  assistantView.className = "view assistant-view";
-  assistantView.id = "view-assistant";
-  assistantView.hidden = true;
-  assistantView.innerHTML = '<div class="page-heading"><div><span class="eyebrow">YOUR FIELD SHIFT COMPANION</span><h1>Ask anything<span>.</span></h1><p>Talk about your field, school, science, writing, or whatever is on your mind.</p></div></div><div class="assistant-layout" style="grid-template-columns:1fr"><article class="panel assistant-chat-panel"><div class="assistant-chat-head"><div><span class="eyebrow">FIELD SHIFT AI · ON DEVICE</span><h2>What can I help you explore?</h2></div><button class="button secondary small" id="assistant-clear" type="button">Clear chat</button></div><div id="assistant-messages" class="assistant-messages" aria-live="polite"></div><form id="assistant-form" class="assistant-composer"><label class="sr-only" for="assistant-input">Your message</label><textarea id="assistant-input" name="message" maxlength="4000" required placeholder="Ask anything…"></textarea><div><small id="assistant-status">First use downloads about 5.8 GB. Requires WebGPU and approximately 8.4 GB of graphics memory; many phones cannot run it.</small><button class="button" type="submit">Send <svg><use href="#i-arrow"/></svg></button></div></form></article></div>';
-  $("main").insertBefore(assistantView, $(".app-footer"));
-  $("#assistant-status")?.remove();
-  initAiStorageSettings();
   const feedbackLink = document.createElement("a");
   feedbackLink.href = "#/feedback";
   feedbackLink.dataset.route = "feedback";
@@ -428,7 +413,6 @@ function init() {
       renderFeedback();
     },
   });
-  initAssistant();
   initAccounts({getState:()=>state,toast}).catch(error=>toast(error.message));
   window.__fieldshiftIntro ||= initIntro({
     language: state.preferences.language,
@@ -450,7 +434,6 @@ function navigate() {
     "crops",
     "profit",
     "reports",
-    "assistant",
     "account",
     "explore",
     "feedback",
@@ -479,7 +462,6 @@ function navigate() {
       crops: "Crop planner",
       profit: "Profit & scenarios",
       reports: "Reports",
-      assistant: "FieldShift AI",
       account: "My account",
       explore: "Explore",
       feedback: "Comments & feedback",
