@@ -17,7 +17,11 @@ import { initPlanning } from "./planning.js";
 import { initScenes } from "./scenes.js";
 import { initI18n, t, currentLanguage } from "./i18n.js";
 import { initIntro } from "./intro.js";
-import { workspaceStorage } from "./storage.js";
+import { workspaceStorage, storageReady } from "./storage.js";
+import { initAccounts } from "./accounts.js";
+
+window.__fieldshiftIntro ||= initIntro({language:'en'});
+await storageReady;
 
 const $ = (q, root = document) => root.querySelector(q);
 const $$ = (q, root = document) => [...root.querySelectorAll(q)];
@@ -266,6 +270,8 @@ function init() {
   assistantView.hidden = true;
   assistantView.innerHTML = '<div class="page-heading"><div><span class="eyebrow">YOUR FIELD SHIFT COMPANION</span><h1>Ask anything<span>.</span></h1><p>Talk about your field, school, science, writing, or whatever is on your mind.</p></div></div><div class="assistant-layout" style="grid-template-columns:1fr"><article class="panel assistant-chat-panel"><div class="assistant-chat-head"><div><span class="eyebrow">FIELD SHIFT AI · ON DEVICE</span><h2>What can I help you explore?</h2></div><button class="button secondary small" id="assistant-clear" type="button">Clear chat</button></div><div id="assistant-messages" class="assistant-messages" aria-live="polite"></div><form id="assistant-form" class="assistant-composer"><label class="sr-only" for="assistant-input">Your message</label><textarea id="assistant-input" name="message" maxlength="4000" required placeholder="Ask anything…"></textarea><div><small id="assistant-status">First use downloads about 5.8 GB. Requires WebGPU and approximately 8.4 GB of graphics memory; many phones cannot run it.</small><button class="button" type="submit">Send <svg><use href="#i-arrow"/></svg></button></div></form></article></div>';
   $("main").insertBefore(assistantView, $(".app-footer"));
+  $("#assistant-status")?.remove();
+  initAiStorageSettings();
   const feedbackLink = document.createElement("a");
   feedbackLink.href = "#/feedback";
   feedbackLink.dataset.route = "feedback";
@@ -417,6 +423,7 @@ function init() {
     },
   });
   initAssistant();
+  initAccounts({getState:()=>state,toast}).catch(error=>toast(error.message));
   window.__fieldshiftIntro ||= initIntro({
     language: state.preferences.language,
   });
@@ -438,6 +445,7 @@ function navigate() {
     "profit",
     "reports",
     "assistant",
+    "account",
     "explore",
     "feedback",
     "settings",
@@ -466,6 +474,7 @@ function navigate() {
       profit: "Profit & scenarios",
       reports: "Reports",
       assistant: "FieldShift AI",
+      account: "My account",
       explore: "Explore",
       feedback: "Comments & feedback",
       settings: "Settings",
@@ -2140,7 +2149,20 @@ function renderFeedback() {
     .join("");
 }
 
-let assistantHistory = [];
+let assistantHistory = read('fieldshift.ai.history',[]).filter(item=>['user','assistant'].includes(item?.role)&&typeof item?.content==='string').slice(-12);
+let aiEngine;
+let aiBusy=false;
+const AI_MODEL = 'gemma-2-9b-it-q4f32_1-MLC';
+function initAiStorageSettings(){
+  const panel=document.createElement('article');panel.className='panel ai-storage-panel';
+  panel.innerHTML='<div class="panel-heading"><div><span class="eyebrow">AI STORAGE & PERFORMANCE</span><h2>Make room for your ideas</h2></div><span class="pill">GEMMA 2 · 9B</span></div><div class="ai-storage-grid"><div><span class="eyebrow">DEVICE SPACE USED</span><strong id="ai-storage-used">Checking…</strong></div><div><span class="eyebrow">BROWSER ALLOWANCE</span><strong id="ai-storage-quota">Checking…</strong></div><div><span class="eyebrow">STORAGE RETENTION</span><strong id="ai-storage-retention">Checking…</strong></div></div><p class="fine-print">The browser sets the maximum available space for this site. Retaining storage helps keep the downloaded model between visits when supported. Cloud accounts save your records and chat, not the model files. Model size does not remove its graphics-memory requirement.</p><div class="button-row"><button class="button" id="ai-retain-storage" type="button">Retain model storage</button><button class="button secondary" id="ai-refresh-storage" type="button">Refresh usage</button><button class="button secondary" id="ai-clear-model" type="button">Remove downloaded model</button></div><p class="fine-print" id="assistant-status" role="status">Model loads when you send a message.</p>';
+  $('#view-settings').append(panel);
+  const refresh=async()=>{const estimate=await navigator.storage?.estimate?.();const gb=value=>number(value)?(value/1e9).toFixed(2)+' GB':'Unavailable';text('#ai-storage-used',gb(estimate?.usage));text('#ai-storage-quota',gb(estimate?.quota));text('#ai-storage-retention',(await navigator.storage?.persisted?.())?'Persistent':'Browser managed');};
+  $('#ai-refresh-storage').onclick=()=>refresh().catch(()=>toast('Storage information is unavailable.'));
+  $('#ai-retain-storage').onclick=async()=>{try{const retained=await navigator.storage?.persist?.();await refresh();toast(retained?'Persistent storage enabled.':'The browser controls storage retention on this device.');}catch{toast('Storage retention is unavailable in this browser.');}};
+  $('#ai-clear-model').onclick=async event=>{if(aiBusy)return toast('Wait for the current AI request to finish.');const button=event.currentTarget;button.disabled=true;try{await aiEngine?.unload();aiEngine=null;const webllm=await import('https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.80/+esm');await webllm.deleteModelAllInfoInCache(AI_MODEL);text('#assistant-status','Downloaded model removed. It will download again when needed.');await refresh();toast('Downloaded AI model removed. It can be downloaded again.');}catch{toast('The model cache could not be cleared.');}finally{button.disabled=false;}};
+  refresh().catch(()=>{});
+}
 function assistantFieldContext() {
   const selected = hasLocation(),
     weather = state.weather?.current,
@@ -2249,9 +2271,10 @@ function initAssistant() {
     "assistant",
     "Welcome to FieldShift AI.",
   );
-  let engine;
+  assistantHistory.forEach(item=>addAssistantMessage(item.role,item.content));
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
+    if(aiBusy)return;
     const input = form.elements.message,
       message = String(input.value || "").trim();
     if (!message) return;
@@ -2263,16 +2286,18 @@ function initAssistant() {
     host.append(pending);
     const button = form.querySelector("button");
     button.disabled = true;
+    aiBusy=true;
+    $('#assistant-clear').disabled=true;
     try {
       const status = $("#assistant-status");
       if (!navigator.gpu) throw new Error("This browser or device does not support WebGPU, which this on-device model needs. Try a current WebGPU-compatible browser and device.");
-      if (!engine) {
+      if (!aiEngine) {
         status.textContent = "Loading Gemma 2 9B. The first download is about 5.8 GB; please keep this page open.";
         const webllm = await import("https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.80/+esm");
-        engine = await webllm.CreateMLCEngine("gemma-2-9b-it-q4f32_1-MLC", {initProgressCallback: progress => {status.textContent = progress.text || "Loading the AI model…";}});
+        aiEngine = await webllm.CreateMLCEngine(AI_MODEL, {initProgressCallback: progress => {status.textContent = progress.text || "Loading the AI model…";}});
       }
       status.textContent = "AI ready · running on your device";
-      const data = await engine.chat.completions.create({messages:[{role:"system",content:"You are FieldShift AI, a helpful general assistant. Answer open-ended questions clearly. Never invent farm data. State uncertainty and encourage local expert advice for important farming decisions. Field data provided by the app: "+JSON.stringify(assistantFieldContext())},...assistantHistory,{role:"user",content:message}],temperature:0.7,max_tokens:512});
+      const data = await aiEngine.chat.completions.create({messages:[{role:"system",content:"You are FieldShift AI, a helpful general assistant. Answer open-ended questions clearly. Never invent farm data. State uncertainty and encourage local expert advice for important farming decisions. Field data provided by the app: "+JSON.stringify(assistantFieldContext())},...assistantHistory.slice(-4).map(item=>({...item,content:item.content.slice(0,1200)})),{role:"user",content:message}],temperature:0.7,max_tokens:768});
       pending.remove();
       const answer = data.choices?.[0]?.message?.content?.trim();
       if (!answer) throw new Error("The model returned an empty response. Please try again.");
@@ -2282,6 +2307,7 @@ function initAssistant() {
         { role: "assistant", content: answer },
       );
       assistantHistory = assistantHistory.slice(-12);
+      write('fieldshift.ai.history',assistantHistory);
     } catch (error) {
       pending.remove();
       $("#assistant-status").textContent = "AI unavailable or the model download failed. This 5.8 GB model needs WebGPU and about 8.4 GB of graphics memory. Check your device, free storage, and connection.";
@@ -2291,11 +2317,14 @@ function initAssistant() {
       );
     } finally {
       button.disabled = false;
+      aiBusy=false;
+      $('#assistant-clear').disabled=false;
       input.focus();
     }
   });
   $("#assistant-clear").addEventListener("click", () => {
     assistantHistory = [];
+    write('fieldshift.ai.history',assistantHistory);
     host.replaceChildren();
     addAssistantMessage(
       "assistant",

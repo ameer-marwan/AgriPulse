@@ -23,6 +23,7 @@
     <link rel="stylesheet" href="i18n.css" />
     <link rel="stylesheet" href="intro.css" />
     <link rel="stylesheet" href="intro-real.css" />
+    <link rel="stylesheet" href="accounts.css" />
   </head>
   <body class="intro-pending">
     <svg class="svg-sprite" xmlns="http://www.w3.org/2000/svg">
@@ -1088,19 +1089,18 @@
           >
           <div class="setting-item">
             <div>
-              <b>Device-local workspace</b>
+              <b>Workspace saving</b>
               <p>
-                Fields, journal records, and assumptions are stored in this
-                browser.
+                Signed-in accounts save fields, journal records, plans, settings, and chat to the cloud. Guest work lasts only in this tab.
               </p>
             </div>
-            <span class="pill">LOCAL</span>
+            <a class="pill" href="#/account">MY ACCOUNT</a>
           </div>
           <div class="setting-item ai-settings-note">
             <div>
               <b>FieldShift AI</b>
               <p>
-                The assistant runs on your device with an open model. The first use downloads about 5.8 GB, requires WebGPU, and needs approximately 8.4 GB of graphics memory. Your messages stay in this browser session.
+                Gemma 2 9B runs on your device. Its first download is about 5.8 GB and it needs WebGPU plus approximately 8.4 GB of graphics memory. AI model files remain on this device; conversations save with your account, or only in this tab for guests.
               </p>
             </div>
             <span class="pill">ON DEVICE</span>

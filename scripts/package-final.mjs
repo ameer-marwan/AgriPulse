@@ -11,18 +11,18 @@ const scriptSafe=s=>s.replace(/<\/script/gi,'<\\/script');
 let html=await read('dist/index.html');
 const logo=await dataUri('dist/assets/logo-new.png','image/png');
 const landscape=await dataUri('dist/assets/field-landscape.jpg','image/jpeg');
-let css=(await Promise.all(['dist/vendor/maplibre-gl.css','dist/styles.css','dist/planning.css','dist/scenes.css','dist/i18n.css','dist/intro.css','dist/intro-real.css'].map(read))).join('\n');
+let css=(await Promise.all(['dist/vendor/maplibre-gl.css','dist/styles.css','dist/planning.css','dist/scenes.css','dist/i18n.css','dist/intro.css','dist/intro-real.css','dist/accounts.css'].map(read))).join('\n');
 css=css.replaceAll("url('assets/field-landscape.jpg')",'url("'+landscape+'")');
 for (const name of ['sea','forest','sky-clear','sky-clouds','sky-storm']) {
   const asset = await dataUri('dist/assets/'+name+'.jpg','image/jpeg');
   css = css.replace(new RegExp('url\\([\'\"]?assets/'+name+'\\.jpg[\'\"]?\\)','g'),()=> 'url("'+asset+'")');
 }
 css=css.replaceAll("url('assets/intro-plant.jpg')",'url("'+await dataUri('dist/assets/intro-plant.jpg','image/jpeg')+'")');
-html=html.replace(/<link rel="stylesheet" href="[^"]+">/g,'').replace('</head>',()=>'<style>'+css.replace(/<\/style/gi,'<\\/style')+'</style></head>');
+html=html.replace(/<link rel="stylesheet" href="[^"]+"\s*\/?>/g,'').replace('</head>',()=>'<style>'+css.replace(/<\/style/gi,'<\\/style')+'</style></head>');
 html=html.replaceAll('assets/logo-new.png',logo);
 html=html.replaceAll('assets/dunia-alajial-logo.jpg',await dataUri('dist/assets/dunia-alajial-logo.jpg','image/jpeg'));
-let js='const __fieldshiftModules = {};\n';
-for(const name of ['storage','data','geo','planning','scenes','i18n','intro']){
+let js='(async()=>{\nconst __fieldshiftModules = {};\n';
+for(const name of ['storage','accounts','data','geo','planning','scenes','i18n','intro']){
   let code=await read('dist/'+name+'.js');
   const names=[...code.matchAll(/^export\s+(?:async\s+)?(?:function|const|let|class)\s+(\w+)/gm)].map(m=>m[1]);
   if(!names.length)throw Error('No named exports in '+name);
@@ -34,7 +34,7 @@ for(const name of ['storage','data','geo','planning','scenes','i18n','intro']){
 let app=await read('dist/app.js');
 app=app.replace(/^import\s+\{([^}]+)\}\s+from\s+['"]\.\/(\w+)\.js['"];?/gm,(_match,names,module)=>'const {'+names+'} = __fieldshiftModules.'+module+';');
 if(/^import\s/m.test(app))throw Error('Unresolved app import');
-js+=app;
+js+=app+'\n})().catch(error=>{console.error(error);document.body.classList.remove("intro-pending");});';
 const vendor=await read('dist/vendor/maplibre-gl.js');
 html=html.replace('<script src="vendor/maplibre-gl.js"></script>',()=>'<script>'+scriptSafe(vendor)+'</script>');
 html=html.replace('<script type="module" src="app.js"></script>',()=>'<script>'+scriptSafe(js)+'</script>');

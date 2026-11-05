@@ -11,8 +11,10 @@ function page() {
 }
 
 export default {
-  async fetch(request) {
+  async fetch(request, env) {
     const url = new URL(request.url)
+    const accountResponse = await handleAccountApi(request, env)
+    if (accountResponse) return accountResponse
     if (url.pathname.startsWith('/api/')) {
       return new Response(JSON.stringify({ error: 'Not found.' }), {
         status: 404,
