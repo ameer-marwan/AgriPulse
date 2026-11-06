@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://fieldshift-nasa.ameer-prince.chatgpt.site/api/:path*"
+    }
+  ]
+}
