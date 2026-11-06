@@ -608,6 +608,10 @@ function bindEvents() {
     state.preferences.theme = event.target.value;
     applyPreferences();
   });
+  $$('[data-theme-choice]').forEach(button => button.addEventListener('click', () => {
+    state.preferences.theme = button.dataset.themeChoice;
+    applyPreferences();
+  }));
   $$(".location-dialog-content").forEach((form) =>
     form.addEventListener("keydown", (event) => {
       if (event.key === "Escape") form.closest("dialog").close();
@@ -699,6 +703,10 @@ function applyPreferences() {
   const theme = resolvedTheme();
   document.body.classList.toggle("light", theme === "light");
   document.documentElement.dataset.theme = theme;
+  $$('[data-theme-choice]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.themeChoice === state.preferences.theme)));
+  const themeButton = $('.theme-button');
+  if (themeButton) { themeButton.setAttribute('aria-label', theme === 'light' ? 'Switch to dark theme' : 'Switch to daylight theme'); themeButton.setAttribute('title', theme === 'light' ? 'Switch to dark theme' : 'Switch to daylight theme'); }
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'light' ? '#f1f3ea' : '#101b16');
   $("#appearance").value = ["auto", "dark", "light"].includes(
     state.preferences.theme,
   )
