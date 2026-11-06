@@ -6,15 +6,22 @@ let revision = 0, version = 0, timer, saving = false, conflict = false, loadFail
 let status = { state: 'loading', message: 'Connecting to your workspace…', updatedAt: null };
 const allowed = key => typeof key === 'string' && key.startsWith('fieldshift.') && !key.startsWith('fieldshift.auth') && !key.startsWith('fieldshift.guest');
 const notify = () => window.dispatchEvent(new CustomEvent('fieldshift:storage', { detail: { ...status, user: session.user, guest: !session.user } }));
+export async function readAccountResponse(response) {
+  let body;
+  try { body = await response.json(); } catch {
+    throw new Error('The account server is unavailable. Run the complete FieldShift project with npm run dev, then open http://localhost:4173.');
+  }
+  if (!body || typeof body !== 'object' || Array.isArray(body)) throw new Error('The account server returned an invalid response. Run the complete FieldShift project with npm run dev.');
+  if (!response.ok) { const error = new Error(body.error || 'Could not connect to your account.'); error.status = response.status; throw error; }
+  return body;
+}
 function setStatus(state, message, updatedAt = status.updatedAt) { status = { state, message, updatedAt }; notify(); }
 function guestSave() { try { sessionStorage.setItem(guestKey, JSON.stringify(Object.fromEntries(entries))); } catch { setStatus('error', 'This tab cannot hold more guest data. Download a backup before closing it.'); } }
 async function api(path, options = {}) {
   const controller = new AbortController(), timeout = setTimeout(() => controller.abort(), 15000);
   try {
     const response = await fetch(path, { credentials: 'same-origin', ...options, signal: controller.signal, headers: { 'content-type': 'application/json', ...options.headers } });
-    const body = await response.json();
-    if (!response.ok) { const error = new Error(body.error || 'Could not connect to your account.'); error.status = response.status; throw error; }
-    return body;
+    return await readAccountResponse(response);
   } finally { clearTimeout(timeout); }
 }
 async function flush() {

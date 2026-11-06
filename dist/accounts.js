@@ -1,11 +1,9 @@
-import { workspaceStorage, storageReady } from './storage.js';
+import { workspaceStorage, storageReady, readAccountResponse } from './storage.js';
 const $ = (selector, root = document) => root.querySelector(selector);
 const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
 async function accountRequest(path, body, method = 'POST') {
   const response = await fetch(path, { method, credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: body === undefined ? undefined : JSON.stringify(body) });
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.error || 'The account request could not be completed.');
-  return data;
+  return readAccountResponse(response);
 }
 function downloadSnapshot() {
   const blob = new Blob([JSON.stringify(workspaceStorage.snapshot(), null, 2)], { type: 'application/json' });

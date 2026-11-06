@@ -2,11 +2,17 @@
 
 An interactive field operations workspace for the 2026 NASA Space Apps Challenge. The existing Site identity is preserved in `.openai/hosting.json`.
 
-## Open the final website
+## Run FieldShift with accounts
 
-Open **FieldShift-Final.html** in Chrome, Edge, or Firefox. This portable edition embeds the application, styles, logo, photo and map library in one file. Internet access is needed for live weather, satellite tiles, place search and NASA data. The file does not require a server, an API key, or a package installation. Mobile file previewers may not run JavaScript; open it in a full browser, or host the `dist` folder on a static web host.
+Install Node.js 22.13 or newer. Extract the complete project, open a terminal in the folder containing `package.json`, and run:
 
-The editable project is also included. Run `npm run dev` with Node 20+ to open it at `http://127.0.0.1:4173`. No dependencies are required to run the application. `npm run package:final` recreates the portable HTML in `release/` from the current source.
+```sh
+npm run dev
+```
+
+Open **http://127.0.0.1:4173** in a browser and keep the terminal open. Create a username and password, or enter as a guest. Accounts and their workspaces are saved in `.local/fieldshift.sqlite` on the computer running the server; back up this file to keep those local accounts. Local accounts are separate from accounts on the published website. Guest work lasts only in the current browser tab.
+
+The portable `release/FieldShift-Final.html` contains the visual website, but opening it alone or running it on a static-only web host does not start the account server. Account creation and login require the complete project and server above, or the published FieldShift site. Internet access is needed for live weather, satellite maps, place search, and NASA data.
 
 ## What is new in this edition
 
@@ -25,11 +31,11 @@ The editable project is also included. Run `npm run dev` with Node 20+ to open i
 - Printable field report including the selected rotation, economics assumptions, soil records, schedule, scenario and observations.
 - Field selector accessible from every page; responsive phone and desktop layouts.
 
-FieldShift opens directly after its introduction with no account, login, or password gate. Save a workspace backup from Settings and a season/photo backup after adding records. Browser data is device-local; files opened from a different path or a different browser may have a separate storage area. The portable file includes no personal field records.
+The introduction offers account sign-in, account creation, or guest entry. Save a workspace backup from Settings and a season/photo backup after adding records. The portable file includes no personal field records.
 
 ## Run locally
 
-Requires Node 20+. The application is buildless and needs no runtime package installation.
+Requires Node.js 22.13 or newer. The application is buildless and needs no runtime package installation.
 
 ```sh
 npm run dev
@@ -64,7 +70,7 @@ For browser checks, install development dependencies (`npm install`) and Chromiu
 
 ## Important boundaries
 
-The hosted application stores workspace records only in the current browser. There is no account system or cloud synchronization. A selected point uses the provider's reference grid. A drawn polygon gives geometric area; the application does not pretend to calculate a spatially aggregated soil/weather measurement over that polygon.
+The published application stores signed-in account workspaces in its hosted database; local installations use their own SQLite database. Guest work lasts only in the current tab. A selected point uses the provider's reference grid. A drawn polygon gives geometric area; the application does not pretend to calculate a spatially aggregated soil/weather measurement over that polygon.
 
 Soil pH/carbon values come only from user-entered samples. Regional SoilGrids property maps are not connected. Economics uses entered assumptions, not a live commodity feed; it excludes costs that were not entered. Rotation results explain broad trait rules and do not predict yield or certify suitability.
 
