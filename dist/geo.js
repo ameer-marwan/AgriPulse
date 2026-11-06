@@ -89,8 +89,9 @@ export function createFieldMap(container, { onSelect = () => {}, onBoundary = ()
   }
   function applyLayer() {
     if (!ready) return;
-    map.setLayoutProperty('satellite-base', 'visibility', layer === 'satellite' ? 'visible' : 'none');
+    map.setLayoutProperty('satellite-base', 'visibility', layer !== 'terrain' ? 'visible' : 'none');
     map.setLayoutProperty('terrain-base', 'visibility', layer === 'terrain' ? 'visible' : 'none');
+    map.setLayoutProperty('thermal-base', 'visibility', layer === 'thermal' ? 'visible' : 'none');
   }
   function finishDrawing() {
     if (!drawing) return null;
@@ -114,7 +115,7 @@ export function createFieldMap(container, { onSelect = () => {}, onBoundary = ()
       if (map && !alreadySelected) map.flyTo({ center: [location.lon, Math.max(-85, Math.min(85, location.lat))], zoom: Math.max(map.getZoom(), 10), duration: 700, essential: false });
     },
     setMode(next) { mode = next === 'globe' ? 'globe' : 'map'; if (drawing && mode === 'globe') api.cancelDrawing(); applyMode(); frameMode(); },
-    setLayer(next) { layer = next === 'terrain' ? 'terrain' : 'satellite'; applyLayer(); },
+    setLayer(next) { layer = ['terrain', 'thermal'].includes(next) ? next : 'satellite'; applyLayer(); },
     startDrawing() {
       if (!map || !ready) { status('Wait for the map to load before drawing.', 'error'); return; }
       mode = 'map'; applyMode(); drawing = true; vertices = []; map.doubleClickZoom.disable(); map.getCanvas().style.cursor = 'crosshair'; update();
@@ -135,12 +136,14 @@ export function createFieldMap(container, { onSelect = () => {}, onBoundary = ()
         version: 8,
         sources: {
           'satellite-raster': { type: 'raster', tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'], tileSize: 256, maxzoom: 19, attribution: 'Imagery © Esri, Maxar, Earthstar Geographics, and the GIS User Community' },
-          'terrain-raster': { type: 'raster', tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize: 256, maxzoom: 19, attribution: '© OpenStreetMap contributors' }
+          'terrain-raster': { type: 'raster', tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize: 256, maxzoom: 19, attribution: '© OpenStreetMap contributors' },
+          'thermal-raster': { type: 'raster', tiles: ['https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_L3_Land_Surface_Temp_8Day_Day/default/GoogleMapsCompatible_Level7/{z}/{y}/{x}.png'], tileSize: 256, maxzoom: 7, attribution: 'Land surface temperature: NASA GIBS / MODIS Terra' }
         },
         layers: [
           { id: 'background', type: 'background', paint: { 'background-color': '#07120e' } },
           { id: 'satellite-base', type: 'raster', source: 'satellite-raster', paint: { 'raster-saturation': -0.1, 'raster-brightness-max': 0.9 } },
-          { id: 'terrain-base', type: 'raster', source: 'terrain-raster', layout: { visibility: 'none' }, paint: { 'raster-saturation': -0.3 } }
+          { id: 'terrain-base', type: 'raster', source: 'terrain-raster', layout: { visibility: 'none' }, paint: { 'raster-saturation': -0.3 } },
+          { id: 'thermal-base', type: 'raster', source: 'thermal-raster', layout: { visibility: 'none' }, paint: { 'raster-opacity': 0.85 } }
         ]
       },
       center: [18, 23], zoom: 1.8, maxZoom: 19, attributionControl: true, antialias: true

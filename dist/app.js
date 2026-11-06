@@ -558,6 +558,7 @@ function bindEvents() {
   $$("[data-map-layer]").forEach((button) =>
     button.addEventListener("click", () => {
       state.map.setLayer(button.dataset.mapLayer);
+      $('#thermal-legend').hidden = button.dataset.mapLayer !== 'thermal';
       $$("[data-map-layer]").forEach((b) =>
         b.classList.toggle("selected", b === button),
       );
@@ -1736,6 +1737,7 @@ function renderRotations() {
   notifyFieldUpdate();
 }
 function renderCropLibrary(filter = "") {
+  const stickers = {wheat:'🌾',maize:'🌽',sorghum:'🌾',barley:'🌾',soybean:'🫘',chickpea:'🫘',cowpea:'🫘',sunflower:'🌻',rye:'🌾',clover:'☘️'};
   $("#crop-library").innerHTML =
     crops
       .filter((c) =>
@@ -1745,7 +1747,7 @@ function renderCropLibrary(filter = "") {
       )
       .map(
         (c) =>
-          '<article class="crop-library-card"><span class="eyebrow">' +
+          '<article class="crop-library-card"><span class="crop-sticker" aria-hidden="true">' + (stickers[c.id] || '🌱') + '</span><span class="eyebrow">' +
           escapeHTML(c.family.toUpperCase()) +
           "</span><h3>" +
           escapeHTML(c.name) +

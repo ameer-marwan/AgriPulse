@@ -429,10 +429,11 @@
               <div class="segmented">
                 <button class="selected" data-map-layer="satellite">
                   Satellite</button
-                ><button data-map-layer="terrain">Terrain</button>
+                ><button data-map-layer="terrain">Terrain</button><button data-map-layer="thermal">Thermal</button>
               </div>
             </div>
             <div id="explorer-map-host"></div>
+            <div class="thermal-legend" id="thermal-legend" hidden><b>NASA land surface temperature</b><p>Latest available eight-day daytime composite from MODIS Terra. Regional surface temperature, not air temperature or an individual field measurement. Clouds and missing observations can leave gaps.</p><img src="https://gibs.earthdata.nasa.gov/legends/MODIS_Land_Surface_Temp_H.svg" alt="NASA land surface temperature color legend"><a href="https://worldview.earthdata.nasa.gov/" target="_blank" rel="noopener noreferrer">Explore NASA Worldview ↗</a></div>
             <div class="draw-toolbar">
               <button data-action="draw">
                 <svg><use href="#i-plus" /></svg>Draw boundary</button
