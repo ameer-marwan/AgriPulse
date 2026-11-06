@@ -29,7 +29,7 @@
 .earth-stars-near{opacity:.45;background-size:320px 350px,480px 420px;animation:intro-star-drift 35s linear infinite reverse}
 .earth-atmosphere{position:absolute;width:min(68vmin,640px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,transparent 57%,#54bdfb25 68%,transparent 75%);filter:blur(9px);animation:intro-atmosphere 2.6s ease-in-out infinite alternate}
 .earth-canvas{position:relative;z-index:2;animation:intro-earth-arrive 1.1s cubic-bezier(.16,.8,.25,1) both;filter:drop-shadow(0 0 24px #71c8ff99) drop-shadow(0 0 75px #238dcf55);transition:transform 1.3s cubic-bezier(.55,.01,.9,.3),opacity 1s ease}
-.earth-intro.zooming .earth-canvas{transform:scale(8);opacity:1;animation:none}
+.earth-intro.zooming .earth-canvas{animation:intro-dive 1s cubic-bezier(.55,.02,.9,.3) forwards}
 .earth-orbit{position:absolute;z-index:3;width:min(81vmin,760px);aspect-ratio:1;border:1px solid #9ee9eb44;border-radius:50%;pointer-events:none;opacity:.8}
 .earth-orbit-one{transform:rotateX(68deg) rotate(-22deg);animation:intro-orbit-one 9s linear infinite}
 .earth-orbit-two{transform:rotateY(72deg) rotate(38deg);border-color:#a8dcac33;animation:intro-orbit-two 12s linear infinite}
@@ -47,6 +47,7 @@
 @keyframes intro-nebula-drift{from{transform:scale(1.05) translate3d(-1%,0,0)}to{transform:scale(1.13) translate3d(1%,1%,0)}}
 @keyframes intro-meteor{0%{opacity:0;transform:translate3d(0,0,0) rotate(24deg)}6%{opacity:1}22%{opacity:0;transform:translate3d(180px,80px,0) rotate(24deg)}100%{opacity:0;transform:translate3d(180px,80px,0) rotate(24deg)}}
 @keyframes intro-earth-arrive{from{transform:scale(.78);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes intro-dive{from{opacity:1;transform:scale(1)}to{opacity:1;transform:scale(12) translate(-4%,3%)}}
 @keyframes intro-atmosphere{from{opacity:.6;transform:scale(.97)}to{opacity:1;transform:scale(1.05)}}
 @keyframes intro-orbit-one{to{transform:rotateX(68deg) rotate(338deg)}}
 @keyframes intro-orbit-two{to{transform:rotateY(72deg) rotate(398deg)}}
