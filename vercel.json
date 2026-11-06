@@ -1,5 +1,7 @@
 {
   "version": 2,
+  "buildCommand": "npm run package:final",
+  "outputDirectory": "release",
   "rewrites": [
     {
       "source": "/api/:path*",
