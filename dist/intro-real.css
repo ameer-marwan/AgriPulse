@@ -18,15 +18,15 @@
 .earth-intro.revealed{background:#06150e}
 .earth-intro.revealed .earth-landscape{opacity:1;animation:intro-farmland-drift 22s ease-in-out infinite alternate}
 .earth-landscape::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 25% 10%,#ffde9550,transparent 42%),linear-gradient(100deg,transparent 25%,#f2f5da0c 50%,transparent 75%);animation:intro-sunlight 12s ease-in-out infinite alternate;pointer-events:none}
-.earth-space{background-color:#02090d;background-image:radial-gradient(ellipse at 50% 50%,#102d3d 0%,#050e1a 44%,#020509 100%);opacity:1;transition:opacity 1s ease,visibility 1s ease}
+.earth-space{background:#020407;opacity:1;transition:opacity 1s ease,visibility 1s ease}
 .earth-nebula{position:absolute;inset:-8%;background:url('assets/intro-space.jpg') center/cover no-repeat;opacity:.9;animation:intro-nebula-drift 18s ease-in-out infinite alternate;will-change:transform}
 .earth-meteor{position:absolute;z-index:1;width:155px;height:2px;border-radius:50%;background:linear-gradient(90deg,transparent,#8acfff 72%,#fff);filter:drop-shadow(0 0 5px #94d6ff);opacity:0;pointer-events:none}
 .earth-meteor-one{top:20%;left:8%;animation:intro-meteor 3.8s .25s ease-in infinite}
 .earth-meteor-two{top:65%;left:62%;width:110px;animation:intro-meteor 4.8s .8s ease-in infinite}
 .earth-intro.revealed .earth-space{display:grid;opacity:0;visibility:hidden;pointer-events:none}
 .earth-stars{position:absolute;inset:-15%;pointer-events:none;background-image:radial-gradient(circle,#fff 1px,transparent 1.6px),radial-gradient(circle,#9dd6ffcc 1px,transparent 1.5px);background-size:139px 167px,223px 199px}
-.earth-stars-far{opacity:.48;animation:intro-star-drift 45s linear infinite}
-.earth-stars-near{opacity:.8;background-size:237px 271px,389px 319px;animation:intro-star-drift 24s linear infinite reverse}
+.earth-stars-far{opacity:.25;background-size:250px 280px,370px 400px;animation:intro-star-drift 45s linear infinite}
+.earth-stars-near{opacity:.45;background-size:320px 350px,480px 420px;animation:intro-star-drift 35s linear infinite reverse}
 .earth-atmosphere{position:absolute;width:min(68vmin,640px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,transparent 57%,#54bdfb25 68%,transparent 75%);filter:blur(9px);animation:intro-atmosphere 2.6s ease-in-out infinite alternate}
 .earth-canvas{position:relative;z-index:2;animation:intro-earth-arrive 1.1s cubic-bezier(.16,.8,.25,1) both;filter:drop-shadow(0 0 24px #71c8ff99) drop-shadow(0 0 75px #238dcf55);transition:transform 1.3s cubic-bezier(.55,.01,.9,.3),opacity 1s ease}
 .earth-intro.zooming .earth-canvas{transform:scale(8);opacity:0;animation:none}
