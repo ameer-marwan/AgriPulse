@@ -1,0 +1,18 @@
+/* Arabic uses a right-to-left layout while maps, charts and coordinates retain their natural direction. */
+html[dir="rtl"] .sidebar{inset:0 0 0 auto;border-right:0;border-left:1px solid var(--border)}
+html[dir="rtl"] .topbar{inset:0 var(--sidebar-w) auto 0}
+html[dir="rtl"] main{margin-left:0;margin-right:var(--sidebar-w)}
+html[dir="rtl"] .topbar-right{margin-left:0;margin-right:auto}
+html[dir="rtl"] .side-nav a,html[dir="rtl"] .settings-link,html[dir="rtl"] .operator,html[dir="rtl"] .brand,html[dir="rtl"] .challenge-mark{direction:rtl}
+html[dir="rtl"] .side-nav a.active{box-shadow:inset -2px 0 var(--accent)}
+html[dir="rtl"] .side-nav a .nav-badge{margin-left:0;margin-right:auto}
+html[dir="rtl"] .page-heading,html[dir="rtl"] .panel-heading,html[dir="rtl"] .field-picker>b,html[dir="rtl"] .map-footer,html[dir="rtl"] .weather-details,html[dir="rtl"] .sample-row,html[dir="rtl"] .setting-item{direction:rtl}
+html[dir="rtl"] .banner-link{margin-left:0;margin-right:auto}
+html[dir="rtl"] .field-banner:after{right:auto;left:10%}
+html[dir="rtl"] .weather-details{border-left:0;border-right:1px solid #354735;padding-left:0;padding-right:40px}
+html[dir="rtl"] .weather-feature,html[dir="rtl"] .report-summary,html[dir="rtl"] .planning-panel,html[dir="rtl"] .settings-panel{text-align:right}
+html[dir="rtl"] input,html[dir="rtl"] textarea,html[dir="rtl"] select{direction:rtl;text-align:right}
+html[dir="rtl"] .maplibregl-map,html[dir="rtl"] .chart,html[dir="rtl"] [data-coordinates],html[dir="rtl"] .planning-table-wrap{direction:ltr}
+html[dir="rtl"] .toast{left:auto;right:calc(50% + 90px);transform:translate(50%,12px)}
+html[dir="rtl"] .toast.visible{transform:translate(50%,0)}
+@media(max-width:760px){html[dir="rtl"] .sidebar{transform:translateX(100%)}html[dir="rtl"] .menu-open .sidebar{transform:translateX(0)}html[dir="rtl"] .topbar{left:0;right:0}html[dir="rtl"] main{margin-right:0}html[dir="rtl"] .weather-details{border-right:0;border-top:1px solid #354735;padding-right:0}html[dir="rtl"] .toast{right:50%;transform:translate(50%,12px)}html[dir="rtl"] .toast.visible{transform:translate(50%,0)}}

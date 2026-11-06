@@ -1,0 +1,20 @@
+FIELDSHIFT — START HERE
+
+To run the complete website, including accounts:
+
+1. Install Node.js 22.13 or newer from https://nodejs.org/.
+2. Extract the entire ZIP and open a terminal in this folder.
+3. Run: npm run dev
+4. Open http://127.0.0.1:4173 in a browser. Keep the terminal open.
+
+Create a username and password, log in, or enter as a guest. Local accounts
+and workspaces are stored on this computer in .local/fieldshift.sqlite.
+They are separate from accounts on the published site. Guest work lasts only
+in the current browser tab.
+
+The release/FieldShift-Final.html file is a portable visual version. Opening it
+alone or using a static-only compiler does not start the account server, so
+sign-in requires the complete project and the command above.
+
+Internet access is needed for weather, maps, place search, and NASA data.
+See README.md for more information. Press Ctrl+C in the terminal to stop.

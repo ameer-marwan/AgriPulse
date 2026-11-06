@@ -1,0 +1,17 @@
+import {readFile,writeFile,mkdir,rm,cp} from 'node:fs/promises';
+import {resolve,dirname} from 'node:path';
+import {fileURLToPath} from 'node:url';
+const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
+const output=resolve(root,'worker-dist');
+await rm(output,{recursive:true,force:true});
+await mkdir(resolve(output,'dist/server'),{recursive:true});
+await mkdir(resolve(output,'.openai'),{recursive:true});
+const html=await readFile(resolve(root,'release/FieldShift-Final.html'));
+const template=await readFile(resolve(root,'worker/entry.js'),'utf8');
+const accountApi=await readFile(resolve(root,'worker/account-api.js'),'utf8');
+if(!template.includes('__PAGE_BASE64__'))throw new Error('Worker HTML placeholder is missing.');
+await writeFile(resolve(output,'dist/server/index.js'),accountApi.replace(/^export /gm,'')+'\n'+template.replace('__PAGE_BASE64__',html.toString('base64')));
+await cp(resolve(root,'.openai/hosting.json'),resolve(output,'.openai/hosting.json'));
+await cp(resolve(root,'migrations'),resolve(output,'migrations'),{recursive:true});
+await cp(resolve(root,'drizzle'),resolve(output,'drizzle'),{recursive:true});
+console.log('Worker artifact: '+output);

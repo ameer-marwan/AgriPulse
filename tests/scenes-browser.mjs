@@ -1,0 +1,37 @@
+import {createRequire} from 'node:module';
+import assert from 'node:assert/strict';
+import {mkdir} from 'node:fs/promises';
+const require=createRequire(import.meta.url);
+let playwright;
+try{playwright=require('playwright');}catch{playwright=require('/opt/codex/runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');}
+const origin=process.env.FIELDSHIFT_PREVIEW||'http://127.0.0.1:4173';
+const browser=await playwright.chromium.launch({executablePath:'/usr/bin/chromium',headless:true,proxy:process.env.HTTPS_PROXY?{server:process.env.HTTPS_PROXY,bypass:'127.0.0.1,localhost'}:undefined,args:['--no-sandbox','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+const context=await browser.newContext({viewport:{width:1440,height:1000}});
+await context.addInitScript(()=>sessionStorage.setItem('fieldshift.intro.skip-auto','1'));
+const page=await context.newPage(),errors=[];
+page.on('pageerror',e=>errors.push(e.message));
+const day='2026-10-30',days=Array.from({length:7},(_,i)=>new Date(Date.UTC(2026,9,30+i)).toISOString().slice(0,10));
+const cases=new Map([[10,[0,1,'clear']],[11,[2,1,'partly']],[12,[3,1,'cloudy']],[13,[45,1,'fog']],[14,[61,1,'rain']],[15,[71,1,'snow']],[16,[95,1,'storm']],[17,[0,0,'night']],[18,[999,1,'unknown']]]);
+function fixture(lat,lon){const [code,isDay]=cases.get(lat)||[0,1];return {latitude:lat,longitude:lon,elevation:300,timezone:'UTC',current:{time:day+'T12:00',temperature_2m:22,apparent_temperature:21,relative_humidity_2m:60,wind_speed_10m:12,weather_code:code,is_day:isDay},hourly:{time:Array.from({length:24},(_,i)=>day+'T'+String(i).padStart(2,'0')+':00'),temperature_2m:Array(24).fill(22),precipitation:Array(24).fill(0),soil_moisture_0_to_1cm:Array(24).fill(.25),wind_speed_10m:Array(24).fill(12),relative_humidity_2m:Array(24).fill(60),weather_code:Array(24).fill(code)},daily:{time:days,temperature_2m_max:Array(7).fill(25),temperature_2m_min:Array(7).fill(12),precipitation_sum:Array(7).fill(1),precipitation_probability_max:Array(7).fill(20),et0_fao_evapotranspiration:Array(7).fill(3),wind_speed_10m_max:Array(7).fill(18)}};}
+await page.route('https://api.open-meteo.com/**',async route=>{const url=new URL(route.request().url()),lat=Number(url.searchParams.get('latitude'));if(lat===19){await new Promise(resolve=>setTimeout(resolve,500));return route.fulfill({status:503,json:{error:true}});}await new Promise(resolve=>setTimeout(resolve,150));return route.fulfill({json:fixture(lat,Number(url.searchParams.get('longitude')))});});
+async function route(name){await page.goto(origin+'/#/'+name,{waitUntil:'domcontentloaded'});await page.locator('#view-'+name).waitFor({state:'visible'});}
+async function select(lat){await page.locator('.topbar-field').click();await page.locator('#latitude-input').fill(String(lat));await page.locator('#longitude-input').fill('20');await page.locator('[data-action="coordinates"]').click();}
+async function expectScene(scene){await page.waitForFunction(s=>document.querySelector('#view-weather').dataset.weatherScene===s,scene);assert.equal(await page.locator('#view-weather').getAttribute('data-weather-scene'),scene);}
+await mkdir('/workspace/scratch',{recursive:true});
+try{
+  await page.goto(origin+'/#/weather',{waitUntil:'domcontentloaded'});await page.locator('#view-weather .weather-feature').waitFor();
+  assert.equal(await page.locator('.section-scene').count(),3,'Only weather, water and soil get scenic layers');
+  for(const name of ['overview','map','crops','profit','reports','settings'])assert.equal(await page.locator('#view-'+name+' .section-scene').count(),0,name+' has no scenic background');
+  for(const [lat,[code,isDay,scene]] of cases){await select(lat);await page.waitForFunction(()=>document.querySelector('[data-weather-status]').textContent==='MODEL');await expectScene(scene);assert.match(await page.locator('[data-stat="conditions"]').first().innerText(),code===999?/Unknown|Unavailable|code/i:/\S/);if(scene==='clear'||scene==='cloudy')await page.screenshot({path:'/workspace/scratch/fieldshift-weather-'+scene+'.png'});}
+  await select(10);await expectScene('clear');await select(19);assert.equal(await page.locator('#view-weather').getAttribute('data-weather-scene'),'unknown','Loading new land clears previous scene immediately');await page.waitForFunction(()=>document.querySelector('[data-weather-status]').textContent==='UNAVAILABLE');await expectScene('unknown');
+  await select(14);await expectScene('rain');await page.locator('[data-action="refresh"]').click();await expectScene('rain');
+  await page.emulateMedia({reducedMotion:'reduce'});assert.equal(await page.locator('#view-weather .weather-feature').evaluate(el=>getComputedStyle(el,'::before').animationName),'none','Reduced-motion stops rain animation');await page.emulateMedia({reducedMotion:'no-preference'});
+  await route('water');assert.match(await page.locator('#view-water>.page-heading').evaluate(el=>getComputedStyle(el).backgroundImage),/sea\.jpg/,'Water header uses sea image');await page.locator('#planning-temperature').fill('2');await page.locator('#planning-temperature').dispatchEvent('input');assert.match(await page.locator('#planning-temperature-label').textContent(),/2/,'Scene does not block water controls');await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:'/workspace/scratch/fieldshift-water-sea.png'});
+  await route('soil');assert.match(await page.locator('#view-soil>.page-heading').evaluate(el=>getComputedStyle(el).backgroundImage),/forest\.jpg/,'Soil header uses forest image');await page.getByRole('button',{name:'Add a soil sample',exact:true}).click();assert.equal(await page.locator('#soil-dialog').isVisible(),true,'Forest overlay does not block sample action');await page.locator('#soil-dialog [data-action="close-dialog"]').click();await page.screenshot({path:'/workspace/scratch/fieldshift-soil-forest.png'});
+  assert.equal(await page.locator('body').evaluate(el=>getComputedStyle(el).backgroundImage),'none','No global scenic theme');
+  for(const width of [1440,390,320]){await page.setViewportSize({width,height:width===1440?1000:844});for(const name of ['weather','water','soil','overview']){await route(name);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,name+' fits '+width+'px');}}
+  await page.setViewportSize({width:390,height:844});await route('water');await page.screenshot({path:'/workspace/scratch/fieldshift-water-mobile.png'});
+  await route('settings');await page.locator('#appearance').selectOption('light');for(const name of ['weather','water','soil']){await route(name);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,name+' daylight fits phone');}
+  assert.deepEqual(errors,[],'No uncaught browser errors');
+  console.log('PASS: selected-field weather scenes, day/night and error reset, section-only sea/forest, controls, reduced motion, desktop/mobile/daylight layouts.');
+}catch(error){console.error(await page.evaluate(()=>({viewport:innerWidth,scrollWidth:document.documentElement.scrollWidth,overflow:[...document.querySelectorAll('body *')].filter(el=>{const r=el.getBoundingClientRect();return r.width>0&&r.right>innerWidth+1;}).map(el=>({tag:el.tagName,id:el.id,class:typeof el.className==='string'?el.className:'svg',right:el.getBoundingClientRect().right,width:el.getBoundingClientRect().width})).slice(0,15)})));throw error;}finally{await browser.close();}
