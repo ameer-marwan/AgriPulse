@@ -19,6 +19,10 @@
 .earth-intro.revealed .earth-landscape{opacity:1;animation:intro-farmland-drift 22s ease-in-out infinite alternate}
 .earth-landscape::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 25% 10%,#ffde9550,transparent 42%),linear-gradient(100deg,transparent 25%,#f2f5da0c 50%,transparent 75%);animation:intro-sunlight 12s ease-in-out infinite alternate;pointer-events:none}
 .earth-space{background-color:#02090d;background-image:radial-gradient(ellipse at 50% 50%,#102d3d 0%,#050e1a 44%,#020509 100%);opacity:1;transition:opacity 1s ease,visibility 1s ease}
+.earth-nebula{position:absolute;inset:-8%;background:url('assets/intro-space.jpg') center/cover no-repeat;opacity:.9;animation:intro-nebula-drift 18s ease-in-out infinite alternate;will-change:transform}
+.earth-meteor{position:absolute;z-index:1;width:155px;height:2px;border-radius:50%;background:linear-gradient(90deg,transparent,#8acfff 72%,#fff);filter:drop-shadow(0 0 5px #94d6ff);opacity:0;pointer-events:none}
+.earth-meteor-one{top:20%;left:8%;animation:intro-meteor 3.8s .25s ease-in infinite}
+.earth-meteor-two{top:65%;left:62%;width:110px;animation:intro-meteor 4.8s .8s ease-in infinite}
 .earth-intro.revealed .earth-space{display:grid;opacity:0;visibility:hidden;pointer-events:none}
 .earth-stars{position:absolute;inset:-15%;pointer-events:none;background-image:radial-gradient(circle,#fff 1px,transparent 1.6px),radial-gradient(circle,#9dd6ffcc 1px,transparent 1.5px);background-size:139px 167px,223px 199px}
 .earth-stars-far{opacity:.48;animation:intro-star-drift 45s linear infinite}
@@ -40,6 +44,8 @@
 .earth-intro.revealed .earth-intro-copy>p{animation:intro-copy-rise .8s .34s both}
 .earth-intro.revealed .earth-intro-copy>.earth-intro-enter{animation:intro-copy-rise .8s .48s both;box-shadow:0 0 25px #c9ed8255}
 @keyframes intro-star-drift{from{transform:translate3d(-1%,0,0)}to{transform:translate3d(4%,3%,0)}}
+@keyframes intro-nebula-drift{from{transform:scale(1.05) translate3d(-1%,0,0)}to{transform:scale(1.13) translate3d(1%,1%,0)}}
+@keyframes intro-meteor{0%{opacity:0;transform:translate3d(0,0,0) rotate(24deg)}6%{opacity:1}22%{opacity:0;transform:translate3d(180px,80px,0) rotate(24deg)}100%{opacity:0;transform:translate3d(180px,80px,0) rotate(24deg)}}
 @keyframes intro-earth-arrive{from{transform:scale(.78);opacity:0}to{transform:scale(1);opacity:1}}
 @keyframes intro-atmosphere{from{opacity:.6;transform:scale(.97)}to{opacity:1;transform:scale(1.05)}}
 @keyframes intro-orbit-one{to{transform:rotateX(68deg) rotate(338deg)}}
@@ -50,4 +56,4 @@
 @keyframes intro-farmland-drift{from{transform:scale(1.14) translate3d(-1%,0,0)}to{transform:scale(1.03) translate3d(1%,.5%,0)}}
 @keyframes intro-sunlight{from{opacity:.55;transform:translateX(-2%)}to{opacity:1;transform:translateX(2%)}}
 @media(max-width:600px){.earth-atmosphere{width:82vmin}.earth-orbit{width:92vmin}.earth-intro-copy{width:calc(100% - 28px)}}
-@media(prefers-reduced-motion:reduce){.earth-stars,.earth-atmosphere,.earth-orbit,.earth-flare,.earth-canvas,.earth-zoom-flash,.earth-intro.revealed .earth-landscape,.earth-landscape::after,.earth-intro.revealed .earth-intro-logo,.earth-intro.revealed .earth-intro-copy h1,.earth-intro.revealed .earth-intro-copy>p,.earth-intro.revealed .earth-intro-copy>.earth-intro-enter{animation:none!important}.earth-landscape{transition:none;transform:none}.earth-intro.revealed .earth-space{display:none}}
+@media(prefers-reduced-motion:reduce){.earth-nebula,.earth-meteor,.earth-stars,.earth-atmosphere,.earth-orbit,.earth-flare,.earth-canvas,.earth-zoom-flash,.earth-intro.revealed .earth-landscape,.earth-landscape::after,.earth-intro.revealed .earth-intro-logo,.earth-intro.revealed .earth-intro-copy h1,.earth-intro.revealed .earth-intro-copy>p,.earth-intro.revealed .earth-intro-copy>.earth-intro-enter{animation:none!important}.earth-landscape{transition:none;transform:none}.earth-intro.revealed .earth-space{display:none}}
