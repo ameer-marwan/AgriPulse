@@ -18,7 +18,6 @@ import { initScenes } from "./scenes.js";
 import { initI18n, t, currentLanguage } from "./i18n.js";
 import { initIntro } from "./intro.js";
 import { workspaceStorage, storageReady } from "./storage.js";
-import { initAccounts } from "./accounts.js";
 
 window.__fieldshiftIntro ||= initIntro({language:'en'});
 await storageReady;
@@ -413,7 +412,6 @@ function init() {
       renderFeedback();
     },
   });
-  initAccounts({getState:()=>state,toast}).catch(error=>toast(error.message));
   window.__fieldshiftIntro ||= initIntro({
     language: state.preferences.language,
   });
@@ -434,7 +432,6 @@ function navigate() {
     "crops",
     "profit",
     "reports",
-    "account",
     "explore",
     "feedback",
     "settings",
@@ -462,7 +459,6 @@ function navigate() {
       crops: "Crop planner",
       profit: "Profit & scenarios",
       reports: "Reports",
-      account: "My account",
       explore: "Explore",
       feedback: "Comments & feedback",
       settings: "Settings",
