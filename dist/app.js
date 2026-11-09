@@ -254,6 +254,7 @@ function restoreFieldSettings() {
 }
 
 function init() {
+  if (localStorage.getItem("agripulse.sidebar-collapsed") === "1") document.body.classList.add("sidebar-collapsed");
   // The transient top-bar data badge is intentionally removed.
   $(".system-status")?.remove();
   for(const route of ['overview','weather','soil','water','crops','profit','reports']){
@@ -478,6 +479,13 @@ function bindEvents() {
     const action = event.target.closest("[data-action]");
     if (!action) return;
     const actions = {
+      "toggle-sidebar": () => {
+        const collapsed = document.body.classList.toggle("sidebar-collapsed");
+        localStorage.setItem("agripulse.sidebar-collapsed", collapsed ? "1" : "0");
+        const button = document.querySelector("[data-action=toggle-sidebar]");
+        button?.setAttribute("aria-expanded", String(!collapsed));
+        button?.setAttribute("aria-label", collapsed ? "Expand navigation" : "Collapse navigation");
+      },
       menu: () => document.body.classList.toggle("menu-open"),
       "close-menu": () => document.body.classList.remove("menu-open"),
       location: () => $("#location-dialog").showModal(),
