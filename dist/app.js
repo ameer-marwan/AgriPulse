@@ -300,14 +300,14 @@ function init() {
     <aside class="explore-world-note"><span>✦</span><p><b>No single model fits every farm.</b> The strongest ideas are adapted to local people, evidence, climate, soils and water.</p></aside>
     <div class="explore-world-section-heading explore-resources-heading"><div><span class="eyebrow">TRUSTED RESOURCES</span><h2>Learn more about agriculture.</h2></div><p>Continue exploring with Saudi agriculture, NASA Earth observation, and a global view of changing land.</p></div>
     <div class="learn-resources explore-resources"><article class="panel learn-card learn-ksa"><span class="learn-card-number">01</span><div class="icon-box lime"><svg><use href="#i-leaf"/></svg></div><span class="eyebrow">SAUDI ARABIA</span><h2>KSA Agriculture</h2><p>Discover Saudi agriculture, industry events, technologies, and initiatives supporting the Kingdom’s farming sector.</p><a class="button learn-resource-link" href="https://saudi-agriculture.com/" target="_blank" rel="noopener noreferrer">Open KSA Agriculture <span aria-hidden="true">↗</span></a></article><article class="panel learn-card learn-nasa"><span class="learn-card-number">02</span><div class="icon-box blue"><svg><use href="#i-globe"/></svg></div><span class="eyebrow">EARTH OBSERVATION</span><h2>NASA Harvest</h2><p>Explore NASA’s global agriculture and food-security program, connecting satellite Earth observations with practical decisions.</p><a class="button learn-resource-link" href="https://www.nasaharvest.org" target="_blank" rel="noopener noreferrer">Open NASA Harvest <span aria-hidden="true">↗</span></a></article><article class="panel learn-card learn-earth"><span class="learn-card-number">03</span><div class="icon-box amber"><svg><use href="#i-map"/></svg></div><span class="eyebrow">EXPLORE THE PLANET</span><h2>Google Earth</h2><p>Travel across the globe, inspect landscapes, and understand the geographic context around farms and fields.</p><a class="button learn-resource-link" href="https://earth.google.com/web/@0,-1.38870016,0a,22251752.77375655d,35y,0h,0t,0r/data=CgRCAggBMikKJwolCiExM0FFVHlOV21hSXJSMUxBZjZvdy1Da05iczc1dHFhX3cgAToDCgEwQgIIAEoHCJvAuHEQAQ" target="_blank" rel="noopener noreferrer">Open Google Earth <span aria-hidden="true">↗</span></a></article></div>
-    <aside class="learn-note"><span>✦</span><p><b>Keep learning beyond your field.</b> These websites open in a new tab, so your AgriNova workspace stays exactly where you left it.</p></aside>`;
+    <aside class="learn-note"><span>✦</span><p><b>Keep learning beyond your field.</b> These websites open in a new tab, so your AgriPulse workspace stays exactly where you left it.</p></aside>`;
   $("main").insertBefore(exploreView, $(".app-footer"));
   const feedbackView = document.createElement("section");
   feedbackView.className = "view";
   feedbackView.id = "view-feedback";
   feedbackView.hidden = true;
   feedbackView.innerHTML =
-    '<div class="page-heading"><div><span class="eyebrow">COMMENTS & FEEDBACK</span><h1>Help AgriNova grow<span>.</span></h1><p>Share an idea, report a problem, or tell us what works well.</p></div><span class="pill">SAVED FEEDBACK</span></div><div class="feedback-layout"><form id="feedback-form" class="panel feedback-form"><div class="panel-heading"><div><span class="eyebrow">YOUR MESSAGE</span><h2>What would you like us to know?</h2></div></div><label>Name (optional)<input name="name" maxlength="60" placeholder="Your name"></label><div class="form-grid"><label>Feedback type<select name="category"><option value="Idea">Idea</option><option value="Problem">Problem</option><option value="Question">Question</option><option value="Compliment">Compliment</option></select></label><label>Overall rating<select name="rating"><option value="5">5 · Excellent</option><option value="4">4 · Good</option><option value="3">3 · Okay</option><option value="2">2 · Needs work</option><option value="1">1 · Poor</option></select></label></div><label>Comment<textarea name="comment" minlength="10" maxlength="1000" required placeholder="Write your feedback here…"></textarea></label><button class="button full" type="submit">Save feedback</button><p class="fine-print">Feedback is included when you download the workspace backup.</p></form><article class="panel feedback-history"><div class="panel-heading"><div><span class="eyebrow">YOUR FEEDBACK</span><h2>Recent feedback</h2></div><span class="pill" id="feedback-count">0 COMMENTS</span></div><div id="feedback-list"></div></article></div>';
+    '<div class="page-heading"><div><span class="eyebrow">COMMENTS & FEEDBACK</span><h1>Help AgriPulse grow<span>.</span></h1><p>Share an idea, report a problem, or tell us what works well.</p></div><span class="pill">SAVED FEEDBACK</span></div><div class="feedback-layout"><form id="feedback-form" class="panel feedback-form"><div class="panel-heading"><div><span class="eyebrow">YOUR MESSAGE</span><h2>What would you like us to know?</h2></div></div><label>Name (optional)<input name="name" maxlength="60" placeholder="Your name"></label><div class="form-grid"><label>Feedback type<select name="category"><option value="Idea">Idea</option><option value="Problem">Problem</option><option value="Question">Question</option><option value="Compliment">Compliment</option></select></label><label>Overall rating<select name="rating"><option value="5">5 · Excellent</option><option value="4">4 · Good</option><option value="3">3 · Okay</option><option value="2">2 · Needs work</option><option value="1">1 · Poor</option></select></label></div><label>Comment<textarea name="comment" minlength="10" maxlength="1000" required placeholder="Write your feedback here…"></textarea></label><button class="button full" type="submit">Save feedback</button><p class="fine-print">Feedback is included when you download the workspace backup.</p></form><article class="panel feedback-history"><div class="panel-heading"><div><span class="eyebrow">YOUR FEEDBACK</span><h2>Recent feedback</h2></div><span class="pill" id="feedback-count">0 COMMENTS</span></div><div id="feedback-list"></div></article></div>';
   $("main").insertBefore(feedbackView, $(".app-footer"));
   replaceArrowGlyphs();
   const savedPlansPanel = document.createElement("article");
@@ -2272,7 +2272,7 @@ function addAssistantMessage(role, content) {
   const article = document.createElement("article");
   article.className = "assistant-message " + role;
   const label = document.createElement("b");
-  label.textContent = role === "user" ? "You" : "AgriNova Assistant";
+  label.textContent = role === "user" ? "You" : "AgriPulse Assistant";
   const body = document.createElement("p");
   body.textContent = content;
   article.append(label, body);
@@ -2285,9 +2285,9 @@ function instantAssistantReply(message) {
   if (/weather|rain|temperature|forecast|wind/.test(q)) return `For ${field}, open Weather to see the live forecast, rainfall, wind, and evapotranspiration. I can help you turn those readings into a planting or irrigation decision.`;
   if (/water|irrigat|drought|moisture/.test(q)) return `Open Water for the latest water balance. Start with the current soil moisture and recent rainfall, then adjust irrigation in small steps and review the result after the next reading.`;
   if (/soil|ph|nitrogen|fertil/.test(q)) return `Open Soil to review pH, moisture, and nutrients. Keep a baseline sample, change one input at a time, and use the crop planner to compare rotations that protect soil health.`;
-  if (/profit|price|money|cost|sell|revenue/.test(q)) return `Open Profit to enter your local selling price, yield, area, and costs. AgriNova calculates revenue, costs, and margin from your numbers instead of assuming every market pays the same.`;
+  if (/profit|price|money|cost|sell|revenue/.test(q)) return `Open Profit to enter your local selling price, yield, area, and costs. AgriPulse calculates revenue, costs, and margin from your numbers instead of assuming every market pays the same.`;
   if (/crop|rotation|plant|wheat|corn|rice/.test(q)) return `Open Crop planner to compare rotations. A strong plan balances expected margin with water demand, soil recovery, and the weather outlook for ${field}.`;
-  if (/nasa|satellite|earth|space/.test(q)) return `AgriNova combines NASA POWER climate history with live weather and your local field inputs. Open NASA data to inspect the source and time range behind each insight.`;
+  if (/nasa|satellite|earth|space/.test(q)) return `AgriPulse combines NASA POWER climate history with live weather and your local field inputs. Open NASA data to inspect the source and time range behind each insight.`;
   return `I’m ready to help with ${field}. Try asking about weather, water, soil, crop rotation, profit, or NASA data. I’ll use the values in your workspace when they are available.`;
 }
 function initAssistant() {
@@ -2296,7 +2296,7 @@ function initAssistant() {
   if (!host || !form) return;
   addAssistantMessage(
     "assistant",
-    "Welcome to AgriNova AI.",
+    "Welcome to AgriPulse AI.",
   );
   assistantHistory.forEach(item=>addAssistantMessage(item.role,item.content));
   form.addEventListener("submit", async (event) => {
@@ -2323,7 +2323,7 @@ function initAssistant() {
         return;
       }
       status.textContent = "AI ready · running on your device";
-      const stream = await aiEngine.chat.completions.create({messages:[{role:"system",content:"You are AgriNova AI, a helpful general assistant. Answer clearly and concisely. Never invent farm data. Field data: "+JSON.stringify(assistantFieldContext())},...assistantHistory.slice(-2).map(item=>({...item,content:item.content.slice(0,800)})),{role:"user",content:message}],temperature:0.7,max_tokens:256,stream:true});
+      const stream = await aiEngine.chat.completions.create({messages:[{role:"system",content:"You are AgriPulse AI, a helpful general assistant. Answer clearly and concisely. Never invent farm data. Field data: "+JSON.stringify(assistantFieldContext())},...assistantHistory.slice(-2).map(item=>({...item,content:item.content.slice(0,800)})),{role:"user",content:message}],temperature:0.7,max_tokens:256,stream:true});
       let answer='';for await(const chunk of stream){answer+=chunk.choices?.[0]?.delta?.content||'';pending.querySelector('p').textContent=answer||'Thinking…';host.scrollTop=host.scrollHeight;}answer=answer.trim();
       if (!answer) throw new Error("The model returned an empty response. Please try again.");
       const latest = host.lastElementChild;
@@ -2425,7 +2425,7 @@ function download(name, content, type) {
 }
 function exportCSV() {
   const rows = [
-    ["AgriNova field intelligence report"],
+    ["AgriPulse field intelligence report"],
     ["Location", state.location.name],
     ["Retrieved", state.weather?.retrievedAt ?? "Unavailable"],
     ["Signal", "Value", "Evidence type", "Source"],
