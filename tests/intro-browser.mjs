@@ -1,5 +1,6 @@
 import {createRequire} from 'node:module';
 import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
 import {mkdir} from 'node:fs/promises';
 const require=createRequire(import.meta.url);
 let playwright;
@@ -10,6 +11,7 @@ const browser=await playwright.chromium.launch({executablePath:process.env.CHROM
 await mkdir('/workspace/scratch/agripulse-intro',{recursive:true});
 const errors=[];
 const observe=page=>page.on('pageerror',error=>errors.push(error.message));
+const hash=value=>createHash('sha256').update(value).digest('hex');
 try {
   const page=await browser.newPage({viewport:{width:1440,height:900}});
   observe(page);
@@ -19,9 +21,9 @@ try {
   await page.waitForTimeout(600);
   const canvas=intro.locator('canvas').first();
   assert.equal(await canvas.count(),1,'The intro contains a rendered globe');
-  const first=await canvas.evaluate(node=>node.toDataURL());
+  const first=hash(await canvas.evaluate(node=>node.toDataURL()));
   await page.waitForTimeout(450);
-  const second=await canvas.evaluate(node=>node.toDataURL());
+  const second=hash(await canvas.evaluate(node=>node.toDataURL()));
   assert.notEqual(first,second,'The Earth changes visually as it rotates');
   await page.screenshot({path:'/workspace/scratch/agripulse-intro/orbit.png'});
   await page.waitForFunction(()=>document.querySelector('.fieldshift-intro')?.classList.contains('zooming'));
@@ -31,7 +33,14 @@ try {
   await enter.waitFor({state:'visible'});
   await page.waitForTimeout(900);
   assert.match(await intro.locator('h1').innerText(),/^AgriPulse\.?$/);
-  assert.ok(await intro.locator('svg').count()>0,'The final scene contains the animated plant');
+  assert.equal(await intro.locator('.ap-growing-plant').count(),0,'The illustrated plant is removed');
+  assert.ok(await intro.locator('.ap-plant-photo').evaluate(node=>node.complete && node.naturalWidth>1000),'The real plant photograph loads');
+  await page.waitForSelector('.ap-plant-scene.ap-photo-ready');
+  const plantCanvas=intro.locator('.ap-plant-canvas');
+  assert.ok(await plantCanvas.evaluate(node=>Number(node.dataset.growth)>.99),'Both leaves reach their full size');
+  const plantFrame=hash(await plantCanvas.evaluate(node=>node.toDataURL()));
+  await page.waitForTimeout(450);
+  assert.notEqual(hash(await plantCanvas.evaluate(node=>node.toDataURL())),plantFrame,'The photographed leaves move in the breeze');
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
   await page.screenshot({path:'/workspace/scratch/agripulse-intro/ready.png'});
   await enter.click();
@@ -61,6 +70,7 @@ try {
   await mobile.evaluate(()=>window.__fieldshiftIntro.open());
   await mobile.waitForFunction(()=>document.querySelector('.fieldshift-intro')?.classList.contains('revealed'));
   await mobile.waitForTimeout(900);
+  await mobile.waitForFunction(()=>[...document.querySelectorAll('.ap-intro-copy h1,.ap-intro-copy>p,.ap-intro-enter')].every(node=>Number(getComputedStyle(node).opacity)>.98));
   assert.equal(await mobile.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,'Phone layout stays within the viewport');
   const button=await mobile.locator('.earth-intro-enter').boundingBox();
   assert.ok(button && button.y>=0 && button.y+button.height<=844,'Entry button fits a phone screen');
@@ -72,6 +82,22 @@ try {
   await reduced.waitForFunction(()=>document.querySelector('.fieldshift-intro')?.classList.contains('revealed'),null,{timeout:2000});
   await reduced.locator('.earth-intro-enter').click();
   await reduced.locator('.fieldshift-intro').waitFor({state:'hidden'});
+  const growthTest=await browser.newPage();
+  await growthTest.route('**/growth-test.html',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><canvas></canvas>'}));
+  await growthTest.goto(origin+'/growth-test.html');
+  const stages=await growthTest.evaluate(async()=>{
+    const {createPlantGrowth}=await import('/growth.js');
+    const canvas=document.querySelector('canvas'),renderer=createPlantGrowth(canvas,document.body);
+    await renderer.ready;
+    const samples=[0,1.7,4.2].map(t=>{
+      renderer.draw(t);
+      const data=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;
+      let green=0;for(let i=0;i<data.length;i+=4)if(data[i+1]>100&&data[i+1]>data[i]*1.02&&data[i+1]>data[i+2]*1.4)green++;
+      return green;
+    });renderer.destroy();return samples;
+  });
+  assert.ok(stages[2]>stages[0]+10000,'The final growth frame has two large green leaves above the bare-soil frame');
+  assert.ok(stages[1]>stages[0]&&stages[1]<stages[2],'The middle frame has a partially grown seedling');
   assert.deepEqual(errors,[],'The animation and app have no uncaught JavaScript errors');
   console.log('PASS: rendered Earth rotates, camera zooms, plant/title reveal, entry/skip/replay, French/Arabic, phone layout, reduced motion, and dismissal persistence.');
 } finally { await browser.close(); }

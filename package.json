@@ -9,6 +9,7 @@
     "package:final": "node scripts/package-final.mjs",
     "build:worker": "npm run package:final && node scripts/build-worker.mjs",
     "render:intro": "node scripts/render-intro.mjs",
+    "render:growth": "node scripts/render-plant-growth.mjs",
     "test": "node --test tests/data.test.mjs tests/geo.test.mjs worker/account-api.test.mjs",
     "test:browser": "node tests/browser-smoke.mjs",
     "test:final": "node tests/final-browser.mjs",

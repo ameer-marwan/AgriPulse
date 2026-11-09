@@ -2487,11 +2487,14 @@ async function loadNasa() {
 }
 // Keep the orbit and plant animation smooth while the map engine is idle.
 // Settings replays run after the workspace has already been initialized.
-if (document.body.classList.contains("intro-open")) {
-  window.addEventListener("fieldshift:intro:closed", () => setTimeout(init, 380), { once: true });
-} else {
-  init();
+function initializeWorkspace() {
+  if (document.body.classList.contains("intro-open")) {
+    window.addEventListener("fieldshift:intro:closed", () => setTimeout(initializeWorkspace, 380), { once: true });
+  } else {
+    init();
+  }
 }
+initializeWorkspace();
 
 function replaceArrowGlyphs() {
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
