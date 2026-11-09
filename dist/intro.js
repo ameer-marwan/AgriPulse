@@ -1,4 +1,5 @@
 /** AgriPulse: a continuous, locally rendered journey from Earth to a growing plant. */
+import { createPlantGrowth } from './growth.js';
 const introCopy = {
   en: {
     title: 'AgriPulse', eyebrow: 'A bigger perspective. A better next season.',
@@ -24,7 +25,7 @@ const introCopy = {
 function createEarthRenderer(canvas, fallback) {
   const context = canvas.getContext('2d', { alpha: true });
   if (!context) return { draw() {}, destroy() {} };
-  const size = matchMedia('(max-width: 600px)').matches ? 288 : 384;
+  const size = matchMedia('(max-width: 600px)').matches ? 320 : 512;
   canvas.width = canvas.height = size;
   const frame = context.createImageData(size, size);
   const pixels = frame.data;
@@ -86,11 +87,13 @@ function createEarthRenderer(canvas, fallback) {
   };
 }
 
+
 export function initIntro({ language = 'en' } = {}) {
   let current = introCopy[language] ? language : 'en';
   let animationFrame = 0;
   let hideTimer = 0;
   let renderer = null;
+  let plantRenderer = null;
   let startedAt = 0;
   let lastDraw = 0;
   let returnFocus = null;
@@ -112,24 +115,9 @@ export function initIntro({ language = 'en' } = {}) {
     <div class="ap-orbit-caption" aria-hidden="true"><span class="ap-coordinate">EARTH / 01</span><p></p></div>
     <div class="ap-plant-scene" aria-hidden="true">
       <div class="ap-plant-glow"></div>
-      <svg class="ap-growing-plant" viewBox="0 0 400 500" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="ap-stem" x1="190" y1="420" x2="220" y2="120" gradientUnits="userSpaceOnUse"><stop stop-color="#3C6734"/><stop offset=".55" stop-color="#A5D961"/><stop offset="1" stop-color="#DAF3A6"/></linearGradient>
-          <linearGradient id="ap-leaf-left" x1="72" y1="207" x2="207" y2="305" gradientUnits="userSpaceOnUse"><stop stop-color="#DAF3A3"/><stop offset=".4" stop-color="#8ABD54"/><stop offset="1" stop-color="#2C682E"/></linearGradient>
-          <linearGradient id="ap-leaf-right" x1="320" y1="115" x2="202" y2="258" gradientUnits="userSpaceOnUse"><stop stop-color="#E5F7BA"/><stop offset=".4" stop-color="#ADD869"/><stop offset="1" stop-color="#347C3C"/></linearGradient>
-          <radialGradient id="ap-soil"><stop stop-color="#759249" stop-opacity=".28"/><stop offset="1" stop-color="#759249" stop-opacity="0"/></radialGradient>
-        </defs>
-        <ellipse cx="200" cy="429" rx="181" ry="43" fill="url(#ap-soil)"/>
-        <ellipse class="ap-soil-ring" cx="200" cy="426" rx="137" ry="21" stroke="#C5E99B" stroke-opacity=".28" stroke-dasharray="2 8"/>
-        <path class="ap-root" d="M200 425C190 448 167 447 158 463M200 425C207 447 232 444 246 466M200 429V478" stroke="#C3DC91" stroke-width="1.5" stroke-opacity=".45" stroke-linecap="round"/>
-        <g class="ap-plant-sway">
-          <path class="ap-stem-path" d="M200 425C194 372 207 338 205 299C203 249 217 204 234 163" stroke="url(#ap-stem)" stroke-width="10" stroke-linecap="round"/>
-          <g class="ap-leaf ap-leaf-left"><path d="M205 307C134 312 81 267 73 203C139 201 198 226 205 307Z" fill="url(#ap-leaf-left)"/><path d="M203 305C163 266 126 241 89 218" stroke="#E1F4B5" stroke-opacity=".48" stroke-width="1.7"/><path d="m141 254-4-25m28 46-2-34m-22 13-27 1m51 20-28 1" stroke="#DAEFAE" stroke-opacity=".3"/></g>
-          <g class="ap-leaf ap-leaf-right"><path d="M214 250C215 169 255 123 327 109C330 185 298 246 214 250Z" fill="url(#ap-leaf-right)"/><path d="M216 247C245 201 283 151 312 125" stroke="#EFFAD3" stroke-opacity=".6" stroke-width="1.8"/><path d="m254 192 33-4m-13-22 27-4m-47 30-2-31m22 5 1-24" stroke="#E8F7C9" stroke-opacity=".28"/></g>
-          <g class="ap-leaf ap-leaf-small"><path d="M200 366C150 369 123 348 113 310C160 308 190 327 200 366Z" fill="url(#ap-leaf-left)"/><path d="m197 364-69-42" stroke="#D9EFB1" stroke-opacity=".35"/></g>
-        </g>
-        <circle class="ap-seed-light" cx="200" cy="424" r="4" fill="#D9F4AE"/>
-      </svg>
+      <canvas class="ap-plant-canvas"></canvas>
+      <img class="ap-plant-photo" src="assets/intro-plant.jpg" alt="" decoding="async" fetchpriority="high">
+      <div class="ap-macro-light"></div>
       <div class="ap-plant-particle ap-particle-one"></div><div class="ap-plant-particle ap-particle-two"></div><div class="ap-plant-particle ap-particle-three"></div>
       <span class="ap-plant-note">EARTH OBSERVATIONS → NEW POSSIBILITIES</span>
     </div>
@@ -169,6 +157,8 @@ export function initIntro({ language = 'en' } = {}) {
     animationFrame = 0;
     renderer?.destroy();
     renderer = null;
+    plantRenderer?.destroy();
+    plantRenderer = null;
   }
 
   function lockPage(lock) {
@@ -201,7 +191,7 @@ export function initIntro({ language = 'en' } = {}) {
     if (!opened) return;
     opened = false;
     halt();
-    try { sessionStorage.setItem('agripulse.intro.seen.v2', '1'); sessionStorage.setItem('fieldshift.intro.skip-auto', '1'); } catch { /* Entry works with browser storage disabled. */ }
+    try { sessionStorage.setItem('agripulse.intro.seen.growth.v1', '1'); sessionStorage.setItem('fieldshift.intro.skip-auto', '1'); } catch { /* Entry works with browser storage disabled. */ }
     overlay.classList.add('leaving');
     document.body.classList.remove('intro-open', 'intro-pending');
     lockPage(false);
@@ -216,15 +206,15 @@ export function initIntro({ language = 'en' } = {}) {
     const elapsed = now - startedAt;
     if (elapsed >= 2200) overlay.classList.add('ap-diving', 'zooming');
     if (elapsed >= 3000 && elapsed < 3900) { overlay.classList.add('ap-land'); setStage('land'); }
-    if (elapsed >= 3900 && elapsed < 5900) { overlay.classList.add('ap-land', 'ap-growing'); setStage('grow'); }
-    if (elapsed >= 5900) {
+    if (elapsed >= 3900 && elapsed < 8000) { overlay.classList.add('ap-land', 'ap-growing'); setStage('grow'); }
+    if (elapsed >= 8000) {
       overlay.classList.add('ap-land', 'ap-growing');
       setStage('ready');
-      halt();
-      return;
     }
-    if (elapsed < 3800 && now - lastDraw >= 32) {
-      renderer?.draw(elapsed / 1000);
+    if (now - lastDraw >= 40) {
+      if (elapsed < 3800) renderer?.draw(elapsed / 1000);
+      else if (renderer) { renderer.destroy(); renderer = null; }
+      if (elapsed >= 3900) plantRenderer?.draw((elapsed - 3900) / 1000);
       lastDraw = now;
     }
     animationFrame = requestAnimationFrame(tick);
@@ -255,6 +245,9 @@ export function initIntro({ language = 'en' } = {}) {
     fallback.hidden = false;
     overlay.querySelector('.ap-earth-canvas').classList.remove('texture-ready');
     try { renderer = createEarthRenderer(overlay.querySelector('.ap-earth-canvas'), fallback); } catch { renderer = null; }
+    const plantScene = overlay.querySelector('.ap-plant-scene');
+    plantScene.classList.remove('ap-photo-ready');
+    try { plantRenderer = createPlantGrowth(overlay.querySelector('.ap-plant-canvas'), plantScene); } catch { plantRenderer = null; }
     startedAt = performance.now();
     lastDraw = 0;
     skip.focus({ preventScroll: true });
@@ -287,7 +280,7 @@ export function initIntro({ language = 'en' } = {}) {
   window.addEventListener('pageshow', event => { if (event.persisted && opened) open(); });
   applyCopy();
   let seen = false;
-  try { seen = sessionStorage.getItem('agripulse.intro.seen.v2') === '1'; } catch { /* No-storage visits can still use the introduction. */ }
+  try { seen = sessionStorage.getItem('agripulse.intro.seen.growth.v1') === '1'; } catch { /* No-storage visits can still use the introduction. */ }
   if (!seen) open();
   else document.body.classList.remove('intro-pending');
   return { open, close };

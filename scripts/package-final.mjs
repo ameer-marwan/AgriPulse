@@ -26,7 +26,7 @@ html=html.replace(/<link rel="stylesheet" href="[^"]+"\s*\/?>/g,'').replace('</h
 html=html.replaceAll('assets/logo-new.png',logo);
 html=html.replaceAll('assets/dunia-alajial-logo.jpg',await dataUri('dist/assets/dunia-alajial-logo.jpg','image/jpeg'));
 let js='(async()=>{\nconst __fieldshiftModules = {};\n';
-for(const name of ['storage','accounts','data','geo','planning','scenes','i18n','intro']){
+for(const name of ['storage','accounts','data','geo','planning','scenes','i18n','growth','intro']){
   let code=await read('dist/'+name+'.js');
   const names=[...code.matchAll(/^export\s+(?:async\s+)?(?:function|const|let|class)\s+(\w+)/gm)].map(m=>m[1]);
   if(!names.length)throw Error('No named exports in '+name);
@@ -45,6 +45,8 @@ html=html.replace('<script type="module" src="app.js"></script>',()=>'<script>'+
 // Dynamic intro markup is part of the injected bundle, so embed its logo after script assembly too.
 html=html.replaceAll('assets/logo-new.png',logo);
 html=html.replaceAll('assets/earth-texture.jpg',await dataUri('dist/assets/earth-texture.jpg','image/jpeg'));
+html=html.replaceAll('assets/intro-plant.jpg',await dataUri('dist/assets/intro-plant.jpg','image/jpeg'));
+html=html.replaceAll('assets/intro-soil.jpg',await dataUri('dist/assets/intro-soil.jpg','image/jpeg'));
 for (const name of ['china','ksa','netherlands','kenya','brazil']) {
   html=html.replaceAll('assets/explore-'+name+'.webp',await dataUri('dist/assets/explore-'+name+'.webp','image/webp'));
 }
