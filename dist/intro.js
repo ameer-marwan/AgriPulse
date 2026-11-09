@@ -8,7 +8,7 @@ const introCopy = {
     steps: ['Our planet', 'Your land', 'New possibilities'], orbit: 'Every field is part of something bigger.', land: 'A closer look at the land that matters.', grow: 'Better decisions. Stronger roots.', scroll: 'Built around your land',
     chooseMode: 'Choose your workspace', modeBody: 'Start with the experience that feels right for your farm. You can change this any time in Settings.',
     simple: 'Simple farmer', simpleBody: 'A guided workspace with fewer inputs. AgriPulse keeps the key steps clear and uses your selected field to fill in what it can.',
-    advanced: 'Advanced farmer', advancedBody: 'The full AgriPulse workspace, with detailed field, crop, water and profit controls for deeper planning.', chooseSimple: 'Start simple', chooseAdvanced: 'Open full workspace'
+    advanced: 'Complex farmer', advancedBody: 'The full AgriPulse workspace, with detailed field, crop, water and profit controls for deeper planning.', chooseSimple: 'Start simple', chooseAdvanced: 'Open complex workspace'
   },
   fr: {
     title: 'AgriPulse', eyebrow: 'Une vision plus large. Une meilleure prochaine saison.',
