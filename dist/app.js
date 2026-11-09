@@ -263,22 +263,6 @@ function init() {
     bar.innerHTML='<div><span class="eyebrow">YOUR SELECTED LAND</span><strong data-context-field>Choose your field</strong><p data-context-status role="status">Choose a place to load its weather, rainfall, water demand and modeled surface moisture.</p></div><div class="field-data-actions"><button class="button" type="button" data-action="location" data-context-select>Choose field</button><button class="button secondary" type="button" data-action="geolocation">Use my location</button><button class="button secondary" type="button" data-action="refresh" data-context-refresh hidden>Refresh data ↻</button></div>';
     heading.after(bar);
   }
-  const feedbackLink = document.createElement("a");
-  feedbackLink.href = "#/feedback";
-  feedbackLink.dataset.route = "feedback";
-  feedbackLink.innerHTML =
-    '<svg><use href="#i-file"/></svg>Comments & feedback';
-  $(".side-nav").append(feedbackLink);
-  const aboutLink = document.createElement("a");
-  aboutLink.href = "#/about";
-  aboutLink.dataset.route = "about";
-  aboutLink.innerHTML = '<svg><use href="#i-globe"/></svg>About us';
-  $(".side-nav").append(aboutLink);
-  const exploreLink = document.createElement("a");
-  exploreLink.href = "#/explore";
-  exploreLink.dataset.route = "explore";
-  exploreLink.innerHTML = '<svg><use href="#i-globe"/></svg>Explore';
-  $(".side-nav").insertBefore(exploreLink, feedbackLink);
   const exploreView = document.createElement("section");
   exploreView.className = "view";
   exploreView.id = "view-explore";
