@@ -51,4 +51,6 @@ for (const name of ['china','ksa','netherlands','kenya','brazil']) {
 if(html.includes('assets/logo-new.png'))throw Error('Portable build contains an unresolved FieldShift logo URL');
 const target=resolve(out,'FieldShift-Final.html');
 await writeFile(target,html);
+// Vercel serves this entrypoint when the portable release is deployed.
+await writeFile(resolve(out,'index.html'),html);
 console.log('Portable website: '+target+' ('+Buffer.byteLength(html).toLocaleString()+' bytes)');

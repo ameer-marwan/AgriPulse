@@ -263,22 +263,6 @@ function init() {
     bar.innerHTML='<div><span class="eyebrow">YOUR SELECTED LAND</span><strong data-context-field>Choose your field</strong><p data-context-status role="status">Choose a place to load its weather, rainfall, water demand and modeled surface moisture.</p></div><div class="field-data-actions"><button class="button" type="button" data-action="location" data-context-select>Choose field</button><button class="button secondary" type="button" data-action="geolocation">Use my location</button><button class="button secondary" type="button" data-action="refresh" data-context-refresh hidden>Refresh data ↻</button></div>';
     heading.after(bar);
   }
-  const feedbackLink = document.createElement("a");
-  feedbackLink.href = "#/feedback";
-  feedbackLink.dataset.route = "feedback";
-  feedbackLink.innerHTML =
-    '<svg><use href="#i-file"/></svg>Comments & feedback';
-  $(".side-nav").append(feedbackLink);
-  const aboutLink = document.createElement("a");
-  aboutLink.href = "#/about";
-  aboutLink.dataset.route = "about";
-  aboutLink.innerHTML = '<svg><use href="#i-globe"/></svg>About us';
-  $(".side-nav").append(aboutLink);
-  const exploreLink = document.createElement("a");
-  exploreLink.href = "#/explore";
-  exploreLink.dataset.route = "explore";
-  exploreLink.innerHTML = '<svg><use href="#i-globe"/></svg>Explore';
-  $(".side-nav").insertBefore(exploreLink, feedbackLink);
   const exploreView = document.createElement("section");
   exploreView.className = "view";
   exploreView.id = "view-explore";
@@ -308,7 +292,7 @@ function init() {
   feedbackView.id = "view-feedback";
   feedbackView.hidden = true;
   feedbackView.innerHTML =
-    '<div class="page-heading"><div><span class="eyebrow">COMMENTS & FEEDBACK</span><h1>Help AgriPulse grow<span>.</span></h1><p>Share an idea, report a problem, or tell us what works well.</p></div><span class="pill">SAVED FEEDBACK</span></div><div class="feedback-layout"><form id="feedback-form" class="panel feedback-form"><div class="panel-heading"><div><span class="eyebrow">YOUR MESSAGE</span><h2>What would you like us to know?</h2></div></div><label>Name (optional)<input name="name" maxlength="60" placeholder="Your name"></label><div class="form-grid"><label>Feedback type<select name="category"><option value="Idea">Idea</option><option value="Problem">Problem</option><option value="Question">Question</option><option value="Compliment">Compliment</option></select></label><label>Overall rating<select name="rating"><option value="5">5 · Excellent</option><option value="4">4 · Good</option><option value="3">3 · Okay</option><option value="2">2 · Needs work</option><option value="1">1 · Poor</option></select></label></div><label>Comment<textarea name="comment" minlength="10" maxlength="1000" required placeholder="Write your feedback here…"></textarea></label><button class="button full" type="submit">Save feedback</button><p class="fine-print">Feedback is included when you download the workspace backup.</p></form><article class="panel feedback-history"><div class="panel-heading"><div><span class="eyebrow">YOUR FEEDBACK</span><h2>Recent feedback</h2></div><span class="pill" id="feedback-count">0 COMMENTS</span></div><div id="feedback-list"></div></article></div>';
+    '<div class="page-heading"><div><span class="eyebrow">COMMENTS & FEEDBACK</span><h1>Help AgriPulse grow<span>.</span></h1><p>Share an idea, report a problem, or tell us what works well.</p></div><span class="pill">PRIVATE NOTES</span></div><div class="feedback-layout"><form id="feedback-form" class="panel feedback-form"><div class="panel-heading"><div><span class="eyebrow">YOUR MESSAGE</span><h2>What would you like us to know?</h2></div></div><label>Name (optional)<input name="name" maxlength="60" placeholder="Your name"></label><div class="form-grid"><label>Feedback type<select name="category"><option value="Idea">Idea</option><option value="Problem">Problem</option><option value="Question">Question</option><option value="Compliment">Compliment</option></select></label><label>Overall rating<select name="rating"><option value="5">5 · Excellent</option><option value="4">4 · Good</option><option value="3">3 · Okay</option><option value="2">2 · Needs work</option><option value="1">1 · Poor</option></select></label></div><label>Comment<textarea name="comment" minlength="10" maxlength="1000" required placeholder="Write your feedback here…"></textarea></label><button class="button full" type="submit">Save feedback</button><p class="fine-print">Your note stays in your local workspace and is included in your downloaded backup.</p></form><article class="panel feedback-history feedback-why"><div class="panel-heading"><div><span class="eyebrow">WHY YOUR COMMENT MATTERS</span><h2>Your feedback shapes the next field decision.</h2></div><span class="pill">FARMER VOICE</span></div><p>Every comment helps us make AgriPulse clearer, more practical, and more trustworthy for farmers and students. Tell us where a chart is confusing, which crop or market is missing, or what would make a recommendation easier to act on.</p><div class="feedback-reasons"><span>Make tools easier to use</span><span>Improve local relevance</span><span>Strengthen NASA data explanations</span></div></article></div>';
   $("main").insertBefore(feedbackView, $(".app-footer"));
   replaceArrowGlyphs();
   const savedPlansPanel = document.createElement("article");
@@ -2501,7 +2485,13 @@ async function loadNasa() {
         " You can retry using the button.</p>";
   }
 }
-init();
+// Keep the orbit and plant animation smooth while the map engine is idle.
+// Settings replays run after the workspace has already been initialized.
+if (document.body.classList.contains("intro-open")) {
+  window.addEventListener("fieldshift:intro:closed", () => setTimeout(init, 380), { once: true });
+} else {
+  init();
+}
 
 function replaceArrowGlyphs() {
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
