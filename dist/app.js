@@ -22,6 +22,26 @@ import { workspaceStorage, storageReady } from "./storage.js";
 window.__fieldshiftIntro ||= initIntro({language:'en'});
 await storageReady;
 
+// The welcome choice is a presentation preference, not an account or a data claim.
+// Guided mode deliberately keeps the high-value inputs visible while tucking away
+// optional scenario details. Full mode always leaves every control available.
+function applyFarmerMode(mode) {
+  const simple = mode === 'simple';
+  document.body.classList.toggle('simple-farmer', simple);
+  document.body.classList.toggle('advanced-farmer', !simple);
+  document.documentElement.dataset.farmerMode = simple ? 'simple' : 'advanced';
+  document.querySelectorAll('[data-farmer-mode-label]').forEach((label) => {
+    label.textContent = simple ? 'GUIDED MODE' : 'FULL CONTROLS';
+  });
+  document.querySelectorAll('.economics-inputs .market-evidence-inputs input, .economics-inputs .market-evidence-inputs select, .economics-inputs .form-grid label:nth-child(n + 4) input').forEach((input) => {
+    input.disabled = simple;
+  });
+}
+let savedFarmerMode = 'advanced';
+try { savedFarmerMode = localStorage.getItem('agripulse.farmer-mode') || 'advanced'; } catch { /* Use full controls if preferences cannot persist. */ }
+applyFarmerMode(savedFarmerMode);
+window.addEventListener('fieldshift:mode:selected', (event) => applyFarmerMode(event.detail));
+
 const $ = (q, root = document) => root.querySelector(q);
 const $$ = (q, root = document) => [...root.querySelectorAll(q)];
 const text = (q, value) =>
@@ -257,6 +277,22 @@ function init() {
   if (localStorage.getItem("agripulse.sidebar-collapsed") === "1") document.body.classList.add("sidebar-collapsed");
   // The transient top-bar data badge is intentionally removed.
   $(".system-status")?.remove();
+  const modeIndicator = document.createElement('span');
+  modeIndicator.className = 'farmer-mode-indicator';
+  modeIndicator.setAttribute('data-farmer-mode-label', '');
+  modeIndicator.setAttribute('title', 'Workspace mode selected after the AgriPulse introduction');
+  $('.topbar-right')?.prepend(modeIndicator);
+  applyFarmerMode(document.body.classList.contains('simple-farmer') ? 'simple' : 'advanced');
+  const farmerMode = $('#farmer-mode');
+  if (farmerMode) {
+    farmerMode.value = document.body.classList.contains('simple-farmer') ? 'simple' : 'advanced';
+    farmerMode.addEventListener('change', () => {
+      const mode = farmerMode.value === 'simple' ? 'simple' : 'advanced';
+      try { localStorage.setItem('agripulse.farmer-mode', mode); } catch { /* Preference stays active until this tab closes. */ }
+      applyFarmerMode(mode);
+      toast(mode === 'simple' ? 'Guided workspace enabled.' : 'Full controls enabled.');
+    });
+  }
   for(const route of ['overview','weather','soil','water','crops','profit','reports']){
     const view=$('#view-'+route),heading=view?.querySelector('.page-heading');if(!heading)continue;
     const bar=document.createElement('section');bar.className='field-data-controls';bar.setAttribute('aria-label','Field data controls');
