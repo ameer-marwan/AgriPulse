@@ -5,19 +5,28 @@ const introCopy = {
     title: 'AgriPulse', eyebrow: 'A bigger perspective. A better next season.',
     body: 'From a changing planet to the soil beneath your feet. Connect Earth observations, local weather and your own field knowledge to explore resilient crops, use water wisely, and plan what grows next.',
     enter: 'Enter AgriPulse', skip: 'Skip intro', replay: 'Replay introduction', replayBody: 'Take the journey from Earth to your next growing season again.',
-    steps: ['Our planet', 'Your land', 'New possibilities'], orbit: 'Every field is part of something bigger.', land: 'A closer look at the land that matters.', grow: 'Better decisions. Stronger roots.', scroll: 'Built around your land'
+    steps: ['Our planet', 'Your land', 'New possibilities'], orbit: 'Every field is part of something bigger.', land: 'A closer look at the land that matters.', grow: 'Better decisions. Stronger roots.', scroll: 'Built around your land',
+    chooseMode: 'Choose your workspace', modeBody: 'Start with the experience that feels right for your farm. You can change this any time in Settings.',
+    simple: 'Simple farmer', simpleBody: 'A guided workspace with fewer inputs. AgriPulse keeps the key steps clear and uses your selected field to fill in what it can.',
+    advanced: 'Advanced farmer', advancedBody: 'The full AgriPulse workspace, with detailed field, crop, water and profit controls for deeper planning.', chooseSimple: 'Start simple', chooseAdvanced: 'Open full workspace'
   },
   fr: {
     title: 'AgriPulse', eyebrow: 'Une vision plus large. Une meilleure prochaine saison.',
     body: 'D’une planète en évolution au sol sous vos pieds. Reliez les observations de la Terre, la météo locale et votre connaissance du terrain pour explorer des cultures résilientes, préserver l’eau et préparer la prochaine saison.',
     enter: 'Entrer dans AgriPulse', skip: 'Passer l’introduction', replay: 'Revoir l’introduction', replayBody: 'Revivez le voyage de la Terre à votre prochaine saison agricole.',
-    steps: ['Notre planète', 'Votre terre', 'De nouvelles possibilités'], orbit: 'Chaque champ fait partie d’un ensemble plus grand.', land: 'Regarder de plus près la terre qui compte.', grow: 'De meilleures décisions. Des racines plus fortes.', scroll: 'Pensé pour votre terre'
+    steps: ['Notre planète', 'Votre terre', 'De nouvelles possibilités'], orbit: 'Chaque champ fait partie d’un ensemble plus grand.', land: 'Regarder de plus près la terre qui compte.', grow: 'De meilleures décisions. Des racines plus fortes.', scroll: 'Pensé pour votre terre',
+    chooseMode: 'Choisissez votre espace', modeBody: 'Commencez avec l’expérience adaptée à votre ferme. Vous pourrez la modifier à tout moment dans les paramètres.',
+    simple: 'Agriculteur guidé', simpleBody: 'Un espace simple avec moins de saisies. AgriPulse utilise votre champ pour compléter ce qui peut l’être.',
+    advanced: 'Agriculteur avancé', advancedBody: 'L’espace AgriPulse complet, avec des réglages détaillés pour le champ, les cultures, l’eau et le profit.', chooseSimple: 'Commencer simplement', chooseAdvanced: 'Ouvrir l’espace complet'
   },
   ar: {
     title: 'AgriPulse', eyebrow: 'رؤية أوسع. وموسم قادم أفضل.',
     body: 'من كوكب يتغير إلى التربة تحت قدميك. اربط رصد الأرض والطقس المحلي ومعرفتك بالحقل لاستكشاف محاصيل أكثر مرونة، وترشيد استخدام المياه، والتخطيط لما ستزرعه لاحقاً.',
     enter: 'دخول AgriPulse', skip: 'تخطي المقدمة', replay: 'إعادة المقدمة', replayBody: 'شاهد الرحلة من الأرض إلى موسمك الزراعي القادم مرة أخرى.',
-    steps: ['كوكبنا', 'أرضك', 'فرص جديدة'], orbit: 'كل حقل جزء من عالم أكبر.', land: 'نظرة أقرب إلى الأرض التي تهمك.', grow: 'قرارات أفضل. وجذور أقوى.', scroll: 'مصمم حول أرضك'
+    steps: ['كوكبنا', 'أرضك', 'فرص جديدة'], orbit: 'كل حقل جزء من عالم أكبر.', land: 'نظرة أقرب إلى الأرض التي تهمك.', grow: 'قرارات أفضل. وجذور أقوى.', scroll: 'مصمم حول أرضك',
+    chooseMode: 'اختر مساحة عملك', modeBody: 'ابدأ بالتجربة التي تناسب مزرعتك. يمكنك تغييرها في أي وقت من الإعدادات.',
+    simple: 'مزارع بسيط', simpleBody: 'مساحة موجهة بإدخالات أقل. يستخدم AgriPulse حقلك لإكمال ما يمكنه تلقائياً.',
+    advanced: 'مزارع متقدم', advancedBody: 'مساحة AgriPulse الكاملة، مع تحكم تفصيلي في الحقل والمحاصيل والمياه والربح.', chooseSimple: 'ابدأ ببساطة', chooseAdvanced: 'افتح المساحة الكاملة'
   }
 };
 
@@ -122,12 +131,14 @@ export function initIntro({ language = 'en' } = {}) {
       <span class="ap-plant-note">EARTH OBSERVATIONS → NEW POSSIBILITIES</span>
     </div>
     <div class="ap-intro-copy" inert><span class="ap-intro-eyebrow"></span><h1 id="ap-intro-title">AgriPulse<span>.</span></h1><p id="ap-intro-description"></p><button type="button" class="ap-intro-enter earth-intro-enter"><span></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6"/></svg></button><span class="ap-intro-small"></span></div>
+    <section class="ap-mode-picker" hidden aria-labelledby="ap-mode-title"><div class="ap-mode-heading"><span class="ap-intro-eyebrow">YOUR AGRIPULSE / YOUR WAY</span><h2 id="ap-mode-title"></h2><p></p></div><div class="ap-mode-grid"><button class="ap-mode-card ap-simple-mode" type="button"><span class="ap-mode-icon">✦</span><span class="ap-mode-card-copy"><b></b><small></small></span><span class="ap-mode-action"></span></button><button class="ap-mode-card ap-advanced-mode" type="button"><span class="ap-mode-icon">◌</span><span class="ap-mode-card-copy"><b></b><small></small></span><span class="ap-mode-action"></span></button></div></section>
     <footer class="ap-intro-footer"><div class="ap-journey-steps" aria-hidden="true"><span><i>01</i><b></b></span><span><i>02</i><b></b></span><span><i>03</i><b></b></span></div><div class="ap-journey-line" aria-hidden="true"><i></i></div></footer>
     <p class="ap-intro-status sr-only" role="status" aria-live="polite"></p>`;
   document.body.append(overlay);
   const enter = overlay.querySelector('.ap-intro-enter');
   const skip = overlay.querySelector('.ap-intro-skip');
   const content = overlay.querySelector('.ap-intro-copy');
+  const modePicker = overlay.querySelector('.ap-mode-picker');
   const status = overlay.querySelector('.ap-intro-status');
   const caption = overlay.querySelector('.ap-orbit-caption p');
   const row = document.createElement('div');
@@ -143,6 +154,14 @@ export function initIntro({ language = 'en' } = {}) {
     overlay.querySelector('#ap-intro-description').textContent = words.body;
     overlay.querySelector('.ap-intro-enter span').textContent = words.enter;
     overlay.querySelector('.ap-intro-small').textContent = words.scroll;
+    modePicker.querySelector('#ap-mode-title').textContent = words.chooseMode;
+    modePicker.querySelector('.ap-mode-heading p').textContent = words.modeBody;
+    modePicker.querySelector('.ap-simple-mode b').textContent = words.simple;
+    modePicker.querySelector('.ap-simple-mode small').textContent = words.simpleBody;
+    modePicker.querySelector('.ap-simple-mode .ap-mode-action').textContent = words.chooseSimple;
+    modePicker.querySelector('.ap-advanced-mode b').textContent = words.advanced;
+    modePicker.querySelector('.ap-advanced-mode small').textContent = words.advancedBody;
+    modePicker.querySelector('.ap-advanced-mode .ap-mode-action').textContent = words.chooseAdvanced;
     skip.textContent = words.skip;
     overlay.querySelectorAll('.ap-journey-steps b').forEach((step, index) => { step.textContent = words.steps[index]; });
     row.querySelector('b').textContent = words.replay;
@@ -201,6 +220,25 @@ export function initIntro({ language = 'en' } = {}) {
     window.dispatchEvent(new CustomEvent('fieldshift:intro:closed'));
   }
 
+  function chooseMode(mode) {
+    const selected = mode === 'simple' ? 'simple' : 'advanced';
+    document.body.classList.toggle('simple-farmer', selected === 'simple');
+    document.body.classList.toggle('advanced-farmer', selected === 'advanced');
+    try { localStorage.setItem('agripulse.farmer-mode', selected); } catch { /* The choice remains active for this visit. */ }
+    window.dispatchEvent(new CustomEvent('fieldshift:mode:selected', { detail: selected }));
+    close();
+  }
+
+  function showModePicker() {
+    if (!opened) return;
+    halt();
+    overlay.classList.add('ap-mode-selecting', 'ap-revealed', 'ap-growing', 'ap-land');
+    content.inert = true;
+    modePicker.hidden = false;
+    status.textContent = introCopy[current].chooseMode;
+    modePicker.querySelector('.ap-simple-mode').focus({ preventScroll: true });
+  }
+
   function tick(now) {
     if (!opened) return;
     const elapsed = now - startedAt;
@@ -226,7 +264,8 @@ export function initIntro({ language = 'en' } = {}) {
     if (!opened) returnFocus = document.activeElement;
     opened = true;
     overlay.hidden = false;
-    overlay.classList.remove('leaving', 'ap-running', 'ap-diving', 'ap-land', 'ap-growing', 'ap-revealed', 'ap-static', 'zooming', 'revealed');
+    overlay.classList.remove('leaving', 'ap-running', 'ap-diving', 'ap-land', 'ap-growing', 'ap-revealed', 'ap-static', 'zooming', 'revealed', 'ap-mode-selecting');
+    modePicker.hidden = true;
     delete overlay.dataset.introStage;
     content.inert = true;
     document.body.classList.add('intro-open', 'intro-pending');
@@ -270,8 +309,10 @@ export function initIntro({ language = 'en' } = {}) {
     overlay.classList.add('ap-static', 'ap-land', 'ap-growing');
     setStage('ready');
   }
-  enter.addEventListener('click', close);
-  skip.addEventListener('click', close);
+  enter.addEventListener('click', showModePicker);
+  skip.addEventListener('click', showModePicker);
+  modePicker.querySelector('.ap-simple-mode').addEventListener('click', () => chooseMode('simple'));
+  modePicker.querySelector('.ap-advanced-mode').addEventListener('click', () => chooseMode('advanced'));
   row.querySelector('button').addEventListener('click', open);
   overlay.addEventListener('keydown', onKeydown);
   window.addEventListener('fieldshift:language', onLanguage);
