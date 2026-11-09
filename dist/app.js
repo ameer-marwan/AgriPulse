@@ -176,6 +176,7 @@ const state = {
   ready: false,
   fieldSettings: read("fieldshift.fieldSettings", {}),
   economicsInputs: { ...defaultEconomics },
+  simpleFarm: read("fieldshift.simpleFarm", { objective: "water", waterSource: "unknown", crop: "recommend" }),
 };
 const hasLocation = () =>
   validPoint(state.location) &&
@@ -323,6 +324,20 @@ function init() {
     <div class="learn-resources explore-resources"><article class="panel learn-card learn-ksa"><span class="learn-card-number">01</span><div class="icon-box lime"><svg><use href="#i-leaf"/></svg></div><span class="eyebrow">SAUDI ARABIA</span><h2>KSA Agriculture</h2><p>Discover Saudi agriculture, industry events, technologies, and initiatives supporting the Kingdom’s farming sector.</p><a class="button learn-resource-link" href="https://saudi-agriculture.com/" target="_blank" rel="noopener noreferrer">Open KSA Agriculture <span aria-hidden="true">↗</span></a></article><article class="panel learn-card learn-nasa"><span class="learn-card-number">02</span><div class="icon-box blue"><svg><use href="#i-globe"/></svg></div><span class="eyebrow">EARTH OBSERVATION</span><h2>NASA Harvest</h2><p>Explore NASA’s global agriculture and food-security program, connecting satellite Earth observations with practical decisions.</p><a class="button learn-resource-link" href="https://www.nasaharvest.org" target="_blank" rel="noopener noreferrer">Open NASA Harvest <span aria-hidden="true">↗</span></a></article><article class="panel learn-card learn-earth"><span class="learn-card-number">03</span><div class="icon-box amber"><svg><use href="#i-map"/></svg></div><span class="eyebrow">EXPLORE THE PLANET</span><h2>Google Earth</h2><p>Travel across the globe, inspect landscapes, and understand the geographic context around farms and fields.</p><a class="button learn-resource-link" href="https://earth.google.com/web/@0,-1.38870016,0a,22251752.77375655d,35y,0h,0t,0r/data=CgRCAggBMikKJwolCiExM0FFVHlOV21hSXJSMUxBZjZvdy1Da05iczc1dHFhX3cgAToDCgEwQgIIAEoHCJvAuHEQAQ" target="_blank" rel="noopener noreferrer">Open Google Earth <span aria-hidden="true">↗</span></a></article></div>
     <aside class="learn-note"><span>✦</span><p><b>Keep learning beyond your field.</b> These websites open in a new tab, so your AgriPulse workspace stays exactly where you left it.</p></aside>`;
   $("main").insertBefore(exploreView, $(".app-footer"));
+  const simpleView = document.createElement("section");
+  simpleView.className = "view simple-farmer-view";
+  simpleView.id = "view-simple";
+  simpleView.hidden = true;
+  const simpleCropOptions = ['<option value="recommend">I don’t know — show crop candidates</option>']
+    .concat(crops.filter(crop => crop.type !== 'cover').map(crop => '<option value="' + escapeHTML(crop.id) + '">' + escapeHTML(crop.name) + '</option>')).join('');
+  simpleView.innerHTML = `
+    <header class="simple-hero"><div><span class="eyebrow">AGRIPULSE ASSISTANT</span><h1>Smarter crop decisions<span>.</span></h1><p>Start with your land. AgriPulse retrieves available weather information automatically and explains what still needs your local knowledge.</p></div><span class="simple-mode-pill">GUIDED WORKSPACE</span></header>
+    <nav class="simple-steps" aria-label="Farm analysis steps"><button type="button" data-simple-step="1"><i>1</i><span>Location</span></button><button type="button" data-simple-step="2"><i>2</i><span>Farm &amp; crop</span></button><button type="button" data-simple-step="3"><i>3</i><span>Analysis</span></button><button type="button" data-simple-step="4"><i>4</i><span>Results</span></button></nav>
+    <section class="simple-stage" data-simple-stage="1"><article class="panel simple-card"><span class="eyebrow">STEP 1 / LOCATION</span><h2>Where is your farm?</h2><p>Use your device location, search for a nearby place, or choose a point on the map. Coordinates are never required.</p><div class="simple-location-readout" id="simple-location-readout">No farm selected yet.</div><div class="button-row"><button class="button" type="button" data-action="geolocation">Use my location</button><button class="button secondary" type="button" data-action="location">Search or choose on map</button></div><p class="fine-print">Location permission is optional. Weather and regional Earth-observation context are retrieved only after you choose a place.</p></article></section>
+    <section class="simple-stage" data-simple-stage="2" hidden><article class="panel simple-card"><span class="eyebrow">STEP 2 / FARM &amp; CROP</span><h2>A few essentials are enough to begin.</h2><p>Choose what you know. You can select “I don’t know” and refine details later in Complex farmer mode.</p><form id="simple-farm-form" class="simple-farm-form"><label>Your main goal<select name="objective"><option value="water">Use water wisely</option><option value="soil">Protect soil health</option><option value="risk">Prepare for changing weather</option></select></label><label>Water source<select name="waterSource"><option value="unknown">I don’t know yet</option><option value="rainfed">Rain-fed only</option><option value="irrigated">Irrigation available</option></select></label><label class="span-two">Crop<select name="crop">${simpleCropOptions}</select></label><button class="button" type="submit">Save and continue <span aria-hidden="true">→</span></button></form></article></section>
+    <section class="simple-stage" data-simple-stage="3" hidden><article class="panel simple-card simple-analyze-card"><span class="eyebrow">STEP 3 / ANALYSIS</span><h2>Ready to analyze your farm?</h2><p>AgriPulse uses your selected location and available forecast data. It does not invent soil tests, water volumes, planting dates, market prices, or field measurements.</p><div class="simple-data-list"><span>✓ Location context</span><span>✓ Weather forecast when available</span><span>✓ Transparent crop-trait screening</span><span>○ Soil, prices and farm measurements stay marked as unknown until provided</span></div><button class="button" type="button" data-action="simple-analysis">Analyze my farm <span aria-hidden="true">→</span></button><p class="fine-print" id="simple-analysis-status" role="status"></p></article></section>
+    <section class="simple-stage" data-simple-stage="4" hidden><header class="simple-results-heading"><div><span class="eyebrow">STEP 4 / RESULTS</span><h2>Your farm, clearly explained.</h2><p id="simple-results-summary">Choose a farm and run the analysis to see available results.</p></div><button class="button secondary" type="button" data-simple-step="2">Adjust farm details</button></header><div class="simple-results-grid" id="simple-results"></div><aside class="simple-results-note"><b>How to read these results</b><p>Results label whether information is forecast, calculated, farmer-supplied, or unavailable. They support planning and do not replace local agronomic advice or laboratory testing.</p><a href="#/about">See data and method notes →</a></aside></section>`;
+  $("main").insertBefore(simpleView, $(".app-footer"));
   const feedbackView = document.createElement("section");
   feedbackView.className = "view";
   feedbackView.id = "view-feedback";
@@ -418,6 +433,8 @@ function init() {
   renderReports();
   renderFeedback();
   renderDecisionBriefing();
+  renderSimpleFlow();
+  if (document.body.classList.contains('simple-farmer') && (!location.hash || location.hash === '#/overview')) location.hash = '/simple';
   navigate();
   window.addEventListener("hashchange", navigate);
   initPlanning({ getState: () => state, fieldKey, toast, crops });
@@ -446,6 +463,7 @@ function navigate() {
     location.hash.replace(/^#\/?/, "").split("?")[0] || "overview";
   state.route = [
     "overview",
+    "simple",
     "map",
     "weather",
     "soil",
@@ -473,6 +491,7 @@ function navigate() {
     "#route-name",
     {
       overview: "Overview",
+      simple: "Guided analysis",
       map: "Field explorer",
       weather: "Weather",
       soil: "Soil intelligence",
@@ -492,6 +511,88 @@ function navigate() {
   document.body.classList.remove("menu-open");
   requestAnimationFrame(() => state.map?.resize());
   if (state.ready) window.scrollTo({ top: 0, behavior: "instant" });
+}
+
+function setSimpleStep(step) {
+  const safeStep = Math.max(1, Math.min(4, Number(step) || 1));
+  $$('.simple-stage').forEach(stage => { stage.hidden = Number(stage.dataset.simpleStage) !== safeStep; });
+  $$('[data-simple-step]').forEach(button => {
+    const number = Number(button.dataset.simpleStep);
+    button.classList.toggle('active', number === safeStep);
+    button.classList.toggle('complete', number < safeStep);
+    button.setAttribute('aria-current', number === safeStep ? 'step' : 'false');
+  });
+}
+
+function renderSimpleFlow() {
+  const readout = $('#simple-location-readout');
+  if (!readout) return;
+  readout.innerHTML = hasLocation()
+    ? '<b>' + escapeHTML(state.location.name) + '</b><span>' + state.location.lat.toFixed(4) + ', ' + state.location.lon.toFixed(4) + ' · selected location</span>'
+    : '<b>Choose your farm location</b><span>GPS is optional. You can search or choose a point on the map.</span>';
+  const form = $('#simple-farm-form');
+  if (form) Object.entries(state.simpleFarm).forEach(([key, value]) => { if (form.elements[key]) form.elements[key].value = value; });
+}
+
+function simpleCard(title, type, body, detail, action = 'See details') {
+  return '<article class="panel simple-result-card"><div class="simple-result-top"><span class="simple-result-type ' + type + '">' + type.toUpperCase() + '</span><span class="simple-result-icon">' + ({ forecast: '☁', calculated: '◒', unavailable: '○', screening: '✦' }[type] || '·') + '</span></div><h3>' + escapeHTML(title) + '</h3><p>' + escapeHTML(body) + '</p><small>' + escapeHTML(detail) + '</small><a href="#/about">' + action + ' →</a></article>';
+}
+
+function renderSimpleResults() {
+  const host = $('#simple-results');
+  const summary = $('#simple-results-summary');
+  if (!host || !summary) return;
+  if (!hasLocation()) {
+    summary.textContent = 'Choose your farm location first. No estimates have been generated.';
+    host.innerHTML = simpleCard('Start with your location', 'unavailable', 'AgriPulse needs a selected place before it can retrieve regional weather context.', 'Required: selected location', 'Choose location');
+    return;
+  }
+  const weather = state.weather;
+  const selectedCrop = state.simpleFarm.crop;
+  const priority = state.simpleFarm.objective || 'water';
+  const irrigated = state.simpleFarm.waterSource === 'irrigated';
+  const rotations = recommendRotations({ priority, currentCrop: selectedCrop === 'recommend' ? 'wheat' : selectedCrop, irrigated, weather });
+  const ids = [...new Set(rotations.flatMap(plan => plan.sequence).filter(id => crops.find(crop => crop.id === id)?.type !== 'cover'))].slice(0, 3);
+  const candidates = ids.map(id => crops.find(crop => crop.id === id)?.name).filter(Boolean);
+  const cropBody = candidates.length ? candidates.join(', ') + '. These are trait-screening candidates based on your chosen goal and water answer, not validated crop-suitability rankings.' : 'No crop candidates can be screened until basic farm details are available.';
+  const current = weather?.current;
+  const firstDay = weather?.daily?.[0];
+  const forecastBody = weather
+    ? 'Current forecast: ' + temp(current?.temperature) + ', wind ' + wind(current?.wind) + '. Seven-day forecast data is available for this selected location.'
+    : 'Forecast data could not be retrieved yet. You can retry after selecting your location.';
+  const waterBody = number(firstDay?.et0)
+    ? 'Forecast reference ET₀ is ' + rain(firstDay.et0) + ' for ' + firstDay.date + '. Crop water need cannot be calculated without crop stage, coefficient and effective rainfall.'
+    : 'Irrigation demand needs crop stage, method and available water information. No total water amount is assumed.';
+  const hot = number(current?.temperature) && current.temperature >= 35;
+  const windy = number(current?.wind) && current.wind >= 30;
+  const riskBody = weather ? (hot || windy ? 'Short-term weather watch: ' + (hot ? 'high temperature' : '') + (hot && windy ? ' and ' : '') + (windy ? 'strong wind' : '') + ' appear in the current forecast. Confirm crop-specific thresholds locally.' : 'No basic short-term heat or wind screening flag is active from the current forecast. This is not a season-long risk assessment.') : 'Weather-related risks are unavailable until forecast retrieval succeeds.';
+  const profitReady = ['areaHa', 'yieldTonnesHa', 'pricePerTonne', 'seedCostHa', 'fertilizerCostHa', 'waterCostHa', 'operationsCostHa'].every(key => number(state.economicsInputs[key]));
+  const profitBody = profitReady ? 'A local scenario is available in Complex farmer mode. It remains a scenario, not a guaranteed profit.' : 'Profit outlook is unavailable because local price, yield, area and cost assumptions have not all been supplied.';
+  summary.textContent = weather ? 'Available data has been organized into five practical checks for ' + state.location.name + '.' : 'Your location is saved. Weather retrieval is unavailable right now, so missing information is shown clearly.';
+  host.innerHTML = [
+    simpleCard('Best crop candidates', 'screening', cropBody, 'Source: AgriPulse crop traits · conditions: local soil, season and market still need confirmation'),
+    simpleCard('Water needs', number(firstDay?.et0) ? 'forecast' : 'unavailable', waterBody, number(firstDay?.et0) ? 'Source: Open-Meteo forecast · reference evapotranspiration, not irrigation instruction' : 'Missing: crop stage, water source details and effective rainfall'),
+    simpleCard('Planting window', 'unavailable', 'A planting window needs validated local seasonal climate and crop information. It is not inferred from a seven-day forecast.', 'Next step: review historical climate in Complex farmer mode'),
+    simpleCard('Profit outlook', profitReady ? 'calculated' : 'unavailable', profitBody, profitReady ? 'Classification: calculated scenario from farmer-supplied assumptions' : 'Missing: local selling price, yield and complete cost inputs'),
+    simpleCard('Farm risks', weather ? 'forecast' : 'unavailable', riskBody, weather ? 'Source: Open-Meteo weather model forecast · retrieved ' + new Date(weather.retrievedAt).toLocaleString() : 'Data status: unavailable')
+  ].join('');
+}
+
+async function runSimpleAnalysis() {
+  if (!hasLocation()) { setSimpleStep(1); toast('Choose your farm location before analysis.'); return; }
+  const button = $('[data-action="simple-analysis"]');
+  const status = $('#simple-analysis-status');
+  button.disabled = true;
+  status.textContent = 'Retrieving available weather data…';
+  try {
+    if (!state.weather) await loadWeather(true);
+    renderRotations();
+    renderSimpleResults();
+    setSimpleStep(4);
+  } finally {
+    button.disabled = false;
+    status.textContent = '';
+  }
 }
 
 function bindEvents() {
@@ -533,6 +634,7 @@ function bindEvents() {
         renderRotations();
         toast("Rotation comparisons updated");
       },
+      "simple-analysis": runSimpleAnalysis,
       "save-plan": savePlan,
       "export-csv": exportCSV,
       print: () => window.print(),
@@ -633,6 +735,23 @@ function bindEvents() {
     state.preferences.theme = event.target.value;
     applyPreferences();
   });
+  $('#simple-farm-form')?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    state.simpleFarm = {
+      objective: form.elements.objective.value,
+      waterSource: form.elements.waterSource.value,
+      crop: form.elements.crop.value,
+    };
+    write('fieldshift.simpleFarm', state.simpleFarm);
+    $('#planning-priority').value = state.simpleFarm.objective === 'risk' ? 'resilience' : state.simpleFarm.objective;
+    $('#irrigation').value = state.simpleFarm.waterSource === 'irrigated' ? 'irrigated' : 'rainfed';
+    if (state.simpleFarm.crop !== 'recommend') $('#current-crop').value = state.simpleFarm.crop;
+    renderRotations();
+    setSimpleStep(3);
+  });
+  $$('[data-simple-step]').forEach(button => button.addEventListener('click', () => setSimpleStep(button.dataset.simpleStep)));
+  window.addEventListener('fieldshift:updated', renderSimpleFlow);
   $$('[data-theme-choice]').forEach(button => button.addEventListener('click', () => {
     state.preferences.theme = button.dataset.themeChoice;
     applyPreferences();
