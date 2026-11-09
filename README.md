@@ -1,14 +1,14 @@
-<p align="center"><img src="dist/assets/logo-new.png" alt="AgriNova logo" width="180"></p>
+<p align="center"><img src="dist/assets/logo-new.png" alt="AgriPulse logo" width="180"></p>
 
-# AgriNova — Your Intelligent Agricultural Assistant
+# AgriPulse — Your Intelligent Agricultural Assistant
 
 ## Live preview
 
-[Open AgriNova](https://fieldshift-two.vercel.app/)
+[Open AgriPulse](https://fieldshift-two.vercel.app/)
 
-## What is AgriNova?
+## What is AgriPulse?
 
-AgriNova is an agricultural decision-support website that helps farmers understand their land and make stronger planning decisions. It brings together weather, water, soil, crop rotation, NASA Earth observations, and local profit information in one workspace.
+AgriPulse is an agricultural decision-support website that helps farmers understand their land and make stronger planning decisions. It brings together weather, water, soil, crop rotation, NASA Earth observations, and local profit information in one workspace.
 
 ## Overview
 
