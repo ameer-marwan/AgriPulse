@@ -1,14 +1,14 @@
-<p align="center"><img src="dist/assets/logo-new.png" alt="FieldShift logo" width="180"></p>
+<p align="center"><img src="dist/assets/logo-new.png" alt="AgriNova logo" width="180"></p>
 
-# FieldShift — Your Intelligent Agricultural Assistant
+# AgriNova — Your Intelligent Agricultural Assistant
 
 ## Live preview
 
-[Open FieldShift](https://fieldshift-two.vercel.app/)
+[Open AgriNova](https://fieldshift-two.vercel.app/)
 
-## What is FieldShift?
+## What is AgriNova?
 
-FieldShift is an agricultural decision-support website that helps farmers understand their land and make stronger planning decisions. It brings together weather, water, soil, crop rotation, NASA Earth observations, and local profit information in one workspace.
+AgriNova is an agricultural decision-support website that helps farmers understand their land and make stronger planning decisions. It brings together weather, water, soil, crop rotation, NASA Earth observations, and local profit information in one workspace.
 
 ## Overview
 
