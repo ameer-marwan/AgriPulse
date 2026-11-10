@@ -14,6 +14,16 @@
 
 ---
 
+## Watch the introduction
+
+<p align="center">
+  <a href="https://github.com/ameer-marwan/AgriPulse/blob/main/media/agripulse-introduction.mp4">
+    <img src="media/agripulse-introduction-thumbnail.jpeg" alt="Play: Inside AgriPulse — The Smart Farming Workspace" width="760">
+  </a>
+</p>
+
+<p align="center"><strong>▶ Click the thumbnail to watch <em>Inside AgriPulse: The Smart Farming Workspace</em>.</strong></p>
+
 ## A clearer picture of every field
 
 AgriPulse is an agricultural decision-support platform designed to turn complex land, climate, and crop information into practical next steps. Instead of switching between weather sites, maps, soil reports, and spreadsheets, farmers can explore one connected workspace that helps them understand what is happening now, what may change next, and which choices can support yield, profitability, and long-term resilience.
