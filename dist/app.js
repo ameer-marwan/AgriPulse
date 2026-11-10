@@ -341,6 +341,7 @@ function init() {
     .concat(crops.some(crop => crop.id === 'alfalfa') ? [] : ['<option value="alfalfa">Alfalfa</option>']).join('');
   simpleView.innerHTML = `
     <header class="simple-toolbar"><a class="simple-brand" href="#/simple" aria-label="AgriPulse simple farmer"><img src="assets/logo-new.png" alt=""><span>AgriPulse <b>AI</b></span></a><div class="simple-toolbar-actions"><button type="button" class="simple-tool-button" data-action="simple-settings" data-simple-copy="settings">Settings</button><button type="button" class="simple-tool-icon" data-action="theme" aria-label="Switch theme" title="Switch theme">◐</button><label class="simple-language-label"><span class="sr-only">Language</span><select id="simple-language" aria-label="Language"><option value="en">EN</option><option value="fr">FR</option><option value="ar">AR</option></select></label></div></header>
+    <dialog class="simple-settings-dialog" id="simple-settings-dialog"><header><div><span class="eyebrow">AGRIPULSE AI</span><h2>Settings</h2></div><button class="simple-tool-icon" type="button" data-action="close-simple-settings" aria-label="Close settings">×</button></header><p>Change your language and theme without leaving the Simple farmer flow.</p><div class="simple-settings-actions"><button class="button secondary" type="button" data-action="theme">Switch light / dark theme</button><label>Language<select id="simple-settings-language"><option value="en">English</option><option value="fr">Français</option><option value="ar">العربية</option></select></label></div></dialog>
     <header class="simple-hero"><div><h1 data-simple-copy="title">AgriPulse AI</h1><p data-simple-copy="subtitle">Smarter crop decisions powered by NASA Earth data.</p></div></header>
     <nav class="simple-steps" aria-label="Farm analysis steps"><button type="button" data-simple-step="1"><i>1</i><span>Location</span></button><button type="button" data-simple-step="2"><i>2</i><span>Farm &amp; crop</span></button><button type="button" data-simple-step="3"><i>3</i><span>Analysis</span></button><button type="button" data-simple-step="4"><i>4</i><span>Results</span></button></nav>
     <section class="simple-stage" data-simple-stage="1"><article class="panel simple-card"><span class="eyebrow">STEP 1 / LOCATION</span><h2>Where is your farm?</h2><p>Use your device location or search for a country, city, village, or farm area. Coordinates are never required.</p><div class="simple-location-readout" id="simple-location-readout">No farm selected yet.</div><div class="button-row"><button class="button" type="button" data-action="geolocation">Use my location</button><button class="button secondary" type="button" data-action="location">Choose on map</button></div><div class="simple-or"><span>or search for a place</span></div><form id="simple-place-search" class="simple-place-search"><label class="sr-only" for="simple-place-query">Search for a place</label><input id="simple-place-query" name="query" minlength="2" required placeholder="Country, city, village, or farm area"><button class="button secondary" type="submit">Search</button></form><div id="simple-place-results" class="simple-place-results" aria-live="polite"></div><p class="fine-print">Location permission is optional. Weather and regional Earth-observation context are retrieved only after you choose a place.</p></article></section>
@@ -553,6 +554,7 @@ const simpleToolbarCopy = {
 function syncSimpleToolbar(language = state.preferences.language) {
   const words = simpleToolbarCopy[language] || simpleToolbarCopy.en;
   $('#simple-language') && ($('#simple-language').value = language);
+  $('#simple-settings-language') && ($('#simple-settings-language').value = language);
   $$('[data-simple-copy]').forEach(element => { element.textContent = words[element.dataset.simpleCopy] || element.textContent; });
   const title = $('[data-simple-copy="title"]');
   if (title) title.textContent = words.title;
@@ -566,6 +568,10 @@ function initSimpleToolbar() {
     if (!settingsPicker) return;
     settingsPicker.value = picker.value;
     settingsPicker.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+  $('#simple-settings-language')?.addEventListener('change', event => {
+    picker.value = event.currentTarget.value;
+    picker.dispatchEvent(new Event('change', { bubbles: true }));
   });
   window.addEventListener('fieldshift:language', event => syncSimpleToolbar(event.detail));
 }
@@ -673,7 +679,8 @@ function bindEvents() {
         button?.setAttribute("aria-expanded", String(!collapsed));
         button?.setAttribute("aria-label", collapsed ? "Expand navigation" : "Collapse navigation");
       },
-      "simple-settings": () => { location.hash = "/settings"; },
+      "simple-settings": () => $('#simple-settings-dialog')?.showModal(),
+      "close-simple-settings": () => $('#simple-settings-dialog')?.close(),
       menu: () => document.body.classList.toggle("menu-open"),
       "close-menu": () => document.body.classList.remove("menu-open"),
       location: () => $("#location-dialog").showModal(),
