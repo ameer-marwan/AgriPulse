@@ -340,7 +340,8 @@ function init() {
     .concat(crops.filter(crop => crop.type !== 'cover').map(crop => '<option value="' + escapeHTML(crop.id) + '">' + escapeHTML(crop.name) + '</option>'))
     .concat(crops.some(crop => crop.id === 'alfalfa') ? [] : ['<option value="alfalfa">Alfalfa</option>']).join('');
   simpleView.innerHTML = `
-    <header class="simple-hero"><div><span class="eyebrow">AGRIPULSE ASSISTANT</span><h1>Smarter crop decisions<span>.</span></h1><p>Start with your land. AgriPulse retrieves available weather information automatically and explains what still needs your local knowledge.</p></div><span class="simple-mode-pill">GUIDED WORKSPACE</span></header>
+    <header class="simple-toolbar"><a class="simple-brand" href="#/simple" aria-label="AgriPulse simple farmer"><img src="assets/logo-new.png" alt=""><span>AgriPulse <b>AI</b></span></a><div class="simple-toolbar-actions"><button type="button" class="simple-tool-button" data-action="simple-settings" data-simple-copy="settings">Settings</button><button type="button" class="simple-tool-icon" data-action="theme" aria-label="Switch theme" title="Switch theme">◐</button><label class="simple-language-label"><span class="sr-only">Language</span><select id="simple-language" aria-label="Language"><option value="en">EN</option><option value="fr">FR</option><option value="ar">AR</option></select></label></div></header>
+    <header class="simple-hero"><div><span class="eyebrow">AGRIPULSE ASSISTANT</span><h1 data-simple-copy="title">Smarter crop decisions<span>.</span></h1><p data-simple-copy="subtitle">Powered by NASA Earth data and your local knowledge.</p></div><span class="simple-mode-pill" data-simple-copy="guided">GUIDED WORKSPACE</span></header>
     <nav class="simple-steps" aria-label="Farm analysis steps"><button type="button" data-simple-step="1"><i>1</i><span>Location</span></button><button type="button" data-simple-step="2"><i>2</i><span>Farm &amp; crop</span></button><button type="button" data-simple-step="3"><i>3</i><span>Analysis</span></button><button type="button" data-simple-step="4"><i>4</i><span>Results</span></button></nav>
     <section class="simple-stage" data-simple-stage="1"><article class="panel simple-card"><span class="eyebrow">STEP 1 / LOCATION</span><h2>Where is your farm?</h2><p>Use your device location or search for a country, city, village, or farm area. Coordinates are never required.</p><div class="simple-location-readout" id="simple-location-readout">No farm selected yet.</div><div class="button-row"><button class="button" type="button" data-action="geolocation">Use my location</button><button class="button secondary" type="button" data-action="location">Choose on map</button></div><div class="simple-or"><span>or search for a place</span></div><form id="simple-place-search" class="simple-place-search"><label class="sr-only" for="simple-place-query">Search for a place</label><input id="simple-place-query" name="query" minlength="2" required placeholder="Country, city, village, or farm area"><button class="button secondary" type="submit">Search</button></form><div id="simple-place-results" class="simple-place-results" aria-live="polite"></div><p class="fine-print">Location permission is optional. Weather and regional Earth-observation context are retrieved only after you choose a place.</p></article></section>
     <section class="simple-stage" data-simple-stage="2" hidden><article class="panel simple-card"><span class="eyebrow">STEP 2 / FARM &amp; CROP</span><h2>A few essentials are enough to begin.</h2><p>Choose what you know. You can select “I don’t know” and refine details later in Complex farmer mode.</p><form id="simple-farm-form" class="simple-farm-form"><label>Your main goal<select name="objective"><option value="water">Use water wisely</option><option value="soil">Protect soil health</option><option value="risk">Prepare for changing weather</option></select></label><label>Water source<select name="waterSource"><option value="unknown">I don’t know yet</option><option value="rainfed">Rain-fed only</option><option value="irrigated">Irrigation available</option></select></label><label class="span-two">Crop<select name="crop">${simpleCropOptions}</select></label><details class="simple-soil-details span-two"><summary>What do you know about your soil? <small>Optional</small></summary><div class="simple-soil-grid"><label>Soil pH<input name="soilPH" inputmode="decimal" min="0" max="14" placeholder="I don’t know"></label><label>Soil texture<select name="soilTexture"><option value="unknown">I don’t know</option><option value="light">Light</option><option value="medium">Medium</option><option value="heavy">Heavy</option><option value="organic">Organic</option></select></label><label>Drainage<select name="drainage"><option value="unknown">I don’t know</option><option value="well">Well drained</option><option value="excessive">Excessively drained</option></select></label></div></details><button class="button" type="submit">Save and continue <span aria-hidden="true">→</span></button></form></article></section>
@@ -459,6 +460,7 @@ function init() {
       renderFeedback();
     },
   });
+  initSimpleToolbar();
   window.__fieldshiftIntro ||= initIntro({
     language: state.preferences.language,
   });
@@ -541,6 +543,31 @@ function renderSimpleFlow() {
     : '<b>Choose your farm location</b><span>GPS is optional. You can search or choose a point on the map.</span>';
   const form = $('#simple-farm-form');
   if (form) Object.entries(state.simpleFarm).forEach(([key, value]) => { if (form.elements[key]) form.elements[key].value = value; });
+}
+
+const simpleToolbarCopy = {
+  en: { settings: 'Settings', title: 'Smarter crop decisions.', subtitle: 'Powered by NASA Earth data and your local knowledge.', guided: 'GUIDED WORKSPACE' },
+  fr: { settings: 'Paramètres', title: 'Des décisions agricoles plus intelligentes.', subtitle: 'Avec les données NASA d’observation de la Terre et vos connaissances locales.', guided: 'ESPACE GUIDÉ' },
+  ar: { settings: 'الإعدادات', title: 'قرارات زراعية أذكى.', subtitle: 'مدعوم ببيانات رصد الأرض من ناسا ومعرفتك المحلية.', guided: 'مساحة عمل موجهة' },
+};
+function syncSimpleToolbar(language = state.preferences.language) {
+  const words = simpleToolbarCopy[language] || simpleToolbarCopy.en;
+  $('#simple-language') && ($('#simple-language').value = language);
+  $$('[data-simple-copy]').forEach(element => { element.textContent = words[element.dataset.simpleCopy] || element.textContent; });
+  const title = $('[data-simple-copy="title"]');
+  if (title) title.innerHTML = escapeHTML(words.title).replace('.', '<span>.</span>');
+}
+function initSimpleToolbar() {
+  const picker = $('#simple-language');
+  if (!picker) return;
+  syncSimpleToolbar();
+  picker.addEventListener('change', () => {
+    const settingsPicker = $('#language');
+    if (!settingsPicker) return;
+    settingsPicker.value = picker.value;
+    settingsPicker.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+  window.addEventListener('fieldshift:language', event => syncSimpleToolbar(event.detail));
 }
 
 function simpleCard(title, type, body, detail, action = 'See details') {
@@ -646,6 +673,7 @@ function bindEvents() {
         button?.setAttribute("aria-expanded", String(!collapsed));
         button?.setAttribute("aria-label", collapsed ? "Expand navigation" : "Collapse navigation");
       },
+      "simple-settings": () => { location.hash = "/settings"; },
       menu: () => document.body.classList.toggle("menu-open"),
       "close-menu": () => document.body.classList.remove("menu-open"),
       location: () => $("#location-dialog").showModal(),
