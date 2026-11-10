@@ -349,7 +349,7 @@ function init() {
     .concat(crops.filter(crop => crop.type !== 'cover').map(crop => '<option value="' + escapeHTML(crop.id) + '">' + escapeHTML(crop.name) + '</option>'))
     .concat(crops.some(crop => crop.id === 'alfalfa') ? [] : ['<option value="alfalfa">Alfalfa</option>']).join('');
   simpleView.innerHTML = `
-    <header class="simple-reference-header"><a class="simple-brand" href="#/simple" aria-label="AgriPulse AI"><span class="simple-brand-mark"><img src="assets/logo-new.png" alt=""></span><span class="simple-brand-copy"><b>AgriPulse</b><small>Simple farmer</small></span></a><div class="simple-nav-progress"><small id="simple-step-label">Step 1 of 4</small><span><i id="simple-progress-bar"></i></span><em id="simple-save-status">Ready</em></div><div class="simple-reference-actions"><button class="simple-theme-switch" type="button" data-action="simple-theme-toggle" aria-label="Switch to dark theme" title="Switch theme"><span class="simple-theme-sun">☀</span><i></i><span class="simple-theme-moon">☾</span></button><label class="simple-top-language"><span aria-hidden="true">◎</span><select id="simple-language" aria-label="Language"><option value="en">English</option><option value="ar">العربية</option><option value="fr">Français</option><option value="es">Español</option><option value="de">Deutsch</option><option value="pt">Português</option><option value="tr">Türkçe</option><option value="ur">اردو</option><option value="hi">हिन्दी</option><option value="zh">中文</option></select></label><button class="simple-settings-button" type="button" data-action="simple-settings"><span aria-hidden="true">⚙</span><b data-simple-copy="settings">Settings</b></button></div></header>
+    <header class="simple-reference-header"><a class="simple-brand" href="#/simple" aria-label="AgriPulse AI"><span class="simple-brand-mark"><img src="assets/logo-new.png" alt=""></span><span class="simple-brand-copy"><b>AgriPulse</b><small>Simple farmer</small></span></a><div class="simple-nav-progress"><small id="simple-step-label">Step 1 of 4</small><span><i id="simple-progress-bar"></i></span><em id="simple-save-status">Ready</em></div><div class="simple-reference-actions"><button class="simple-theme-cycle" type="button" data-action="simple-theme-cycle" aria-label="Change appearance"><span class="simple-theme-cycle-icon" aria-hidden="true">◐</span><span><b id="simple-theme-cycle-label">Automatic</b><small>Appearance</small></span></button><label class="simple-top-language"><span aria-hidden="true">◎</span><select id="simple-language" aria-label="Language"><option value="en">English</option><option value="ar">العربية</option><option value="fr">Français</option><option value="es">Español</option><option value="de">Deutsch</option><option value="pt">Português</option><option value="tr">Türkçe</option><option value="ur">اردو</option><option value="hi">हिन्दी</option><option value="zh">中文</option></select></label><button class="simple-settings-button" type="button" data-action="simple-settings" aria-label="Open settings"><svg aria-hidden="true"><use href="#i-sliders"/></svg><b data-simple-copy="settings">Settings</b></button></div></header>
     <section class="simple-reference-copy"><p class="eyebrow">AGRIPULSE AI · GUIDED FIELD DECISIONS</p><h1 data-simple-copy="title">AgriPulse AI</h1><p class="simple-lede" data-simple-copy="subtitle">Smarter crop decisions powered by NASA Earth data.</p></section>
     <dialog class="simple-settings-dialog" id="simple-settings-dialog"><header><div><span class="eyebrow">AGRIPULSE AI</span><h2 data-simple-copy="settings">Settings</h2></div><button class="simple-tool-icon" type="button" data-action="close-simple-settings" aria-label="Close settings">×</button></header><p data-simple-copy="settingsHelp">Change language or theme without leaving the guided farmer flow.</p><div class="simple-settings-actions"><div class="simple-appearance-options" role="group" aria-label="Choose appearance"><button type="button" data-simple-theme-choice="auto"><span>◐</span><b>Automatic</b><small>Follows local time</small></button><button type="button" data-simple-theme-choice="light"><span>☀</span><b>Daylight</b><small>Bright and fresh</small></button><button type="button" data-simple-theme-choice="dark"><span>☾</span><b>Forest dark</b><small>Calm and focused</small></button></div><label>Appearance<select id="simple-appearance"><option value="auto">Automatic · follows local time</option><option value="dark">Forest dark</option><option value="light">Daylight</option></select></label><label>Weather units<select id="simple-weather-units"><option value="metric">Metric · °C, mm, km/h</option><option value="imperial">Imperial · °F, inches, mph</option></select></label><label>Language<select id="simple-settings-language"><option value="en">English</option><option value="ar">العربية</option><option value="fr">Français</option><option value="es">Español</option><option value="de">Deutsch</option><option value="pt">Português</option><option value="tr">Türkçe</option><option value="ur">اردو</option><option value="hi">हिन्दी</option><option value="zh">中文</option></select></label><button class="button danger" type="button" data-action="reset-workspace">Reset entire workspace</button></div></dialog>
     <nav class="simple-steps" aria-label="Farm analysis steps"><button type="button" data-simple-step="1"><i>1</i><span>Location</span></button><button type="button" data-simple-step="2"><i>2</i><span>Soil &amp; water</span></button><button type="button" data-simple-step="3"><i>3</i><span>Crops</span></button><button type="button" data-simple-step="4"><i>4</i><span>Report</span></button></nav>
@@ -800,6 +800,7 @@ function bindEvents() {
       "simple-back": () => setSimpleStep(action.dataset.backStep || 1),
       "simple-geolocation": () => useSimpleDeviceLocation(),
       "simple-theme-toggle": () => { state.preferences.theme = resolvedTheme() === 'light' ? 'dark' : 'light'; applyPreferences(); syncSimpleToolbar(); },
+      "simple-theme-cycle": () => { const modes = ['auto','light','dark']; state.preferences.theme = modes[(modes.indexOf(state.preferences.theme) + 1) % modes.length]; applyPreferences(); syncSimpleToolbar(); },
       "save-plan": savePlan,
       "export-csv": exportCSV,
       print: () => window.print(),
@@ -931,7 +932,15 @@ function bindEvents() {
     renderRotations();
     runSimpleAnalysis();
   });
-  $$('[data-simple-step]').forEach(button => button.addEventListener('click', () => setSimpleStep(button.dataset.simpleStep)));
+  $$('[data-simple-step]').forEach(button => button.addEventListener('click', () => {
+    const target = Number(button.dataset.simpleStep);
+    if (target > 1 && !hasLocation()) { setSimpleStep(1); toast('Choose your farm location first.'); return; }
+    if (target === 4) {
+      if (!(state.simpleFarm.crops || []).length) { setSimpleStep(3); toast('Choose at least one crop before opening the report.'); return; }
+      runSimpleAnalysis(); return;
+    }
+    setSimpleStep(target);
+  }));
   const filterSimpleCrops = () => {
     const query = ($('#simple-crop-search')?.value || '').trim().toLowerCase();
     const active = $('[data-crop-filter].active')?.dataset.cropFilter || 'all';
@@ -1044,6 +1053,15 @@ function applyPreferences() {
   if (themeButton) { themeButton.setAttribute('aria-label', theme === 'light' ? 'Switch to dark theme' : 'Switch to daylight theme'); themeButton.setAttribute('title', theme === 'light' ? 'Switch to dark theme' : 'Switch to daylight theme'); }
   const simpleThemeSwitch = $('.simple-theme-switch');
   if (simpleThemeSwitch) { simpleThemeSwitch.setAttribute('aria-pressed', String(theme === 'dark')); simpleThemeSwitch.setAttribute('aria-label', theme === 'light' ? 'Switch to dark theme' : 'Switch to daylight theme'); }
+  const simpleThemeCycle = $('.simple-theme-cycle');
+  if (simpleThemeCycle) {
+    const mode = state.preferences.theme;
+    const label = mode === 'auto' ? 'Automatic' : mode === 'light' ? 'Daylight' : 'Forest dark';
+    text('#simple-theme-cycle-label', label);
+    text('.simple-theme-cycle-icon', mode === 'auto' ? '◐' : mode === 'light' ? '☀' : '☾');
+    simpleThemeCycle.dataset.mode = mode;
+    simpleThemeCycle.setAttribute('aria-label', 'Appearance: ' + label + '. Activate to change.');
+  }
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'light' ? '#f1f3ea' : '#101b16');
   $("#appearance").value = ["auto", "dark", "light"].includes(
     state.preferences.theme,
