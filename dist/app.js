@@ -176,7 +176,7 @@ const state = {
   ready: false,
   fieldSettings: read("fieldshift.fieldSettings", {}),
   economicsInputs: { ...defaultEconomics },
-  simpleFarm: read("fieldshift.simpleFarm", { objective: "water", waterSource: "unknown", crop: "recommend", soilPH: "", soilTexture: "unknown", drainage: "unknown" }),
+  simpleFarm: { objective: "water", waterSource: "unknown", crop: "recommend", crops: [], soilPH: "", soilTexture: "unknown", drainage: "unknown", ...read("fieldshift.simpleFarm", {}) },
 };
 // Reviewed Simple-mode crop records adapted from the FieldShift AI reference repository.
 // They deliberately produce factor labels, never a numeric score or planting instruction.
@@ -341,11 +341,11 @@ function init() {
     .concat(crops.some(crop => crop.id === 'alfalfa') ? [] : ['<option value="alfalfa">Alfalfa</option>']).join('');
   simpleView.innerHTML = `
     <header class="simple-reference-header"><div><p class="eyebrow">AGRIPULSE AI</p><h1 data-simple-copy="title">AgriPulse AI</h1><p class="simple-lede" data-simple-copy="subtitle">Smarter crop decisions powered by NASA Earth data.</p></div><label class="simple-reference-language"><span>Language</span><select id="simple-language" aria-label="Language"><option value="en">English</option><option value="ar">العربية</option><option value="fr">Français</option><option value="es">Español</option><option value="de">Deutsch</option><option value="pt">Português</option><option value="tr">Türkçe</option><option value="ur">اردو</option><option value="hi">हिन्दी</option><option value="zh">中文</option></select></label></header>
-    <nav class="simple-steps" aria-label="Farm analysis steps"><button type="button" data-simple-step="1"><i>1</i><span>Location</span></button><button type="button" data-simple-step="2"><i>2</i><span>Farm &amp; crop</span></button><button type="button" data-simple-step="3"><i>3</i><span>Analysis</span></button><button type="button" data-simple-step="4"><i>4</i><span>Results</span></button></nav>
-    <section class="simple-stage" data-simple-stage="1"><article class="panel simple-card"><span class="eyebrow">STEP 1 / LOCATION</span><h2>Where is your farm?</h2><p>Use your device location or search for a country, city, village, or farm area. Coordinates are never required.</p><div class="simple-location-readout" id="simple-location-readout">No farm selected yet.</div><div class="button-row"><button class="button" type="button" data-action="geolocation">Use my location</button><button class="button secondary" type="button" data-action="location">Choose on map</button></div><div class="simple-or"><span>or search for a place</span></div><form id="simple-place-search" class="simple-place-search"><label class="sr-only" for="simple-place-query">Search for a place</label><input id="simple-place-query" name="query" minlength="2" required placeholder="Country, city, village, or farm area"><button class="button secondary" type="submit">Search</button></form><div id="simple-place-results" class="simple-place-results" aria-live="polite"></div><p class="fine-print">Location permission is optional. Weather and regional Earth-observation context are retrieved only after you choose a place.</p></article></section>
-    <section class="simple-stage" data-simple-stage="2" hidden><article class="panel simple-card"><span class="eyebrow">STEP 2 / FARM &amp; CROP</span><h2>A few essentials are enough to begin.</h2><p>Choose what you know. You can select “I don’t know” and refine details later in Complex farmer mode.</p><form id="simple-farm-form" class="simple-farm-form"><label>Your main goal<select name="objective"><option value="water">Use water wisely</option><option value="soil">Protect soil health</option><option value="risk">Prepare for changing weather</option></select></label><label>Water source<select name="waterSource"><option value="unknown">I don’t know yet</option><option value="rainfed">Rain-fed only</option><option value="irrigated">Irrigation available</option></select></label><label class="span-two">Crop<select name="crop">${simpleCropOptions}</select></label><details class="simple-soil-details span-two"><summary>What do you know about your soil? <small>Optional</small></summary><div class="simple-soil-grid"><label>Soil pH<input name="soilPH" inputmode="decimal" min="0" max="14" placeholder="I don’t know"></label><label>Soil texture<select name="soilTexture"><option value="unknown">I don’t know</option><option value="light">Light</option><option value="medium">Medium</option><option value="heavy">Heavy</option><option value="organic">Organic</option></select></label><label>Drainage<select name="drainage"><option value="unknown">I don’t know</option><option value="well">Well drained</option><option value="excessive">Excessively drained</option></select></label></div></details><button class="button" type="submit">Save and continue <span aria-hidden="true">→</span></button></form></article></section>
-    <section class="simple-stage" data-simple-stage="3" hidden><article class="panel simple-card simple-analyze-card"><span class="eyebrow">STEP 3 / ANALYSIS</span><h2>Ready to analyze your farm?</h2><p>AgriPulse uses your selected location and available forecast data. It does not invent soil tests, water volumes, planting dates, market prices, or field measurements.</p><div class="simple-data-list"><span>✓ Location context</span><span>✓ Weather forecast when available</span><span>✓ Transparent crop-trait screening</span><span>○ Soil, prices and farm measurements stay marked as unknown until provided</span></div><button class="button" type="button" data-action="simple-analysis">Analyze my farm <span aria-hidden="true">→</span></button><p class="fine-print" id="simple-analysis-status" role="status"></p></article></section>
-    <section class="simple-stage" data-simple-stage="4" hidden><header class="simple-results-heading"><div><span class="eyebrow">STEP 4 / RESULTS</span><h2>Your farm, clearly explained.</h2><p id="simple-results-summary">Choose a farm and run the analysis to see available results.</p></div><button class="button secondary" type="button" data-simple-step="2">Adjust farm details</button></header><div class="simple-results-grid" id="simple-results"></div><aside class="simple-results-note"><b>How to read these results</b><p>Results label whether information is forecast, calculated, farmer-supplied, or unavailable. They support planning and do not replace local agronomic advice or laboratory testing.</p><a href="#/about">See data and method notes →</a></aside></section>`;
+    <nav class="simple-steps" aria-label="Farm analysis steps"><button type="button" data-simple-step="1"><i>1</i><span>Location</span></button><button type="button" data-simple-step="2"><i>2</i><span>Soil &amp; water</span></button><button type="button" data-simple-step="3"><i>3</i><span>Crops</span></button><button type="button" data-simple-step="4"><i>4</i><span>Report</span></button></nav>
+    <section class="simple-stage" data-simple-stage="1"><article class="panel simple-card"><span class="eyebrow">STEP 1 / LOCATION</span><h2>Where is your farm?</h2><p>Start with a place. FieldShift AI uses it to set your country, weather context, and local report currency.</p><div class="simple-location-readout" id="simple-location-readout">No farm selected yet.</div><div class="button-row"><button class="button" type="button" data-action="simple-geolocation">Use my location</button><button class="button secondary" type="button" data-action="location">Choose on map</button></div><div class="simple-or"><span>or search for a place</span></div><form id="simple-place-search" class="simple-place-search"><label class="sr-only" for="simple-place-query">Search for a place</label><input id="simple-place-query" name="query" minlength="2" required placeholder="Country, city, village, or farm area"><button class="button secondary" type="submit">Search</button></form><div id="simple-place-results" class="simple-place-results" aria-live="polite"></div><div class="simple-step-actions"><span></span><button class="button" type="button" data-action="simple-next" data-next-step="2">Next <span aria-hidden="true">→</span></button></div></article></section>
+    <section class="simple-stage" data-simple-stage="2" hidden><article class="panel simple-card"><span class="eyebrow">STEP 2 / SOIL &amp; WATER</span><h2>Tell us only what you know.</h2><p>These quick choices help FieldShift AI explain the crop and water signals. “I don’t know” is always okay.</p><form id="simple-farm-form" class="simple-farm-form"><label>Water source<select name="waterSource"><option value="unknown">I don’t know yet</option><option value="rainfed">Rain-fed only</option><option value="irrigated">Irrigation available</option></select></label><label>Your priority<select name="objective"><option value="water">Use water wisely</option><option value="soil">Protect soil health</option><option value="risk">Prepare for changing weather</option></select></label><label>Soil pH <small>Optional</small><input name="soilPH" inputmode="decimal" min="0" max="14" placeholder="I don’t know"></label><label>Soil texture<select name="soilTexture"><option value="unknown">I don’t know</option><option value="light">Light</option><option value="medium">Medium</option><option value="heavy">Heavy</option><option value="organic">Organic</option></select></label><label class="span-two">Drainage<select name="drainage"><option value="unknown">I don’t know</option><option value="well">Well drained</option><option value="excessive">Very fast drainage</option></select></label><div class="simple-step-actions span-two"><button class="button secondary" type="button" data-action="simple-back" data-back-step="1">← Back</button><button class="button" type="submit">Next <span aria-hidden="true">→</span></button></div></form></article></section>
+    <section class="simple-stage" data-simple-stage="3" hidden><article class="panel simple-card"><span class="eyebrow">STEP 3 / CROPS</span><h2>Which crops are you considering?</h2><p>Choose one or more crops. FieldShift AI will compare their available soil conditions and include your primary crop in the report.</p><form id="simple-crops-form" class="simple-crop-checklist">${['wheat','barley','chickpea','alfalfa'].map(id => { const crop = simpleCropEvidence[id]; return '<label><input type="checkbox" name="crops" value="' + id + '"><span><b>' + crop.name + '</b><small>' + crop.source + '</small></span></label>'; }).join('')}<div class="simple-step-actions"><button class="button secondary" type="button" data-action="simple-back" data-back-step="2">← Back</button><button class="button" type="submit">Generate my report <span aria-hidden="true">→</span></button></div></form></article></section>
+    <section class="simple-stage" data-simple-stage="4" hidden><header class="simple-results-heading"><div><span class="eyebrow">STEP 4 / YOUR REPORT</span><h2>Your farm, clearly explained.</h2><p id="simple-results-summary">Your location, crop choices, water context, and planning estimate appear here.</p></div><button class="button secondary" type="button" data-simple-step="1">Start again</button></header><div class="simple-results-grid" id="simple-results"></div><aside class="simple-results-note"><b>How to read your report</b><p>Weather and crop-condition signals are separated from planning estimates. Local currency follows the country you selected; confirm prices with your local buyer before acting.</p></aside></section>`;
   $("main").insertBefore(simpleView, $(".app-footer"));
   const feedbackView = document.createElement("section");
   feedbackView.className = "view";
@@ -542,6 +542,7 @@ function renderSimpleFlow() {
     : '<b>Choose your farm location</b><span>GPS is optional. You can search or choose a point on the map.</span>';
   const form = $('#simple-farm-form');
   if (form) Object.entries(state.simpleFarm).forEach(([key, value]) => { if (form.elements[key]) form.elements[key].value = value; });
+  $$('input[name="crops"]', $('#simple-crops-form')).forEach(input => { input.checked = (state.simpleFarm.crops || []).includes(input.value); });
 }
 
 const simpleToolbarCopy = {
@@ -578,6 +579,29 @@ function initSimpleToolbar() {
 
 function simpleCard(title, type, body, detail, action = 'See details') {
   return '<article class="panel simple-result-card"><div class="simple-result-top"><span class="simple-result-type ' + type + '">' + type.toUpperCase() + '</span><span class="simple-result-icon">' + ({ forecast: '☁', calculated: '◒', unavailable: '○', screening: '✦' }[type] || '·') + '</span></div><h3>' + escapeHTML(title) + '</h3><p>' + escapeHTML(body) + '</p><small>' + escapeHTML(detail) + '</small><a href="#/about">' + action + ' →</a></article>';
+}
+
+const simplePlanningBenchmarks = {
+  wheat: { yield: 3.2, priceUsd: 270, costUsd: 470 },
+  barley: { yield: 2.8, priceUsd: 230, costUsd: 380 },
+  chickpea: { yield: 1.6, priceUsd: 710, costUsd: 510 },
+  alfalfa: { yield: 8.4, priceUsd: 155, costUsd: 720 },
+};
+const simpleFallbackRates = { USD: 1, SAR: 3.75, EGP: 50, EUR: .92, GBP: .79, INR: 84, KES: 129, CNY: 7.25, BRL: 5.45, ZAR: 18.3, NGN: 1550 };
+function simpleCurrency() { return countryCurrencies[state.location.country] || 'USD'; }
+function simpleMoney(value, currency) {
+  return new Intl.NumberFormat({ en: 'en-US', fr: 'fr-FR', ar: 'ar-SA' }[currentLanguage()] || 'en-US', { style: 'currency', currency, maximumFractionDigits: 0 }).format(value);
+}
+async function updateSimpleCurrency() {
+  const currency = simpleCurrency();
+  state.economicsInputs.currency = currency;
+  let rate = simpleFallbackRates[currency] || 1, source = 'planning reference conversion';
+  if (currency !== 'USD') try {
+    const response = await fetch('https://open.er-api.com/v6/latest/USD', { headers: { Accept: 'application/json' } });
+    const data = await response.json();
+    if (response.ok && Number(data?.rates?.[currency]) > 0) { rate = Number(data.rates[currency]); source = 'latest available exchange-rate conversion'; }
+  } catch { /* The transparent reference rate keeps the simple report usable offline. */ }
+  state.simpleFx = { currency, rate, source };
 }
 
 function simpleFactorStatus(value, requirement, kind = 'number') {
@@ -617,15 +641,17 @@ function renderSimpleResults() {
     return;
   }
   const weather = state.weather;
-  const selectedCrop = state.simpleFarm.crop;
+  const selectedCrops = (state.simpleFarm.crops || []).length ? state.simpleFarm.crops : [state.simpleFarm.crop].filter(id => id && id !== 'recommend');
+  const selectedCrop = selectedCrops[0] || 'recommend';
   const priority = state.simpleFarm.objective || 'water';
   const irrigated = state.simpleFarm.waterSource === 'irrigated';
   const rotations = recommendRotations({ priority, currentCrop: selectedCrop === 'recommend' ? 'wheat' : selectedCrop, irrigated, weather });
   const ids = [...new Set(rotations.flatMap(plan => plan.sequence).filter(id => crops.find(crop => crop.id === id)?.type !== 'cover'))].slice(0, 3);
   const candidates = ids.map(id => crops.find(crop => crop.id === id)?.name).filter(Boolean);
-  const assessment = assessSimpleCropEvidence(selectedCrop);
-  const cropBody = assessment
-    ? assessment.profile.name + ': ' + assessment.overall + ' from the available soil factors. ' + (assessment.limiting.length ? 'Potentially limiting: ' + assessment.limiting.join(', ') + '. ' : '') + (assessment.unknown.length ? 'Still unknown: ' + assessment.unknown.join(', ') + '.' : 'Available factors are not limiting under the referenced crop profile.')
+  const assessments = selectedCrops.map(assessSimpleCropEvidence).filter(Boolean);
+  const assessment = assessments[0];
+  const cropBody = assessments.length
+    ? assessments.map(item => item.profile.name + ': ' + item.overall + (item.limiting.length ? ' (watch ' + item.limiting.join(', ') + ')' : '')).join('. ') + '.'
     : candidates.length ? candidates.join(', ') + '. These are reviewed crop profiles you can inspect after choosing a crop; they are not crop recommendations.' : 'Choose a crop to evaluate the available profile factors.';
   const current = weather?.current;
   const firstDay = weather?.daily?.[0];
@@ -638,14 +664,18 @@ function renderSimpleResults() {
   const hot = number(current?.temperature) && current.temperature >= 35;
   const windy = number(current?.wind) && current.wind >= 30;
   const riskBody = weather ? (hot || windy ? 'Short-term weather watch: ' + (hot ? 'high temperature' : '') + (hot && windy ? ' and ' : '') + (windy ? 'strong wind' : '') + ' appear in the current forecast. Confirm crop-specific thresholds locally.' : 'No basic short-term heat or wind screening flag is active from the current forecast. This is not a season-long risk assessment.') : 'Weather-related risks are unavailable until forecast retrieval succeeds.';
-  const profitReady = ['areaHa', 'yieldTonnesHa', 'pricePerTonne', 'seedCostHa', 'fertilizerCostHa', 'waterCostHa', 'operationsCostHa'].every(key => number(state.economicsInputs[key]));
-  const profitBody = profitReady ? 'A local scenario is available in Complex farmer mode. It remains a scenario, not a guaranteed profit.' : 'Profit outlook is unavailable because local price, yield, area and cost assumptions have not all been supplied.';
-  summary.textContent = weather ? 'Available data has been organized into five practical checks for ' + state.location.name + '.' : 'Your location is saved. Weather retrieval is unavailable right now, so missing information is shown clearly.';
+  const benchmark = simplePlanningBenchmarks[selectedCrop];
+  const fx = state.simpleFx || { currency: simpleCurrency(), rate: simpleFallbackRates[simpleCurrency()] || 1, source: 'planning reference conversion' };
+  const sales = benchmark ? benchmark.yield * benchmark.priceUsd * fx.rate : null;
+  const cost = benchmark ? benchmark.costUsd * fx.rate : null;
+  const margin = benchmark ? sales - cost : null;
+  const profitBody = benchmark ? 'Estimated planning margin: ' + simpleMoney(margin, fx.currency) + ' per hectare. Estimated sales ' + simpleMoney(sales, fx.currency) + ' less typical planning costs of ' + simpleMoney(cost, fx.currency) + '.' : 'Choose at least one crop to create the planning estimate.';
+  summary.textContent = weather ? 'Your automatic report is ready for ' + state.location.name + '. Currency: ' + fx.currency + '.' : 'Your location is saved. Weather retrieval is unavailable right now, so missing information is shown clearly.';
   host.innerHTML = [
-    simpleCard(assessment ? 'Crop conditions' : 'Crop profiles', 'screening', cropBody, assessment ? 'Source: ' + assessment.profile.source + ' · climate and planting calendar remain unknown without locally approved seasonal context' : 'Source: reviewed AgriPulse crop profiles · choose a crop for factor-by-factor conditions'),
+    simpleCard(assessments.length ? 'Crop conditions' : 'Crop profiles', 'screening', cropBody, assessments.length ? 'Source: ' + assessments.map(item => item.profile.source).join(' · ') + ' · climate and planting calendar remain unknown without locally approved seasonal context' : 'Source: reviewed AgriPulse crop profiles · choose a crop for factor-by-factor conditions'),
     simpleCard('Water needs', number(firstDay?.et0) ? 'forecast' : 'unavailable', waterBody, number(firstDay?.et0) ? 'Source: Open-Meteo forecast · reference evapotranspiration, not irrigation instruction' : 'Missing: crop stage, water source details and effective rainfall'),
     simpleCard('Planting window', 'unavailable', 'A planting window needs validated local seasonal climate and crop information. It is not inferred from a seven-day forecast.', 'Next step: review historical climate in Complex farmer mode'),
-    simpleCard('Profit outlook', profitReady ? 'calculated' : 'unavailable', profitBody, profitReady ? 'Classification: calculated scenario from farmer-supplied assumptions' : 'Missing: local selling price, yield and complete cost inputs'),
+    simpleCard('Profit planning estimate', benchmark ? 'calculated' : 'unavailable', profitBody, benchmark ? 'Currency: ' + fx.currency + ' · ' + fx.source + ' · benchmark values are planning references, not a local market quote' : 'Choose a crop to create a planning estimate'),
     simpleCard('Farm risks', weather ? 'forecast' : 'unavailable', riskBody, weather ? 'Source: Open-Meteo weather model forecast · retrieved ' + new Date(weather.retrievedAt).toLocaleString() : 'Data status: unavailable')
   ].join('');
 }
@@ -654,16 +684,16 @@ async function runSimpleAnalysis() {
   if (!hasLocation()) { setSimpleStep(1); toast('Choose your farm location before analysis.'); return; }
   const button = $('[data-action="simple-analysis"]');
   const status = $('#simple-analysis-status');
-  button.disabled = true;
-  status.textContent = 'Retrieving available weather data…';
+  if (button) button.disabled = true;
+  if (status) status.textContent = 'Preparing your location, weather, crop and local-currency report…';
   try {
-    if (!state.weather) await loadWeather(true);
+    await Promise.all([state.weather ? Promise.resolve() : loadWeather(true), updateSimpleCurrency()]);
     renderRotations();
     renderSimpleResults();
     setSimpleStep(4);
   } finally {
-    button.disabled = false;
-    status.textContent = '';
+    if (button) button.disabled = false;
+    if (status) status.textContent = '';
   }
 }
 
@@ -707,6 +737,12 @@ function bindEvents() {
         toast("Rotation comparisons updated");
       },
       "simple-analysis": runSimpleAnalysis,
+      "simple-next": () => {
+        if (!hasLocation()) { toast('Choose a farm location first.'); return; }
+        setSimpleStep(action.dataset.nextStep || 2);
+      },
+      "simple-back": () => setSimpleStep(action.dataset.backStep || 1),
+      "simple-geolocation": () => useSimpleDeviceLocation(),
       "save-plan": savePlan,
       "export-csv": exportCSV,
       print: () => window.print(),
@@ -814,7 +850,8 @@ function bindEvents() {
     state.simpleFarm = {
       objective: form.elements.objective.value,
       waterSource: form.elements.waterSource.value,
-      crop: form.elements.crop.value,
+      crop: state.simpleFarm.crop || 'recommend',
+      crops: state.simpleFarm.crops || [],
       soilPH: form.elements.soilPH.value.trim(),
       soilTexture: form.elements.soilTexture.value,
       drainage: form.elements.drainage.value,
@@ -822,9 +859,18 @@ function bindEvents() {
     write('fieldshift.simpleFarm', state.simpleFarm);
     $('#planning-priority').value = state.simpleFarm.objective === 'risk' ? 'resilience' : state.simpleFarm.objective;
     $('#irrigation').value = state.simpleFarm.waterSource === 'irrigated' ? 'irrigated' : 'rainfed';
-    if (state.simpleFarm.crop !== 'recommend' && $('#current-crop option[value="' + state.simpleFarm.crop + '"]')) $('#current-crop').value = state.simpleFarm.crop;
     renderRotations();
     setSimpleStep(3);
+  });
+  $('#simple-crops-form')?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const choices = $$('input[name="crops"]:checked', event.currentTarget).map(input => input.value);
+    if (!choices.length) { toast('Choose at least one crop.'); return; }
+    state.simpleFarm = { ...state.simpleFarm, crops: choices, crop: choices[0] };
+    write('fieldshift.simpleFarm', state.simpleFarm);
+    if ($('#current-crop option[value="' + choices[0] + '"]')) $('#current-crop').value = choices[0];
+    renderRotations();
+    runSimpleAnalysis();
   });
   $$('[data-simple-step]').forEach(button => button.addEventListener('click', () => setSimpleStep(button.dataset.simpleStep)));
   window.addEventListener('fieldshift:updated', renderSimpleFlow);
@@ -1315,8 +1361,7 @@ async function searchSimpleLocation(event) {
       button.addEventListener('click', () => {
         selectLocation({ ...place, method: 'Place search' });
         host.replaceChildren();
-        setSimpleStep(2);
-        toast('Selected ' + place.name);
+        toast('Selected ' + place.name + '. Press Next when you are ready.');
       });
       return button;
     }));
@@ -1409,6 +1454,18 @@ function useDeviceLocation() {
           ? "Location permission was declined. You can use search or coordinates."
           : "Could not retrieve location. Try search or coordinates.",
       ),
+    { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 },
+  );
+}
+function useSimpleDeviceLocation() {
+  if (!navigator.geolocation) return toast('Location access is unavailable in this browser.');
+  toast('Waiting for your location permission…');
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      selectLocation({ lat: position.coords.latitude, lon: position.coords.longitude, name: 'My current location', method: 'Device location' });
+      toast('Location selected. Press Next when you are ready.');
+    },
+    (error) => toast(error.code === 1 ? 'Location permission was declined. Search for your farm instead.' : 'Could not retrieve location. Try search instead.'),
     { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 },
   );
 }
