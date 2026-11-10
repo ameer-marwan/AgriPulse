@@ -20,7 +20,9 @@ import { initIntro } from "./intro.js";
 import { workspaceStorage, storageReady } from "./storage.js";
 
 window.__fieldshiftIntro ||= initIntro({language:'en'});
-await storageReady;
+// Do not block first paint on the account/workspace request. Mobile browsers can
+// suspend or delay that request; the interface must still render immediately.
+await Promise.race([storageReady, new Promise(resolve => setTimeout(resolve, 1200))]);
 
 // The welcome choice is a presentation preference, not an account or a data claim.
 // Guided mode deliberately keeps the high-value inputs visible while tucking away
