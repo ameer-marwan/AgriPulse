@@ -176,7 +176,15 @@ const state = {
   ready: false,
   fieldSettings: read("fieldshift.fieldSettings", {}),
   economicsInputs: { ...defaultEconomics },
-  simpleFarm: read("fieldshift.simpleFarm", { objective: "water", waterSource: "unknown", crop: "recommend" }),
+  simpleFarm: read("fieldshift.simpleFarm", { objective: "water", waterSource: "unknown", crop: "recommend", soilPH: "", soilTexture: "unknown", drainage: "unknown" }),
+};
+// Reviewed Simple-mode crop records adapted from the FieldShift AI reference repository.
+// They deliberately produce factor labels, never a numeric score or planting instruction.
+const simpleCropEvidence = {
+  wheat: { name: 'Wheat', ph: { optimum: [6, 7], absolute: [5.5, 8.5] }, texture: { optimum: ['medium', 'organic'], absolute: ['heavy', 'medium'] }, drainage: { optimum: ['well'], absolute: ['well'] }, source: 'FAO ECOCROP 2114' },
+  barley: { name: 'Barley', ph: { optimum: [6.5, 7.5], absolute: [6, 8] }, texture: { optimum: ['medium'], absolute: ['heavy', 'medium', 'light'] }, drainage: { optimum: ['well'], absolute: ['well'] }, source: 'FAO ECOCROP 1232' },
+  chickpea: { name: 'Chickpea', ph: { optimum: [6, 8.5], absolute: [4.7, 9.5] }, texture: { optimum: ['heavy', 'medium'], absolute: ['heavy', 'medium', 'light'] }, drainage: { optimum: ['well'], absolute: ['well', 'excessive'] }, source: 'FAO ECOCROP 2479' },
+  alfalfa: { name: 'Alfalfa', ph: { optimum: [6.5, 7.5], absolute: [4.3, 8.7] }, texture: { optimum: ['medium', 'light'], absolute: ['medium', 'light'] }, drainage: { optimum: ['well'], absolute: ['well', 'excessive'] }, source: 'FAO ECOCROP 1428' },
 };
 const hasLocation = () =>
   validPoint(state.location) &&
@@ -328,13 +336,14 @@ function init() {
   simpleView.className = "view simple-farmer-view";
   simpleView.id = "view-simple";
   simpleView.hidden = true;
-  const simpleCropOptions = ['<option value="recommend">I don’t know — show crop candidates</option>']
-    .concat(crops.filter(crop => crop.type !== 'cover').map(crop => '<option value="' + escapeHTML(crop.id) + '">' + escapeHTML(crop.name) + '</option>')).join('');
+  const simpleCropOptions = ['<option value="recommend">I don’t know — show crop profiles</option>']
+    .concat(crops.filter(crop => crop.type !== 'cover').map(crop => '<option value="' + escapeHTML(crop.id) + '">' + escapeHTML(crop.name) + '</option>'))
+    .concat(crops.some(crop => crop.id === 'alfalfa') ? [] : ['<option value="alfalfa">Alfalfa</option>']).join('');
   simpleView.innerHTML = `
     <header class="simple-hero"><div><span class="eyebrow">AGRIPULSE ASSISTANT</span><h1>Smarter crop decisions<span>.</span></h1><p>Start with your land. AgriPulse retrieves available weather information automatically and explains what still needs your local knowledge.</p></div><span class="simple-mode-pill">GUIDED WORKSPACE</span></header>
     <nav class="simple-steps" aria-label="Farm analysis steps"><button type="button" data-simple-step="1"><i>1</i><span>Location</span></button><button type="button" data-simple-step="2"><i>2</i><span>Farm &amp; crop</span></button><button type="button" data-simple-step="3"><i>3</i><span>Analysis</span></button><button type="button" data-simple-step="4"><i>4</i><span>Results</span></button></nav>
-    <section class="simple-stage" data-simple-stage="1"><article class="panel simple-card"><span class="eyebrow">STEP 1 / LOCATION</span><h2>Where is your farm?</h2><p>Use your device location, search for a nearby place, or choose a point on the map. Coordinates are never required.</p><div class="simple-location-readout" id="simple-location-readout">No farm selected yet.</div><div class="button-row"><button class="button" type="button" data-action="geolocation">Use my location</button><button class="button secondary" type="button" data-action="location">Search or choose on map</button></div><p class="fine-print">Location permission is optional. Weather and regional Earth-observation context are retrieved only after you choose a place.</p></article></section>
-    <section class="simple-stage" data-simple-stage="2" hidden><article class="panel simple-card"><span class="eyebrow">STEP 2 / FARM &amp; CROP</span><h2>A few essentials are enough to begin.</h2><p>Choose what you know. You can select “I don’t know” and refine details later in Complex farmer mode.</p><form id="simple-farm-form" class="simple-farm-form"><label>Your main goal<select name="objective"><option value="water">Use water wisely</option><option value="soil">Protect soil health</option><option value="risk">Prepare for changing weather</option></select></label><label>Water source<select name="waterSource"><option value="unknown">I don’t know yet</option><option value="rainfed">Rain-fed only</option><option value="irrigated">Irrigation available</option></select></label><label class="span-two">Crop<select name="crop">${simpleCropOptions}</select></label><button class="button" type="submit">Save and continue <span aria-hidden="true">→</span></button></form></article></section>
+    <section class="simple-stage" data-simple-stage="1"><article class="panel simple-card"><span class="eyebrow">STEP 1 / LOCATION</span><h2>Where is your farm?</h2><p>Use your device location or search for a country, city, village, or farm area. Coordinates are never required.</p><div class="simple-location-readout" id="simple-location-readout">No farm selected yet.</div><div class="button-row"><button class="button" type="button" data-action="geolocation">Use my location</button><button class="button secondary" type="button" data-action="location">Choose on map</button></div><div class="simple-or"><span>or search for a place</span></div><form id="simple-place-search" class="simple-place-search"><label class="sr-only" for="simple-place-query">Search for a place</label><input id="simple-place-query" name="query" minlength="2" required placeholder="Country, city, village, or farm area"><button class="button secondary" type="submit">Search</button></form><div id="simple-place-results" class="simple-place-results" aria-live="polite"></div><p class="fine-print">Location permission is optional. Weather and regional Earth-observation context are retrieved only after you choose a place.</p></article></section>
+    <section class="simple-stage" data-simple-stage="2" hidden><article class="panel simple-card"><span class="eyebrow">STEP 2 / FARM &amp; CROP</span><h2>A few essentials are enough to begin.</h2><p>Choose what you know. You can select “I don’t know” and refine details later in Complex farmer mode.</p><form id="simple-farm-form" class="simple-farm-form"><label>Your main goal<select name="objective"><option value="water">Use water wisely</option><option value="soil">Protect soil health</option><option value="risk">Prepare for changing weather</option></select></label><label>Water source<select name="waterSource"><option value="unknown">I don’t know yet</option><option value="rainfed">Rain-fed only</option><option value="irrigated">Irrigation available</option></select></label><label class="span-two">Crop<select name="crop">${simpleCropOptions}</select></label><details class="simple-soil-details span-two"><summary>What do you know about your soil? <small>Optional</small></summary><div class="simple-soil-grid"><label>Soil pH<input name="soilPH" inputmode="decimal" min="0" max="14" placeholder="I don’t know"></label><label>Soil texture<select name="soilTexture"><option value="unknown">I don’t know</option><option value="light">Light</option><option value="medium">Medium</option><option value="heavy">Heavy</option><option value="organic">Organic</option></select></label><label>Drainage<select name="drainage"><option value="unknown">I don’t know</option><option value="well">Well drained</option><option value="excessive">Excessively drained</option></select></label></div></details><button class="button" type="submit">Save and continue <span aria-hidden="true">→</span></button></form></article></section>
     <section class="simple-stage" data-simple-stage="3" hidden><article class="panel simple-card simple-analyze-card"><span class="eyebrow">STEP 3 / ANALYSIS</span><h2>Ready to analyze your farm?</h2><p>AgriPulse uses your selected location and available forecast data. It does not invent soil tests, water volumes, planting dates, market prices, or field measurements.</p><div class="simple-data-list"><span>✓ Location context</span><span>✓ Weather forecast when available</span><span>✓ Transparent crop-trait screening</span><span>○ Soil, prices and farm measurements stay marked as unknown until provided</span></div><button class="button" type="button" data-action="simple-analysis">Analyze my farm <span aria-hidden="true">→</span></button><p class="fine-print" id="simple-analysis-status" role="status"></p></article></section>
     <section class="simple-stage" data-simple-stage="4" hidden><header class="simple-results-heading"><div><span class="eyebrow">STEP 4 / RESULTS</span><h2>Your farm, clearly explained.</h2><p id="simple-results-summary">Choose a farm and run the analysis to see available results.</p></div><button class="button secondary" type="button" data-simple-step="2">Adjust farm details</button></header><div class="simple-results-grid" id="simple-results"></div><aside class="simple-results-note"><b>How to read these results</b><p>Results label whether information is forecast, calculated, farmer-supplied, or unavailable. They support planning and do not replace local agronomic advice or laboratory testing.</p><a href="#/about">See data and method notes →</a></aside></section>`;
   $("main").insertBefore(simpleView, $(".app-footer"));
@@ -538,6 +547,33 @@ function simpleCard(title, type, body, detail, action = 'See details') {
   return '<article class="panel simple-result-card"><div class="simple-result-top"><span class="simple-result-type ' + type + '">' + type.toUpperCase() + '</span><span class="simple-result-icon">' + ({ forecast: '☁', calculated: '◒', unavailable: '○', screening: '✦' }[type] || '·') + '</span></div><h3>' + escapeHTML(title) + '</h3><p>' + escapeHTML(body) + '</p><small>' + escapeHTML(detail) + '</small><a href="#/about">' + action + ' →</a></article>';
 }
 
+function simpleFactorStatus(value, requirement, kind = 'number') {
+  if (value === '' || value === null || value === undefined || value === 'unknown') return 'UNKNOWN';
+  if (kind === 'number') {
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric)) return 'UNKNOWN';
+    if (numeric >= requirement.optimum[0] && numeric <= requirement.optimum[1]) return 'SUITABLE';
+    if (numeric >= requirement.absolute[0] && numeric <= requirement.absolute[1]) return 'MARGINAL';
+    return 'LIMITING';
+  }
+  if (requirement.optimum.includes(value)) return 'SUITABLE';
+  if (requirement.absolute.includes(value)) return 'MARGINAL';
+  return 'LIMITING';
+}
+
+function assessSimpleCropEvidence(cropId) {
+  const profile = simpleCropEvidence[cropId];
+  if (!profile) return null;
+  const pH = simpleFactorStatus(state.simpleFarm.soilPH, profile.ph);
+  const texture = simpleFactorStatus(state.simpleFarm.soilTexture, profile.texture, 'category');
+  const drainage = simpleFactorStatus(state.simpleFarm.drainage, profile.drainage, 'category');
+  const factors = [['soil pH', pH], ['soil texture', texture], ['drainage', drainage]];
+  const limiting = factors.filter(([, status]) => status === 'LIMITING').map(([name]) => name);
+  const unknown = factors.filter(([, status]) => status === 'UNKNOWN').map(([name]) => name);
+  const overall = limiting.length ? 'potentially limited' : unknown.length === factors.length ? 'unknown' : 'no documented limitation';
+  return { profile, factors, limiting, unknown, overall };
+}
+
 function renderSimpleResults() {
   const host = $('#simple-results');
   const summary = $('#simple-results-summary');
@@ -554,7 +590,10 @@ function renderSimpleResults() {
   const rotations = recommendRotations({ priority, currentCrop: selectedCrop === 'recommend' ? 'wheat' : selectedCrop, irrigated, weather });
   const ids = [...new Set(rotations.flatMap(plan => plan.sequence).filter(id => crops.find(crop => crop.id === id)?.type !== 'cover'))].slice(0, 3);
   const candidates = ids.map(id => crops.find(crop => crop.id === id)?.name).filter(Boolean);
-  const cropBody = candidates.length ? candidates.join(', ') + '. These are trait-screening candidates based on your chosen goal and water answer, not validated crop-suitability rankings.' : 'No crop candidates can be screened until basic farm details are available.';
+  const assessment = assessSimpleCropEvidence(selectedCrop);
+  const cropBody = assessment
+    ? assessment.profile.name + ': ' + assessment.overall + ' from the available soil factors. ' + (assessment.limiting.length ? 'Potentially limiting: ' + assessment.limiting.join(', ') + '. ' : '') + (assessment.unknown.length ? 'Still unknown: ' + assessment.unknown.join(', ') + '.' : 'Available factors are not limiting under the referenced crop profile.')
+    : candidates.length ? candidates.join(', ') + '. These are reviewed crop profiles you can inspect after choosing a crop; they are not crop recommendations.' : 'Choose a crop to evaluate the available profile factors.';
   const current = weather?.current;
   const firstDay = weather?.daily?.[0];
   const forecastBody = weather
@@ -570,7 +609,7 @@ function renderSimpleResults() {
   const profitBody = profitReady ? 'A local scenario is available in Complex farmer mode. It remains a scenario, not a guaranteed profit.' : 'Profit outlook is unavailable because local price, yield, area and cost assumptions have not all been supplied.';
   summary.textContent = weather ? 'Available data has been organized into five practical checks for ' + state.location.name + '.' : 'Your location is saved. Weather retrieval is unavailable right now, so missing information is shown clearly.';
   host.innerHTML = [
-    simpleCard('Best crop candidates', 'screening', cropBody, 'Source: AgriPulse crop traits · conditions: local soil, season and market still need confirmation'),
+    simpleCard(assessment ? 'Crop conditions' : 'Crop profiles', 'screening', cropBody, assessment ? 'Source: ' + assessment.profile.source + ' · climate and planting calendar remain unknown without locally approved seasonal context' : 'Source: reviewed AgriPulse crop profiles · choose a crop for factor-by-factor conditions'),
     simpleCard('Water needs', number(firstDay?.et0) ? 'forecast' : 'unavailable', waterBody, number(firstDay?.et0) ? 'Source: Open-Meteo forecast · reference evapotranspiration, not irrigation instruction' : 'Missing: crop stage, water source details and effective rainfall'),
     simpleCard('Planting window', 'unavailable', 'A planting window needs validated local seasonal climate and crop information. It is not inferred from a seven-day forecast.', 'Next step: review historical climate in Complex farmer mode'),
     simpleCard('Profit outlook', profitReady ? 'calculated' : 'unavailable', profitBody, profitReady ? 'Classification: calculated scenario from farmer-supplied assumptions' : 'Missing: local selling price, yield and complete cost inputs'),
@@ -691,6 +730,7 @@ function bindEvents() {
     }),
   );
   $("#place-search-form").addEventListener("submit", searchLocation);
+  $('#simple-place-search')?.addEventListener('submit', searchSimpleLocation);
   $("#geojson-import").addEventListener("change", importBoundary);
   $("#economics-form").addEventListener("submit", (event) => {
     event.preventDefault();
@@ -742,11 +782,14 @@ function bindEvents() {
       objective: form.elements.objective.value,
       waterSource: form.elements.waterSource.value,
       crop: form.elements.crop.value,
+      soilPH: form.elements.soilPH.value.trim(),
+      soilTexture: form.elements.soilTexture.value,
+      drainage: form.elements.drainage.value,
     };
     write('fieldshift.simpleFarm', state.simpleFarm);
     $('#planning-priority').value = state.simpleFarm.objective === 'risk' ? 'resilience' : state.simpleFarm.objective;
     $('#irrigation').value = state.simpleFarm.waterSource === 'irrigated' ? 'irrigated' : 'rainfed';
-    if (state.simpleFarm.crop !== 'recommend') $('#current-crop').value = state.simpleFarm.crop;
+    if (state.simpleFarm.crop !== 'recommend' && $('#current-crop option[value="' + state.simpleFarm.crop + '"]')) $('#current-crop').value = state.simpleFarm.crop;
     renderRotations();
     setSimpleStep(3);
   });
@@ -1217,7 +1260,36 @@ function selectLocation(point, move = true) {
   if (move) state.map.setLocation(point);
   write("fieldshift.location", state.location);
   renderLocation();
+  renderSimpleFlow();
   loadWeather();
+}
+async function searchSimpleLocation(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const host = $('#simple-place-results');
+  const query = form.elements.query.value.trim();
+  if (query.length < 2) return;
+  state.searchController?.abort();
+  state.searchController = new AbortController();
+  host.innerHTML = '<p class="search-results-status">Searching for places…</p>';
+  try {
+    const places = await searchPlaces(query, { signal: state.searchController.signal });
+    if (!places.length) { host.innerHTML = '<p class="search-results-status">No places found. Try a nearby town or village.</p>'; return; }
+    host.replaceChildren(...places.map(place => {
+      const button = document.createElement('button');
+      button.type = 'button'; button.className = 'simple-place-option';
+      button.innerHTML = '<b>' + escapeHTML(place.name) + '</b><small>' + place.lat.toFixed(4) + ', ' + place.lon.toFixed(4) + '</small>';
+      button.addEventListener('click', () => {
+        selectLocation({ ...place, method: 'Place search' });
+        host.replaceChildren();
+        setSimpleStep(2);
+        toast('Selected ' + place.name);
+      });
+      return button;
+    }));
+  } catch (error) {
+    if (error.name !== 'AbortError') host.innerHTML = '<p class="search-results-status">Place search is unavailable. You can use the map instead.</p>';
+  }
 }
 async function searchLocation(event) {
   event.preventDefault();
