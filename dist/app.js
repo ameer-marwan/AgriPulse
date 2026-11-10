@@ -348,7 +348,7 @@ function init() {
     .concat(crops.some(crop => crop.id === 'alfalfa') ? [] : ['<option value="alfalfa">Alfalfa</option>']).join('');
   simpleView.innerHTML = `
     <header class="simple-reference-header"><a class="simple-brand" href="#/simple" aria-label="AgriPulse AI"><img src="assets/logo-new.png" alt=""><span>AgriPulse <b>AI</b></span></a><div class="simple-reference-copy"><p class="eyebrow">AGRIPULSE AI</p><h1 data-simple-copy="title">AgriPulse AI</h1><p class="simple-lede" data-simple-copy="subtitle">Smarter crop decisions powered by NASA Earth data.</p></div><div class="simple-reference-actions"><button class="simple-tool-button" type="button" data-action="simple-settings" data-simple-copy="settings">Settings</button><button class="simple-tool-icon" type="button" data-action="theme" aria-label="Switch theme" title="Switch theme">◐</button><label class="simple-reference-language"><span>Language</span><select id="simple-language" aria-label="Language"><option value="en">English</option><option value="ar">العربية</option><option value="fr">Français</option><option value="es">Español</option><option value="de">Deutsch</option><option value="pt">Português</option><option value="tr">Türkçe</option><option value="ur">اردو</option><option value="hi">हिन्दी</option><option value="zh">中文</option></select></label></div></header>
-    <dialog class="simple-settings-dialog" id="simple-settings-dialog"><header><div><span class="eyebrow">AGRIPULSE AI</span><h2 data-simple-copy="settings">Settings</h2></div><button class="simple-tool-icon" type="button" data-action="close-simple-settings" aria-label="Close settings">×</button></header><p data-simple-copy="settingsHelp">Change language or theme without leaving the guided farmer flow.</p><div class="simple-settings-actions"><button class="button secondary" type="button" data-action="theme" data-simple-copy="theme">Switch light / dark theme</button><label>Language<select id="simple-settings-language"><option value="en">English</option><option value="ar">العربية</option><option value="fr">Français</option><option value="es">Español</option><option value="de">Deutsch</option><option value="pt">Português</option><option value="tr">Türkçe</option><option value="ur">اردو</option><option value="hi">हिन्दी</option><option value="zh">中文</option></select></label></div></dialog>
+    <dialog class="simple-settings-dialog" id="simple-settings-dialog"><header><div><span class="eyebrow">AGRIPULSE AI</span><h2 data-simple-copy="settings">Settings</h2></div><button class="simple-tool-icon" type="button" data-action="close-simple-settings" aria-label="Close settings">×</button></header><p data-simple-copy="settingsHelp">Change language or theme without leaving the guided farmer flow.</p><div class="simple-settings-actions"><div class="simple-appearance-options" role="group" aria-label="Choose appearance"><button type="button" data-simple-theme-choice="auto"><span>◐</span><b>Automatic</b><small>Follows local time</small></button><button type="button" data-simple-theme-choice="light"><span>☀</span><b>Daylight</b><small>Bright and fresh</small></button><button type="button" data-simple-theme-choice="dark"><span>☾</span><b>Forest dark</b><small>Calm and focused</small></button></div><label>Appearance<select id="simple-appearance"><option value="auto">Automatic · follows local time</option><option value="dark">Forest dark</option><option value="light">Daylight</option></select></label><label>Weather units<select id="simple-weather-units"><option value="metric">Metric · °C, mm, km/h</option><option value="imperial">Imperial · °F, inches, mph</option></select></label><label>Language<select id="simple-settings-language"><option value="en">English</option><option value="ar">العربية</option><option value="fr">Français</option><option value="es">Español</option><option value="de">Deutsch</option><option value="pt">Português</option><option value="tr">Türkçe</option><option value="ur">اردو</option><option value="hi">हिन्दी</option><option value="zh">中文</option></select></label><button class="button danger" type="button" data-action="reset-workspace">Reset entire workspace</button></div></dialog>
     <nav class="simple-steps" aria-label="Farm analysis steps"><button type="button" data-simple-step="1"><i>1</i><span>Location</span></button><button type="button" data-simple-step="2"><i>2</i><span>Soil &amp; water</span></button><button type="button" data-simple-step="3"><i>3</i><span>Crops</span></button><button type="button" data-simple-step="4"><i>4</i><span>Report</span></button></nav>
     <section class="simple-stage" data-simple-stage="1"><article class="panel simple-card"><span class="eyebrow">STEP 1 / LOCATION</span><h2>Where is your farm?</h2><p>Start with a place. FieldShift AI uses it to set your country, weather context, and local report currency.</p><div class="simple-location-readout" id="simple-location-readout">No farm selected yet.</div><div class="button-row"><button class="button" type="button" data-action="simple-geolocation">Use my location</button><button class="button secondary" type="button" data-action="location">Choose on map</button></div><div class="simple-or"><span>or search for a place</span></div><form id="simple-place-search" class="simple-place-search"><label class="sr-only" for="simple-place-query">Search for a place</label><input id="simple-place-query" name="query" minlength="2" required placeholder="Country, city, village, or farm area"><button class="button secondary" type="submit">Search</button></form><div id="simple-place-results" class="simple-place-results" aria-live="polite"></div><div class="simple-step-actions"><span></span><button class="button" type="button" data-action="simple-next" data-next-step="2">Next <span aria-hidden="true">→</span></button></div></article></section>
     <section class="simple-stage" data-simple-stage="2" hidden><article class="panel simple-card"><span class="eyebrow">STEP 2 / SOIL &amp; WATER</span><h2>Tell us only what you know.</h2><p>These quick choices help FieldShift AI explain the crop and water signals. “I don’t know” is always okay.</p><form id="simple-farm-form" class="simple-farm-form"><label>Water source<select name="waterSource"><option value="unknown">I don’t know yet</option><option value="rainfed">Rain-fed only</option><option value="irrigated">Irrigation available</option></select></label><label>Your priority<select name="objective"><option value="water">Use water wisely</option><option value="soil">Protect soil health</option><option value="risk">Prepare for changing weather</option></select></label><label>Soil pH <small>Optional</small><input name="soilPH" inputmode="decimal" min="0" max="14" placeholder="I don’t know"></label><label>Soil texture<select name="soilTexture"><option value="unknown">I don’t know</option><option value="light">Light</option><option value="medium">Medium</option><option value="heavy">Heavy</option><option value="organic">Organic</option></select></label><label class="span-two">Drainage<select name="drainage"><option value="unknown">I don’t know</option><option value="well">Well drained</option><option value="excessive">Very fast drainage</option></select></label><div class="simple-step-actions span-two"><button class="button secondary" type="button" data-action="simple-back" data-back-step="1">← Back</button><button class="button" type="submit">Save &amp; continue <span aria-hidden="true">→</span></button></div></form></article></section>
@@ -569,6 +569,9 @@ function syncSimpleToolbar(language = state.preferences.language) {
   const words = simpleToolbarCopy[language] || simpleToolbarCopy.en;
   $('#simple-language') && ($('#simple-language').value = language);
   $('#simple-settings-language') && ($('#simple-settings-language').value = language);
+  $('#simple-appearance') && ($('#simple-appearance').value = state.preferences.theme);
+  $('#simple-weather-units') && ($('#simple-weather-units').value = state.preferences.units);
+  $$('[data-simple-theme-choice]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.simpleThemeChoice === state.preferences.theme)));
   $$('[data-simple-copy]').forEach(element => { element.textContent = words[element.dataset.simpleCopy] || element.textContent; });
   const title = $('[data-simple-copy="title"]');
   if (title) title.textContent = words.title;
@@ -587,6 +590,9 @@ function initSimpleToolbar() {
     picker.value = event.currentTarget.value;
     picker.dispatchEvent(new Event('change', { bubbles: true }));
   });
+  $('#simple-appearance')?.addEventListener('change', event => { state.preferences.theme = event.currentTarget.value; applyPreferences(); syncSimpleToolbar(); });
+  $('#simple-weather-units')?.addEventListener('change', event => { state.preferences.units = event.currentTarget.value; applyPreferences(); if (state.weather) renderWeather(); syncSimpleToolbar(); });
+  $$('[data-simple-theme-choice]').forEach(button => button.addEventListener('click', () => { state.preferences.theme = button.dataset.simpleThemeChoice; applyPreferences(); syncSimpleToolbar(); }));
   window.addEventListener('fieldshift:language', event => syncSimpleToolbar(event.detail));
 }
 
@@ -715,6 +721,22 @@ async function runSimpleAnalysis() {
     if (status) status.textContent = '';
   }
 }
+async function resetEntireWorkspace() {
+  if (!window.confirm('Reset the entire workspace? This removes saved fields, settings, reports, feedback, and guest data.')) return;
+  const keys = [];
+  for (let index = 0; index < workspaceStorage.length; index += 1) {
+    const key = workspaceStorage.key(index);
+    if (key) keys.push(key);
+  }
+  keys.forEach(key => workspaceStorage.removeItem(key));
+  try {
+    [...localStorage.keys()].filter(key => key.startsWith('agripulse.') || key.startsWith('fieldshift.')).forEach(key => localStorage.removeItem(key));
+    sessionStorage.clear();
+  } catch { /* The reload still resets the in-memory UI. */ }
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  await workspaceStorage.retry?.();
+  window.location.href = window.location.pathname;
+}
 
 function bindEvents() {
   document.addEventListener("click", (event) => {
@@ -759,6 +781,7 @@ function bindEvents() {
       "simple-settings": () => $('#simple-settings-dialog')?.showModal(),
       "close-simple-settings": () => $('#simple-settings-dialog')?.close(),
       "simple-save": () => { write('fieldshift.simpleReport', { savedAt: new Date().toISOString(), location: state.location, farm: state.simpleFarm, currency: state.simpleFx || { currency: simpleCurrency() } }); toast('Simple report saved to this workspace.'); },
+      "reset-workspace": () => resetEntireWorkspace(),
       "simple-next": () => {
         if (!hasLocation()) { toast('Choose a farm location first.'); return; }
         setSimpleStep(action.dataset.nextStep || 2);
