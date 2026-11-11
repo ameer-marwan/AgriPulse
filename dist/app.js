@@ -375,7 +375,7 @@ function init() {
   if (simpleAbout) {
     simpleAbout.querySelector('h2').textContent = 'Meet the AgriPulse tech team.';
     const row = simpleAbout.querySelector('.button-row');
-    if (row) row.innerHTML = '<a class="button secondary" href="https://github.com/ameer-marwan" target="_blank" rel="noopener">Ameer on GitHub ↗</a><a class="button secondary" href="https://github.com/a7mdel5taeeb-eng" target="_blank" rel="noopener">a7mdel5taeeb-eng ↗</a>';
+    if (row) row.innerHTML = '<a class="button secondary" href="https://github.com/ameer-marwan" target="_blank" rel="noopener">Ameer on GitHub ↗</a><a class="button secondary" href="https://github.com/a7mdel5taeeb-eng" target="_blank" rel="noopener">a7mdel5taeeb-eng ↗</a><a class="button secondary" href="https://github.com/mostafabass1" target="_blank" rel="noopener">Mostafa on GitHub ↗</a>';
   }
   const replayIntroButton = document.createElement('button');
   replayIntroButton.type = 'button';
