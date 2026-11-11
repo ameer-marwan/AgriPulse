@@ -361,6 +361,12 @@ function init() {
     <dialog class="simple-info-dialog" id="simple-feedback-dialog"><header><div><span class="eyebrow">YOUR FEEDBACK</span><h2>Help AgriPulse grow</h2></div><button class="simple-tool-icon" type="button" data-action="close-simple-dialog" aria-label="Close">×</button></header><p>Tell us what would make the guided farmer experience clearer or more useful.</p><form id="simple-feedback-form"><label>Rating<select name="rating"><option value="5">5 · Excellent</option><option value="4">4 · Good</option><option value="3">3 · Okay</option><option value="2">2 · Needs work</option><option value="1">1 · Poor</option></select></label><label>Comment<textarea name="comment" minlength="5" maxlength="600" required placeholder="Write your feedback"></textarea></label><button class="button" type="submit">Save feedback</button></form></dialog>
     <dialog class="simple-info-dialog" id="simple-about-dialog"><header><div><span class="eyebrow">ABOUT AGRIPULSE</span><h2>Built by students. Grounded in purpose.</h2></div><button class="simple-tool-icon" type="button" data-action="close-simple-dialog" aria-label="Close">×</button></header><div class="simple-about-profile"><img src="assets/dunia-alajial-logo.jpg" alt="Dunia Alajial International School logo"><div><b>Dunia Alajial International School</b><p>AgriPulse connects NASA Earth observations with farmer knowledge to support clearer crop, water, soil, and planning decisions.</p></div></div><div class="button-row"><a class="button secondary" href="https://share.google/ZDHDGsGC8tVU8AKJr" target="_blank" rel="noopener">Learn more ↗</a><a class="button secondary" href="https://github.com/a7mdel5taeeb-eng" target="_blank" rel="noopener">Tech team ↗</a></div></dialog>`;
   $("main").insertBefore(simpleView, $(".app-footer"));
+  const replayIntroButton = document.createElement('button');
+  replayIntroButton.type = 'button';
+  replayIntroButton.className = 'button secondary';
+  replayIntroButton.dataset.action = 'restart-experience';
+  replayIntroButton.textContent = 'Replay intro & choose farmer mode';
+  $('#simple-settings-dialog .simple-settings-actions')?.insertBefore(replayIntroButton, $('[data-action="reset-workspace"]'));
   const feedbackView = document.createElement("section");
   feedbackView.className = "view";
   feedbackView.id = "view-feedback";
@@ -751,6 +757,14 @@ async function resetEntireWorkspace() {
   await workspaceStorage.retry?.();
   window.location.href = window.location.pathname;
 }
+function restartExperience() {
+  try {
+    sessionStorage.removeItem('agripulse.intro.seen.growth.v1');
+    sessionStorage.removeItem('fieldshift.intro.skip-auto');
+    localStorage.removeItem('agripulse.farmer-mode');
+  } catch { /* The intro can still replay when storage is restricted. */ }
+  window.location.replace(window.location.origin + window.location.pathname + '?intro=' + Date.now());
+}
 
 function bindEvents() {
   document.addEventListener("click", (event) => {
@@ -796,6 +810,7 @@ function bindEvents() {
       "close-simple-settings": () => $('#simple-settings-dialog')?.close(),
       "simple-save": () => { write('fieldshift.simpleReport', { savedAt: new Date().toISOString(), location: state.location, farm: state.simpleFarm, currency: state.simpleFx || { currency: simpleCurrency() } }); toast('Simple report saved to this workspace.'); },
       "reset-workspace": () => resetEntireWorkspace(),
+      "restart-experience": () => restartExperience(),
       "simple-feedback": () => $('#simple-feedback-dialog')?.showModal(),
       "simple-about": () => $('#simple-about-dialog')?.showModal(),
       "close-simple-dialog": () => action.closest('dialog')?.close(),
@@ -950,6 +965,7 @@ function bindEvents() {
   });
   $$('[data-simple-step]').forEach(button => button.addEventListener('click', () => {
     const target = Number(button.dataset.simpleStep);
+    if (target === 1 && button.closest('[data-simple-stage="4"]')) { restartExperience(); return; }
     if (target > 1 && !hasLocation()) { setSimpleStep(1); toast('Choose your farm location first.'); return; }
     if (target === 4) {
       if (!(state.simpleFarm.crops || []).length) { setSimpleStep(3); toast('Choose at least one crop before opening the report.'); return; }
