@@ -185,6 +185,7 @@ const state = {
   weather: null,
   nasa: null,
   historyMetric: "rain",
+  historyYear: Math.min(2030, Math.max(2020, new Date().getUTCFullYear() - 1)),
   economics: null,
   rotationOptions: [],
   selectedPlan: "soil",
@@ -487,6 +488,7 @@ function init() {
   if (hasLocation()) state.map.setLocation(state.location);
   if (state.location.boundary) state.map.setBoundary(state.location.boundary);
   bindEvents();
+  if ($('#history-year-select')) $('#history-year-select').value = String(state.historyYear);
   initAgriSystem();
   initSeasonSimulator();
   applyPreferences();
@@ -3357,6 +3359,33 @@ function renderHistoricalLocalRecords() {
   ].slice(0,4);
   host.innerHTML = rows.length ? rows.map(item => '<div class="history-record"><i>' + item.icon + '</i><span><b>' + escapeHTML(item.title) + '</b><small>' + escapeHTML(item.meta) + '</small></span></div>').join('') : '<p class="empty">No local records yet. Add a soil sample or save a field decision to build its memory.</p>';
 }
+function historicalOutlook(start, latest, targetYear) {
+  const years = Math.max(1, latest.year - start.year), forward = targetYear - latest.year;
+  const clamp = (value,min,max) => Math.min(max,Math.max(min,value));
+  const months = latest.months.map((recent,index) => {
+    const early = start.months[index] || {};
+    const project = (key,annualLimit) => {
+      if (!number(recent[key]) || !number(early[key])) return null;
+      const rawTrend = (recent[key] - early[key]) / years;
+      const limit = typeof annualLimit === 'function' ? annualLimit(recent[key]) : annualLimit;
+      return Math.max(0,recent[key] + clamp(rawTrend,-limit,limit) * forward);
+    };
+    return { month: recent.month, temperature: project('temperature',.35), rain: project('rain',value => Math.max(5,value*.12)), solar: project('solar',value => Math.max(.15,value*.04)), availableDays: null, expectedDays: recent.expectedDays };
+  });
+  return { year: targetYear, months, location: latest.location, retrievedAt: new Date().toISOString(), source: 'NASA POWER trend-based planning outlook', sourceUrl: latest.sourceUrl, classification: 'Statistical planning outlook — not observed data or a weather forecast', projection: true, basisYears: [start.year,latest.year], units: latest.units, limitations: `Planning outlook for ${targetYear}, created by extending the bounded monthly direction between ${start.year} and ${latest.year} NASA POWER observations. It is not an observation, climate-model projection, seasonal forecast, or planting prescription. Confirm decisions with official local forecasts and agricultural advice.` };
+}
+function historicalVerdict(result) {
+  const values = key => result.months.map(month => month[key]).filter(number);
+  const mean = key => { const rows=values(key); return rows.length ? rows.reduce((sum,value)=>sum+value,0)/rows.length : null; };
+  const temperatures=values('temperature'), rains=values('rain'), annualRain=rains.length===12?rains.reduce((sum,value)=>sum+value,0):null, avgTemp=mean('temperature');
+  const hotMonths=temperatures.filter(value=>value>=30).length, veryWet=rains.filter(value=>value>=150).length, dry=number(annualRain)&&annualRain<250, wet=number(annualRain)&&annualRain>1200;
+  let level='balanced', mark='MIXED', title='A mixed agricultural signal with manageable trade-offs.', copy='No single regional signal defines a good farming year. Match the monthly pattern with crop stage, soil, irrigation capacity, pests, and local observations.';
+  if (hotMonths>=5 || dry) { level='pressure'; mark='PRESSURE'; title=result.projection?'Heat and water pressure may deserve early planning.':'Heat and water pressure made this a more demanding agricultural year.'; copy=`${hotMonths} month${hotMonths===1?'':'s'} crossed a 30°C monthly mean${number(annualRain)?` and the year recorded about ${annualRain.toFixed(0)} mm of complete monthly rainfall`:''}. Favor locally proven heat tolerance, protect soil cover, and verify irrigation capacity.`; }
+  else if (wet || veryWet>=3) { level='watch'; mark='WET WATCH'; title=result.projection?'A wetter outlook could improve supply while raising field risks.':'Water supply was stronger, with added drainage and disease risks.'; copy='Higher rainfall can support water availability, but timing matters. Check drainage, field access, nutrient loss, and crop disease pressure month by month.'; }
+  else if (number(annualRain) && annualRain>=250 && annualRain<=900 && number(avgTemp) && avgTemp<28) { level='supportive'; mark='SUPPORTIVE'; title=result.projection?'The trend outlook appears broadly supportive—with local checks.':'The regional pattern was broadly supportive—but not automatically a good farm year.'; copy='Temperature and rainfall stayed within broad planning ranges. Yield still depends on rainfall timing, crop choice, soil, pests, inputs, and market conditions.'; }
+  const tags=[hotMonths?`${hotMonths} hot month${hotMonths===1?'':'s'}`:'No extreme monthly heat mean',number(annualRain)?`${annualRain.toFixed(0)} mm annual rain`:'Rainfall total incomplete',veryWet?`${veryWet} very wet month${veryWet===1?'':'s'}`:'Rain spread needs local review'];
+  return {level,mark,title,copy,tags};
+}
 function renderHistoricalAnalytics(result) {
   const host = $('#analytics-result'); if (!host || !result) return;
   const months = result.months || [], valid = key => months.filter(month => number(month[key]) !== null);
@@ -3368,7 +3397,10 @@ function renderHistoricalAnalytics(result) {
   const monthName = month => new Intl.DateTimeFormat(localeForLanguage(),{month:'short'}).format(new Date(Date.UTC(2024,month-1,1)));
   const unit = metric === 'temperature' ? '°C' : metric === 'rain' ? 'mm' : result.units?.solar || '';
   text('#history-location',state.location.name); text('#history-year',result.year);
-  text('#history-summary','A regional view of the previous calendar year. Select a signal to inspect each month.');
+  text('#history-summary',result.projection ? `A ${result.year} planning outlook derived from the direction between ${result.basisYears.join(' and ')} observations.` : `Observed regional context for ${result.year}. Select a signal to inspect each month.`);
+  text('#history-classification',result.projection?'FUTURE PLANNING OUTLOOK':'NASA POWER OBSERVATIONS');
+  text('#history-year-label',result.projection?'OUTLOOK YEAR':'OBSERVED YEAR');
+  text('#history-source-chip',result.projection?`Trend basis: ${result.basisYears.join(' → ')} · not a forecast`:'Observed NASA POWER regional grid · not a field sensor');
   text('#history-temp',number(average('temperature')) !== null ? average('temperature').toFixed(1) + '°C' : '—');
   text('#history-rain',number(totalRain) !== null ? totalRain.toFixed(0) + ' mm' : '—');
   text('#history-solar',number(average('solar')) !== null ? average('solar').toFixed(1) : '—');
@@ -3379,10 +3411,18 @@ function renderHistoricalAnalytics(result) {
     const height = available ? 12 + ((value-min)/span)*78 : 2;
     return '<button type="button" class="history-bar' + (peak?.month === month.month ? ' peak' : '') + '" aria-label="' + escapeHTML(monthName(month.month) + ': ' + (available ? value.toFixed(1) + ' ' + unit : 'Unavailable')) + '"><span><i style="height:' + height.toFixed(1) + '%"></i></span><b>' + escapeHTML(monthName(month.month)) + '</b><small>' + (available ? escapeHTML(value.toFixed(metric === 'rain' ? 0 : 1)) : '—') + '</small></button>';
   }).join('') + '</div><p class="fine-print">' + escapeHTML(result.limitations) + '</p>';
+  const verdict=historicalVerdict(result), verdictHost=$('#history-verdict');
+  if(verdictHost) verdictHost.dataset.level=verdict.level;
+  text('#history-verdict .history-verdict-mark span',verdict.mark); text('#history-verdict-title',verdict.title); text('#history-verdict-copy',verdict.copy);
+  $('#history-verdict-tags').innerHTML=verdict.tags.map(tag=>'<span>'+escapeHTML(tag)+'</span>').join('');
+  const detail=$('#history-detail-table');
+  if(detail) detail.innerHTML='<div class="history-detail-head"><span>Month</span><span>Mean temperature</span><span>Rainfall</span><span>Solar energy</span><span>Evidence</span></div>'+months.map(month=>'<div><b>'+escapeHTML(monthName(month.month))+'</b><span>'+escapeHTML(number(month.temperature)?month.temperature.toFixed(1)+'°C':'—')+'</span><span>'+escapeHTML(number(month.rain)?month.rain.toFixed(1)+' mm':'—')+'</span><span>'+escapeHTML(number(month.solar)?month.solar.toFixed(1):'—')+'</span><small>'+escapeHTML(result.projection?'Trend outlook':'Observed regional grid')+'</small></div>').join('');
   renderHistoricalLocalRecords();
 }
 async function loadNasa() {
   const container = $("#nasa-result");
+  const selectedYear = Number($('#history-year-select')?.value || state.historyYear);
+  state.historyYear = Math.min(2030,Math.max(2020,selectedYear));
   if (!hasLocation()) {
     if (container) container.innerHTML = '<p class="empty">Choose a field before requesting NASA climate context.</p>';
     const analytics = $('#analytics-result');
@@ -3395,9 +3435,17 @@ async function loadNasa() {
   if (container) container.innerHTML = '<p class="empty">Requesting historical NASA POWER data…</p>';
   if ($('#analytics-result')) $('#analytics-result').innerHTML = '<p class="empty">Requesting historical NASA POWER data…</p>';
   try {
-    const result = await fetchNasa(state.location, {
-      signal: state.nasaController.signal,
-    });
+    const latestCompletedYear = new Date().getUTCFullYear() - 1;
+    let result;
+    if (state.historyYear <= latestCompletedYear) {
+      result = await fetchNasa(state.location, { signal: state.nasaController.signal, year: state.historyYear });
+    } else {
+      const [start,latest] = await Promise.all([
+        fetchNasa(state.location,{signal:state.nasaController.signal,year:2020}),
+        fetchNasa(state.location,{signal:state.nasaController.signal,year:latestCompletedYear}),
+      ]);
+      result = historicalOutlook(start,latest,state.historyYear);
+    }
     if (key !== fieldKey()) return;
     state.nasa = result;
     const max = Math.max(1, ...result.months.map((m) => m.rain ?? 0));
