@@ -184,6 +184,7 @@ const state = {
   plans: read("fieldshift.plans", []),
   weather: null,
   nasa: null,
+  historyMetric: "rain",
   economics: null,
   rotationOptions: [],
   selectedPlan: "soil",
@@ -634,7 +635,7 @@ function renderAgriSystemLiveSignals() {
   const etTotal = forecast.reduce((sum,day) => sum + (number(day.et0) ? day.et0 : 0),0);
   text('#system-live-weather', weather ? temp(weather.current?.temperature) + ' · ' + t(formatWeatherCode(weather.current?.weatherCode)) : t(hasLocation() ? 'Connecting…' : 'Choose a field'));
   text('#system-live-water', weather ? rain(rainTotal) + ' ' + t('rain') + ' · ET₀ ' + rain(etTotal) : t('Waiting for forecast'));
-  const localSoil = state.samples.filter(sample => sample.fieldKey === fieldKey()).length;
+  const localSoil = state.samples.filter(sample => sample.field === fieldKey()).length;
   text('#system-live-soil', localSoil ? localSoil + ' ' + t('local record(s)') : hasLocation() ? t('Automatic land context') : t('No local details'));
   const connected = [hasLocation(),Boolean(weather),localSoil > 0,Boolean(state.economics)].filter(Boolean).length;
   text('#system-live-readiness', connected + ' / 4 ' + t('connected'));
@@ -683,6 +684,7 @@ function navigate() {
     "water",
     "crops",
     "profit",
+    "analytics",
     "reports",
     "explore",
     "feedback",
@@ -711,6 +713,7 @@ function navigate() {
       water: "Water",
       crops: "Crop planner",
       profit: "Profit & scenarios",
+      analytics: "Past analytics",
       reports: "Reports",
       explore: "Explore",
       feedback: "Comments & feedback",
@@ -726,6 +729,10 @@ function navigate() {
   target?.append($("#map-dock"));
   document.body.classList.remove("menu-open");
   requestAnimationFrame(() => state.map?.resize());
+  if (state.route === 'analytics') {
+    renderHistoricalLocalRecords();
+    if (state.nasa) renderHistoricalAnalytics(state.nasa);
+  }
   if (state.ready) window.scrollTo({ top: 0, behavior: "instant" });
 }
 
@@ -1263,6 +1270,7 @@ function bindEvents() {
       "export-csv": exportCSV,
       print: () => window.print(),
       nasa: loadNasa,
+      "history-load": loadNasa,
       "delete-feedback": () => {
         state.feedback = state.feedback.filter(
           (item) => item.id !== action.dataset.id,
@@ -1317,6 +1325,11 @@ function bindEvents() {
   $("#place-search-form").addEventListener("submit", searchLocation);
   $('#simple-place-search')?.addEventListener('submit', searchSimpleLocation);
   $$('[data-agri-tip]').forEach(button => button.addEventListener('click', () => showSimpleAgriTip(button.dataset.agriTip)));
+  $$('[data-history-metric]').forEach(button => button.addEventListener('click', () => {
+    state.historyMetric = button.dataset.historyMetric;
+    $$('[data-history-metric]').forEach(item => item.classList.toggle('active', item === button));
+    if (state.nasa) renderHistoricalAnalytics(state.nasa);
+  }));
   $('#simple-currency')?.addEventListener('change', async event => {
     state.simpleFarm.currency = event.currentTarget.value;
     state.economicsInputs.currency = event.currentTarget.value;
@@ -3333,18 +3346,54 @@ function exportCSV() {
   );
   toast("Report downloaded");
 }
+function renderHistoricalLocalRecords() {
+  const host = $('#history-local-records'); if (!host) return;
+  if (!hasLocation()) { host.innerHTML = '<p class="empty">Choose a field to connect its local records.</p>'; return; }
+  const samples = state.samples.filter(item => item.field === fieldKey());
+  const notes = state.journal.filter(item => item.field === fieldKey()).slice(0, 3);
+  const rows = [
+    ...samples.slice(-2).reverse().map(item => ({ icon: '◉', title: item.name || 'Soil sample', meta: [item.date, number(item.ph) !== null ? 'pH ' + item.ph : 'Local record'].filter(Boolean).join(' · ') })),
+    ...notes.map(item => ({ icon: '↻', title: item.title, meta: new Date(item.time).toLocaleDateString(localeForLanguage()) + ' · ' + item.detail })),
+  ].slice(0,4);
+  host.innerHTML = rows.length ? rows.map(item => '<div class="history-record"><i>' + item.icon + '</i><span><b>' + escapeHTML(item.title) + '</b><small>' + escapeHTML(item.meta) + '</small></span></div>').join('') : '<p class="empty">No local records yet. Add a soil sample or save a field decision to build its memory.</p>';
+}
+function renderHistoricalAnalytics(result) {
+  const host = $('#analytics-result'); if (!host || !result) return;
+  const months = result.months || [], valid = key => months.filter(month => number(month[key]) !== null);
+  const average = key => { const rows = valid(key); return rows.length ? rows.reduce((sum,row) => sum + row[key],0) / rows.length : null; };
+  const rainRows = valid('rain'), totalRain = rainRows.length ? rainRows.reduce((sum,row) => sum + row.rain,0) : null;
+  const metric = state.historyMetric || 'rain', rows = valid(metric), values = rows.map(row => row[metric]);
+  const min = values.length ? Math.min(...values) : 0, max = values.length ? Math.max(...values) : 1, span = Math.max(1,max-min);
+  const peak = rows.length ? rows.reduce((best,row) => row[metric] > best[metric] ? row : best,rows[0]) : null;
+  const monthName = month => new Intl.DateTimeFormat(localeForLanguage(),{month:'short'}).format(new Date(Date.UTC(2024,month-1,1)));
+  const unit = metric === 'temperature' ? '°C' : metric === 'rain' ? 'mm' : result.units?.solar || '';
+  text('#history-location',state.location.name); text('#history-year',result.year);
+  text('#history-summary','A regional view of the previous calendar year. Select a signal to inspect each month.');
+  text('#history-temp',number(average('temperature')) !== null ? average('temperature').toFixed(1) + '°C' : '—');
+  text('#history-rain',number(totalRain) !== null ? totalRain.toFixed(0) + ' mm' : '—');
+  text('#history-solar',number(average('solar')) !== null ? average('solar').toFixed(1) : '—');
+  text('#history-peak',peak ? monthName(peak.month) : '—');
+  text('#history-peak-note',peak ? (metric === 'rain' ? 'Wettest available month' : metric === 'temperature' ? 'Warmest available month' : 'Brightest available month') : 'No complete values available');
+  host.innerHTML = '<div class="history-chart-label"><span>' + escapeHTML(metric === 'rain' ? 'Monthly rainfall' : metric === 'temperature' ? 'Mean temperature' : 'Mean solar energy') + '</span><b>' + result.year + '</b></div><div class="history-bars">' + months.map(month => {
+    const value = number(month[metric]); const available = value !== null;
+    const height = available ? 12 + ((value-min)/span)*78 : 2;
+    return '<button type="button" class="history-bar' + (peak?.month === month.month ? ' peak' : '') + '" aria-label="' + escapeHTML(monthName(month.month) + ': ' + (available ? value.toFixed(1) + ' ' + unit : 'Unavailable')) + '"><span><i style="height:' + height.toFixed(1) + '%"></i></span><b>' + escapeHTML(monthName(month.month)) + '</b><small>' + (available ? escapeHTML(value.toFixed(metric === 'rain' ? 0 : 1)) : '—') + '</small></button>';
+  }).join('') + '</div><p class="fine-print">' + escapeHTML(result.limitations) + '</p>';
+  renderHistoricalLocalRecords();
+}
 async function loadNasa() {
   const container = $("#nasa-result");
   if (!hasLocation()) {
-    container.innerHTML =
-      '<p class="empty">Choose a field before requesting NASA climate context.</p>';
+    if (container) container.innerHTML = '<p class="empty">Choose a field before requesting NASA climate context.</p>';
+    const analytics = $('#analytics-result');
+    if (analytics) analytics.innerHTML = '<p class="empty">Choose a field before requesting NASA climate context.</p>';
     return;
   }
   state.nasaController?.abort();
   state.nasaController = new AbortController();
   const key = fieldKey();
-  container.innerHTML =
-    '<p class="empty">Requesting historical NASA POWER data…</p>';
+  if (container) container.innerHTML = '<p class="empty">Requesting historical NASA POWER data…</p>';
+  if ($('#analytics-result')) $('#analytics-result').innerHTML = '<p class="empty">Requesting historical NASA POWER data…</p>';
   try {
     const result = await fetchNasa(state.location, {
       signal: state.nasaController.signal,
@@ -3352,7 +3401,7 @@ async function loadNasa() {
     if (key !== fieldKey()) return;
     state.nasa = result;
     const max = Math.max(1, ...result.months.map((m) => m.rain ?? 0));
-    container.innerHTML =
+    if (container) container.innerHTML =
       '<span class="eyebrow">' +
       result.year +
       ' MONTHLY RAINFALL · MM</span><div class="nasa-months">' +
@@ -3375,13 +3424,14 @@ async function loadNasa() {
       '</p><span class="eyebrow">NASA POWER · RETRIEVED ' +
       new Date(result.retrievedAt).toLocaleDateString() +
       "</span>";
+    renderHistoricalAnalytics(result);
     notifyFieldUpdate();
   } catch (error) {
-    if (error.name !== "AbortError" && key === fieldKey())
-      container.innerHTML =
-        '<p class="empty">' +
-        escapeHTML(error.message) +
-        " You can retry using the button.</p>";
+    if (error.name !== "AbortError" && key === fieldKey()) {
+      const message = '<p class="empty">' + escapeHTML(error.message) + ' You can retry using the button.</p>';
+      if (container) container.innerHTML = message;
+      if ($('#analytics-result')) $('#analytics-result').innerHTML = message;
+    }
   }
 }
 // Keep the orbit and plant animation smooth while the map engine is idle.

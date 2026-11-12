@@ -90,6 +90,9 @@
           <circle cx="12" cy="12" r="9" />
           <path d="M12 7v5l3 2" />
         </symbol>
+        <symbol id="i-github" viewBox="0 0 24 24">
+          <path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.86c-2.78.6-3.37-1.18-3.37-1.18-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.53 2.35 1.09 2.92.83.09-.65.35-1.09.64-1.34-2.22-.25-4.56-1.11-4.56-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02A9.6 9.6 0 0 1 12 6.84a9.6 9.6 0 0 1 2.5.34c1.91-1.3 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.75c0 .27.18.58.69.48A10 10 0 0 0 12 2Z" />
+        </symbol>
       </defs>
     </svg>
     <a class="skip-link" href="#main">Skip to content</a>
@@ -118,6 +121,8 @@
           ><svg><use href="#i-leaf" /></svg><span>Crop planner</span></a
         ><a href="#/profit" data-route="profit"
           ><svg><use href="#i-chart" /></svg><span>Profit & scenarios</span></a
+        ><a href="#/analytics" data-route="analytics"
+          ><svg><use href="#i-clock" /></svg><span>Past analytics</span></a
         ><a href="#/reports" data-route="reports"
           ><svg><use href="#i-file" /></svg><span>Reports</span></a
         ><a href="#/explore" data-route="explore"
@@ -987,6 +992,31 @@
           </div>
         </div>
       </section>
+      <section class="view" id="view-analytics" hidden aria-labelledby="analytics-title">
+        <div class="page-heading analytics-heading">
+          <div><span class="eyebrow">PAST ANALYTICS / NASA POWER</span><h1 id="analytics-title">See the season behind you<span>.</span></h1><p>Explore the previous calendar year for your selected land and compare temperature, rainfall, and solar-energy patterns.</p></div>
+          <button class="button" type="button" data-action="history-load"><svg><use href="#i-clock" /></svg> Load historical data</button>
+        </div>
+        <section class="historical-hero panel">
+          <div><span class="eyebrow">REGIONAL CLIMATE MEMORY</span><h2 id="history-location">Choose your field to begin</h2><p id="history-summary">AgriPulse requests historical NASA POWER data only when you ask for it.</p></div>
+          <div class="history-year-orbit"><span id="history-year">—</span><small>PAST YEAR</small></div>
+        </section>
+        <div class="history-metrics" aria-live="polite">
+          <article><span>Average temperature</span><strong id="history-temp">—</strong><small>Annual monthly mean</small></article>
+          <article><span>Recorded rainfall</span><strong id="history-rain">—</strong><small>Complete monthly totals only</small></article>
+          <article><span>Average solar energy</span><strong id="history-solar">—</strong><small>NASA POWER regional grid</small></article>
+          <article><span>Strongest signal</span><strong id="history-peak">—</strong><small id="history-peak-note">Load data to compare months</small></article>
+        </div>
+        <section class="panel history-workbench">
+          <header><div><span class="eyebrow">12-MONTH EXPLORER</span><h2>Move through the year.</h2></div><div class="history-tabs" role="group" aria-label="Historical metric"><button class="active" type="button" data-history-metric="rain">Rainfall</button><button type="button" data-history-metric="temperature">Temperature</button><button type="button" data-history-metric="solar">Solar</button></div></header>
+          <div id="analytics-result" class="history-chart"><p class="empty">Select a field, then load historical data.</p></div>
+          <footer><span><i></i> NASA POWER · historical regional context</span><a href="https://power.larc.nasa.gov/" target="_blank" rel="noopener noreferrer">Inspect the source ↗</a></footer>
+        </section>
+        <section class="history-insight-grid">
+          <article class="panel"><span class="eyebrow">HOW TO USE THIS</span><h3>Look for timing, not certainty.</h3><p>Compare wetter, hotter, or brighter months with your crop calendar. One historical year is context—not a climate normal or a farm measurement.</p></article>
+          <article class="panel history-memory"><span class="eyebrow">FIELD MEMORY</span><h3>Your evidence stays connected.</h3><div id="history-local-records"><p class="empty">Soil samples and field notes for the selected land will appear here.</p></div></article>
+        </section>
+      </section>
       <section class="view" id="view-reports" hidden>
         <div class="page-heading">
           <div>
@@ -1192,8 +1222,13 @@
         </section>
       </section>
       <footer class="app-footer">
-        <span>AGRIPULSE / EARTH SCIENCE × AGRICULTURE</span
-        ><span>Built for the 2026 NASA Space Apps Challenge</span>
+        <span>AGRIPULSE / EARTH SCIENCE × AGRICULTURE</span>
+        <span class="footer-credit">Built for the 2026 NASA Space Apps Challenge</span>
+        <nav class="footer-contributors" aria-label="AgriPulse contributors">
+          <a href="https://github.com/ameer-marwan" target="_blank" rel="noopener noreferrer"><svg><use href="#i-github" /></svg>Ameer</a>
+          <a href="https://github.com/a7mdel5taeeb-eng" target="_blank" rel="noopener noreferrer"><svg><use href="#i-github" /></svg>Mr. Ahmed</a>
+          <a href="https://github.com/mostafabass1" target="_blank" rel="noopener noreferrer"><svg><use href="#i-github" /></svg>Mostafa</a>
+        </nav>
       </footer>
     </main>
     <div id="map-dock">
