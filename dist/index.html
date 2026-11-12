@@ -289,6 +289,54 @@
             </article>
           </div>
         </section>
+        <section class="agri-system" aria-labelledby="agri-system-title">
+          <header class="agri-system-heading">
+            <div>
+              <span class="eyebrow">FROM EARTH SIGNALS TO FIELD ACTION</span>
+              <h2 id="agri-system-title">See how AgriPulse builds a decision.</h2>
+              <p>Choose any signal or step to understand what it contributes.</p>
+            </div>
+            <button class="agri-system-all" type="button" data-system-show-all>Show the full pathway</button>
+          </header>
+          <div class="agri-system-canvas">
+            <div class="agri-earth-stage" aria-label="Animated Earth observation globe">
+              <div class="agri-earth" aria-hidden="true">
+                <span class="agri-earth-cloud cloud-one"></span>
+                <span class="agri-earth-cloud cloud-two"></span>
+                <i></i><b></b><em></em>
+              </div>
+              <div class="agri-earth-rings" aria-hidden="true"><i></i><i></i><i></i></div>
+              <span class="agri-earth-label">EARTH OBSERVATION</span>
+            </div>
+            <div class="agri-system-flow" role="list" aria-label="AgriPulse decision pathway">
+              <div class="agri-system-column">
+                <span class="agri-system-column-label">01 · OBSERVE</span>
+                <button class="agri-system-node active" type="button" data-system-node="climate"><i>☀</i><span><b>Climate pattern</b><small>Heat · rain · wind</small></span></button>
+                <button class="agri-system-node" type="button" data-system-node="water"><i>≈</i><span><b>Water signal</b><small>Rain · ET₀ · moisture</small></span></button>
+                <button class="agri-system-node" type="button" data-system-node="land"><i>◫</i><span><b>Land context</b><small>Soil · boundary · history</small></span></button>
+              </div>
+              <div class="agri-system-column">
+                <span class="agri-system-column-label">02 · INTERPRET</span>
+                <button class="agri-system-node" type="button" data-system-node="stress"><i>⌁</i><span><b>Stress screening</b><small>Heat · water · suitability</small></span></button>
+                <button class="agri-system-node" type="button" data-system-node="rotation"><i>↻</i><span><b>Rotation comparison</b><small>Soil · resilience · trade-offs</small></span></button>
+                <button class="agri-system-node" type="button" data-system-node="economics"><i>↗</i><span><b>Local economics</b><small>Yield · costs · currency</small></span></button>
+              </div>
+              <div class="agri-system-column">
+                <span class="agri-system-column-label">03 · DECIDE</span>
+                <button class="agri-system-node" type="button" data-system-node="brief"><i>✓</i><span><b>Decision brief</b><small>Evidence · uncertainty · next step</small></span></button>
+                <button class="agri-system-node" type="button" data-system-node="report"><i>▤</i><span><b>Field report</b><small>Save · share · revisit</small></span></button>
+              </div>
+            </div>
+            <aside class="agri-system-detail" aria-live="polite">
+              <span class="eyebrow" id="agri-system-detail-stage">OBSERVE</span>
+              <div class="agri-system-detail-icon" id="agri-system-detail-icon">☀</div>
+              <h3 id="agri-system-detail-title">Climate pattern</h3>
+              <p id="agri-system-detail-copy">Recent weather and longer climate context help reveal heat, rainfall, and wind conditions around the selected land.</p>
+              <small id="agri-system-detail-source">Source type: Earth and weather observations</small>
+              <a id="agri-system-detail-link" href="#/weather">Open weather intelligence →</a>
+            </aside>
+          </div>
+        </section>
         <div class="metrics">
           <article class="metric-card">
             <div class="metric-top">

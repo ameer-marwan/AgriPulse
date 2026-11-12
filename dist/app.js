@@ -481,6 +481,7 @@ function init() {
   if (hasLocation()) state.map.setLocation(state.location);
   if (state.location.boundary) state.map.setBoundary(state.location.boundary);
   bindEvents();
+  initAgriSystem();
   applyPreferences();
   clearInterval(themeClock);
   themeClock = setInterval(() => {
@@ -539,6 +540,47 @@ function init() {
   if (hasLocation()) loadWeather();
   else {resetWeather("unselected");requestAutoLocation();}
   state.ready = true;
+}
+
+const agriSystemDetails = {
+  climate: { stage: 'OBSERVE', icon: '☀', title: 'Climate pattern', copy: 'Recent weather and longer climate context help reveal heat, rainfall, and wind conditions around the selected land.', source: 'Source type: Earth and weather observations', link: 'Open weather intelligence →', href: '#/weather' },
+  water: { stage: 'OBSERVE', icon: '≈', title: 'Water signal', copy: 'Forecast rain, reference evapotranspiration, and modeled surface moisture create a short-term picture of incoming water and atmospheric demand.', source: 'Source type: Forecast models and field records', link: 'Open water intelligence →', href: '#/water' },
+  land: { stage: 'OBSERVE', icon: '◫', title: 'Land context', copy: 'The selected boundary, local soil samples, crop history, and farmer observations keep regional data connected to a real place.', source: 'Source type: Farmer inputs and mapped land', link: 'Open field explorer →', href: '#/map' },
+  stress: { stage: 'INTERPRET', icon: '⌁', title: 'Stress screening', copy: 'AgriPulse checks weather and land signals for possible heat, water, and crop-suitability concerns. It flags evidence to review, not automatic instructions.', source: 'Method: Transparent threshold screening', link: 'Review field signals →', href: '#/weather' },
+  rotation: { stage: 'INTERPRET', icon: '↻', title: 'Rotation comparison', copy: 'Alternative crop sequences are compared for water demand, crop-family diversity, soil-supporting traits, and resilience trade-offs.', source: 'Method: Explainable rotation scenarios', link: 'Compare crop paths →', href: '#/crops' },
+  economics: { stage: 'INTERPRET', icon: '↗', title: 'Local economics', copy: 'Yield, selling price, field area, costs, and local currency are kept visible so every profit estimate can be checked and changed.', source: 'Method: Editable planning assumptions', link: 'Open profit scenarios →', href: '#/profit' },
+  brief: { stage: 'DECIDE', icon: '✓', title: 'Decision brief', copy: 'The strongest signals are organized into practical next checks, with uncertainty and missing evidence shown beside the recommendation.', source: 'Output: Evidence-led next actions', link: 'Return to field briefing →', href: '#/overview' },
+  report: { stage: 'DECIDE', icon: '▤', title: 'Field report', copy: 'Weather, soil, water, rotation, and economics are gathered into a record that can be saved, shared, and revisited as conditions change.', source: 'Output: Downloadable decision record', link: 'Open evidence report →', href: '#/reports' },
+  all: { stage: 'THE FULL PATHWAY', icon: '✦', title: 'One connected field decision', copy: 'AgriPulse moves from Earth observations and farmer knowledge to transparent comparisons, then presents a decision brief that keeps sources, assumptions, and uncertainty visible.', source: 'Observe → interpret → decide → learn', link: 'Choose your field to begin →', href: '#/map' },
+};
+function renderAgriSystemDetail(key) {
+  const detail = agriSystemDetails[key] || agriSystemDetails.climate;
+  text('#agri-system-detail-stage', t(detail.stage));
+  text('#agri-system-detail-icon', detail.icon);
+  text('#agri-system-detail-title', t(detail.title));
+  text('#agri-system-detail-copy', t(detail.copy));
+  text('#agri-system-detail-source', t(detail.source));
+  const link = $('#agri-system-detail-link');
+  if (link) { link.textContent = t(detail.link); link.href = detail.href; }
+}
+function initAgriSystem() {
+  const section = $('.agri-system');
+  if (!section || section.dataset.ready) return;
+  section.dataset.ready = 'true';
+  section.querySelectorAll('[data-system-node]').forEach(button => button.addEventListener('click', () => {
+    section.classList.remove('show-all');
+    section.querySelectorAll('[data-system-node]').forEach(node => node.classList.toggle('active', node === button));
+    renderAgriSystemDetail(button.dataset.systemNode);
+  }));
+  section.querySelector('[data-system-show-all]')?.addEventListener('click', () => {
+    section.classList.toggle('show-all');
+    section.querySelectorAll('[data-system-node]').forEach(node => node.classList.toggle('active', section.classList.contains('show-all')));
+    renderAgriSystemDetail(section.classList.contains('show-all') ? 'all' : 'climate');
+  });
+  window.addEventListener('fieldshift:language', () => {
+    const selected = section.classList.contains('show-all') ? 'all' : section.querySelector('[data-system-node].active')?.dataset.systemNode || 'climate';
+    renderAgriSystemDetail(selected);
+  });
 }
 
 function navigate() {
