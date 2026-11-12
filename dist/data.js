@@ -110,11 +110,9 @@ export async function searchPlaces(query, { signal } = {}) {
   }));
 }
 
-export async function fetchNasa(point, { signal, year: requestedYear } = {}) {
+export async function fetchNasa(point, { signal } = {}) {
   const { lat, lon } = coordinates(point);
-  const latestCompletedYear = new Date().getUTCFullYear() - 1;
-  const year = requestedYear == null ? latestCompletedYear : Number(requestedYear);
-  if (!Number.isInteger(year) || year < 2020 || year > latestCompletedYear) throw new Error(`NASA observations are available here from 2020 through ${latestCompletedYear}.`);
+  const year = new Date().getUTCFullYear() - 1;
   const key = `nasa:${lat},${lon}:${year}`;
   const saved = cache.get(key);
   if (signal?.aborted) throw new DOMException('Request cancelled', 'AbortError');
@@ -139,7 +137,7 @@ export async function fetchNasa(point, { signal, year: requestedYear } = {}) {
     source: 'NASA POWER', sourceUrl: 'https://power.larc.nasa.gov/docs/services/api/temporal/daily/',
     classification: 'Historical regional model and satellite-derived data', cached: false,
     units: { temperature: '°C', rain: 'mm/month', solar: typeof data.parameters?.ALLSKY_SFC_SW_DWN?.units === 'string' ? data.parameters.ALLSKY_SFC_SW_DWN.units : 'Provider unit unavailable' },
-    limitations: `${year} calendar-year observations; not a long-term climate normal. Coarse source grids describe regional context, not field measurements. Incomplete monthly rainfall totals remain unavailable.` };
+    limitations: 'Previous calendar year only; not a long-term climate normal. Coarse source grids describe regional context, not field measurements. Incomplete monthly rainfall totals remain unavailable.' };
   cache.set(key, { at: Date.now(), value });
   return value;
 }
