@@ -39,10 +39,22 @@ function applyFarmerMode(mode) {
     input.disabled = simple;
   });
 }
+function switchFarmerMode(mode, { navigateToWorkspace = true } = {}) {
+  const next = mode === 'simple' ? 'simple' : 'advanced';
+  try { localStorage.setItem('agripulse.farmer-mode', next); } catch { /* The mode remains active for this visit. */ }
+  applyFarmerMode(next);
+  if ($('#farmer-mode')) $('#farmer-mode').value = next;
+  if ($('#simple-farmer-mode')) $('#simple-farmer-mode').value = next;
+  if (navigateToWorkspace) location.hash = next === 'simple' ? '/simple' : '/overview';
+  requestAnimationFrame(() => {
+    state?.map?.resize?.();
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  });
+}
 let savedFarmerMode = 'advanced';
 try { savedFarmerMode = localStorage.getItem('agripulse.farmer-mode') || 'advanced'; } catch { /* Use full controls if preferences cannot persist. */ }
 applyFarmerMode(savedFarmerMode);
-window.addEventListener('fieldshift:mode:selected', (event) => applyFarmerMode(event.detail));
+window.addEventListener('fieldshift:mode:selected', (event) => switchFarmerMode(event.detail));
 
 const $ = (q, root = document) => root.querySelector(q);
 const $$ = (q, root = document) => [...root.querySelectorAll(q)];
@@ -140,6 +152,12 @@ const countryCurrencies = {
   Austria: "EUR",
   Greece: "EUR",
   Finland: "EUR",
+  Turkey: "TRY", Pakistan: "PKR", Bangladesh: "BDT", Japan: "JPY",
+  Canada: "CAD", Australia: "AUD", Mexico: "MXN", Argentina: "ARS",
+  Chile: "CLP", Colombia: "COP", Indonesia: "IDR", Malaysia: "MYR",
+  Thailand: "THB", Philippines: "PHP", Russia: "RUB", Morocco: "MAD",
+  Algeria: "DZD", Tunisia: "TND", Jordan: "JOD", "United Arab Emirates": "AED",
+  Qatar: "QAR", Kuwait: "KWD", Bahrain: "BHD", Oman: "OMR",
 };
 const priceSourceNames = {
   none: "Choose a source",
@@ -228,12 +246,26 @@ const wind = (n) =>
       ? Math.round(n * 0.621371) + " mph"
       : Math.round(n) + " km/h"
     : "—";
+const localeForLanguage = () =>
+  ({
+    en: "en-US",
+    fr: "fr-FR",
+    ar: "ar-SA",
+    es: "es-ES",
+    de: "de-DE",
+    pt: "pt-BR",
+    tr: "tr-TR",
+    ur: "ur-PK",
+    hi: "hi-IN",
+    zh: "zh-CN",
+  })[currentLanguage()] || "en-US";
 const money = (n, currency = state.economicsInputs.currency) =>
   number(n)
-    ? new Intl.NumberFormat(
-        { en: "en-US", fr: "fr-FR", ar: "ar-SA" }[currentLanguage()] || "en-US",
-        { style: "currency", currency, maximumFractionDigits: 0 },
-      ).format(n)
+    ? new Intl.NumberFormat(localeForLanguage(), {
+        style: "currency",
+        currency,
+        maximumFractionDigits: 0,
+      }).format(n)
     : "—";
 const moisture = (n) => (number(n) ? (n * 100).toFixed(0) + "%" : "—");
 const dateShort = (date) =>
@@ -306,8 +338,7 @@ function init() {
     farmerMode.value = document.body.classList.contains('simple-farmer') ? 'simple' : 'advanced';
     farmerMode.addEventListener('change', () => {
       const mode = farmerMode.value === 'simple' ? 'simple' : 'advanced';
-      try { localStorage.setItem('agripulse.farmer-mode', mode); } catch { /* Preference stays active until this tab closes. */ }
-      applyFarmerMode(mode);
+      switchFarmerMode(mode);
       toast(mode === 'simple' ? 'Guided workspace enabled.' : 'Full controls enabled.');
     });
   }
@@ -352,7 +383,7 @@ function init() {
     <header class="simple-reference-header"><a class="simple-brand" href="#/simple" aria-label="AgriPulse AI"><span class="simple-brand-mark"><img src="assets/logo-new.png" alt=""></span><span class="simple-brand-copy"><b>AgriPulse</b><small>Simple farmer</small></span></a><div class="simple-nav-progress"><small id="simple-step-label">Step 1 of 4</small><span><i id="simple-progress-bar"></i></span><em id="simple-save-status">Ready</em></div><div class="simple-reference-actions"><button class="simple-theme-cycle" type="button" data-action="simple-theme-cycle" aria-label="Change appearance"><span class="simple-theme-cycle-icon" aria-hidden="true">◐</span><span><b id="simple-theme-cycle-label">Automatic</b><small>Appearance</small></span></button><button class="simple-settings-button" type="button" data-action="simple-settings" aria-label="Open settings"><svg aria-hidden="true"><use href="#i-sliders"/></svg><b data-simple-copy="settings">Settings</b></button></div></header>
     <section class="simple-reference-copy"><p class="eyebrow">AGRIPULSE · GUIDED FIELD DECISIONS</p><h1 data-simple-copy="title">AgriPulse AI</h1><p class="simple-lede" data-simple-copy="subtitle">Smarter crop decisions powered by NASA Earth data.</p></section>
     <section class="simple-agri-backdrop" aria-label="Agricultural field"><div><span class="eyebrow">FROM EARTH DATA TO YOUR FIELD</span><h2>A clearer season starts with your land.</h2><p>Choose a location, add what you know, and turn weather, soil, water, crop, and market context into one practical report.</p></div><span class="simple-agri-badge">NASA EARTH OBSERVATIONS · FARMER KNOWLEDGE</span></section>
-    <dialog class="simple-settings-dialog" id="simple-settings-dialog"><header><div><span class="eyebrow">AGRIPULSE AI</span><h2 data-simple-copy="settings">Settings</h2></div><button class="simple-tool-icon" type="button" data-action="close-simple-settings" aria-label="Close settings">×</button></header><p data-simple-copy="settingsHelp">Change language or theme without leaving the guided farmer flow.</p><div class="simple-settings-actions"><div class="simple-appearance-options" role="group" aria-label="Choose appearance"><button type="button" data-simple-theme-choice="auto"><span>◐</span><b>Automatic</b><small>Follows local time</small></button><button type="button" data-simple-theme-choice="light"><span>☀</span><b>Daylight</b><small>Bright and fresh</small></button><button type="button" data-simple-theme-choice="dark"><span>☾</span><b>Forest dark</b><small>Calm and focused</small></button></div><label>Appearance<select id="simple-appearance"><option value="auto">Automatic · follows local time</option><option value="dark">Forest dark</option><option value="light">Daylight</option></select></label><label>Weather units<select id="simple-weather-units"><option value="metric">Metric · °C, mm, km/h</option><option value="imperial">Imperial · °F, inches, mph</option></select></label><label>Language<select id="simple-settings-language"><option value="en">English</option><option value="ar">العربية</option><option value="fr">Français</option><option value="es">Español</option><option value="de">Deutsch</option><option value="pt">Português</option><option value="tr">Türkçe</option><option value="ur">اردو</option><option value="hi">हिन्दी</option><option value="zh">中文</option></select></label><button class="button danger" type="button" data-action="reset-workspace">Reset entire workspace</button></div></dialog>
+    <dialog class="simple-settings-dialog" id="simple-settings-dialog"><header><div><span class="eyebrow">AGRIPULSE AI</span><h2 data-simple-copy="settings">Settings</h2></div><button class="simple-tool-icon" type="button" data-action="close-simple-settings" aria-label="Close settings">×</button></header><p data-simple-copy="settingsHelp">Change language or theme without leaving the guided farmer flow.</p><div class="simple-settings-actions"><div class="simple-appearance-options" role="group" aria-label="Choose appearance"><button type="button" data-simple-theme-choice="auto"><span>◐</span><b>Automatic</b><small>Follows local time</small></button><button type="button" data-simple-theme-choice="light"><span>☀</span><b>Daylight</b><small>Bright and fresh</small></button><button type="button" data-simple-theme-choice="dark"><span>☾</span><b>Forest dark</b><small>Calm and focused</small></button></div><label>Appearance<select id="simple-appearance"><option value="auto">Automatic · follows local time</option><option value="dark">Forest dark</option><option value="light">Daylight</option></select></label><label>Weather units<select id="simple-weather-units"><option value="metric">Metric · °C, mm, km/h</option><option value="imperial">Imperial · °F, inches, mph</option></select></label><label>Language<select id="simple-settings-language"><option value="en">English</option><option value="ar">العربية</option><option value="fr">Français</option><option value="es">Español</option><option value="de">Deutsch</option><option value="pt">Português</option><option value="tr">Türkçe</option><option value="ur">اردو</option><option value="hi">हिन्दी</option><option value="zh">中文</option></select></label><label>Farmer workspace<select id="simple-farmer-mode"><option value="simple">Simple farmer · guided</option><option value="advanced">Complex farmer · full controls</option></select></label><button class="button danger" type="button" data-action="reset-workspace">Reset entire workspace</button></div></dialog>
     <nav class="simple-steps" aria-label="Farm analysis steps"><button type="button" data-simple-step="1"><i>1</i><span>Location</span></button><button type="button" data-simple-step="2"><i>2</i><span>Soil &amp; water</span></button><button type="button" data-simple-step="3"><i>3</i><span>Crops</span></button><button type="button" data-simple-step="4"><i>4</i><span>Report</span></button></nav>
     <section class="simple-stage" data-simple-stage="1"><article class="panel simple-card"><span class="eyebrow">STEP 1 / LOCATION</span><h2>Where is your farm?</h2><p>Start with a place. AgriPulse uses it to set your country, weather context, and local report currency.</p><div class="simple-location-readout" id="simple-location-readout">No farm selected yet.</div><div class="simple-location-context" id="simple-location-context"><span>◎ Country: waiting</span><span>¤ Currency: waiting</span><span>☁ Weather: waiting</span></div><div class="button-row"><button class="button" type="button" data-action="simple-geolocation">Use my location</button><button class="button secondary" type="button" data-action="simple-map-focus">Choose on map</button></div><div class="simple-or"><span>or search for a place</span></div><form id="simple-place-search" class="simple-place-search"><label class="sr-only" for="simple-place-query">Search for a place</label><input id="simple-place-query" name="query" minlength="2" required placeholder="Country, city, village, or farm area"><button class="button secondary" type="submit">Search</button></form><div id="simple-place-results" class="simple-place-results" aria-live="polite"></div><div class="simple-step-actions"><span></span><button class="button" type="button" data-action="simple-next" data-next-step="2">Next <span aria-hidden="true">→</span></button></div></article></section>
     <section class="simple-stage" data-simple-stage="2" hidden><article class="panel simple-card"><span class="eyebrow">STEP 2 / SOIL &amp; WATER</span><h2>Tell us only what you know.</h2><p>These quick choices help AgriPulse explain the crop and water signals. “I don’t know” is always okay.</p><form id="simple-farm-form" class="simple-farm-form"><label>Water source<select name="waterSource"><option value="unknown">I don’t know yet</option><option value="rainfed">Rain-fed only</option><option value="irrigated">Irrigation available</option></select></label><label>Your priority<select name="objective"><option value="water">Use water wisely</option><option value="soil">Protect soil health</option><option value="risk">Prepare for changing weather</option></select></label><label>Soil pH <small>Optional</small><input name="soilPH" inputmode="decimal" min="0" max="14" placeholder="I don’t know"></label><label>Soil texture<select name="soilTexture"><option value="unknown">I don’t know</option><option value="light">Light</option><option value="medium">Medium</option><option value="heavy">Heavy</option><option value="organic">Organic</option></select></label><label class="span-two">Drainage<select name="drainage"><option value="unknown">I don’t know</option><option value="well">Well drained</option><option value="excessive">Very fast drainage</option></select></label><div class="simple-step-actions span-two"><button class="button secondary" type="button" data-action="simple-back" data-back-step="1"><span aria-hidden="true">←</span> Back</button><button class="button" type="submit">Save &amp; continue <span aria-hidden="true">→</span></button></div></form></article></section>
@@ -370,7 +401,7 @@ function init() {
   $('#simple-place-results')?.after(simpleMapHost);
   const simpleCurrencyField = document.createElement('label');
   simpleCurrencyField.className = 'simple-currency-choice';
-  simpleCurrencyField.innerHTML = '<span>Report currency</span><select id="simple-currency"><option value="USD">USD · $</option><option value="SAR">SAR · ﷼</option><option value="EGP">EGP · E£</option><option value="EUR">EUR · €</option><option value="GBP">GBP · £</option><option value="INR">INR · ₹</option><option value="CNY">CNY · ¥</option><option value="BRL">BRL · R$</option><option value="KES">KES · KSh</option><option value="ZAR">ZAR · R</option><option value="NGN">NGN · ₦</option></select><small>Automatically chosen from the selected country. You can change it.</small>';
+  simpleCurrencyField.innerHTML = '<span>Report currency</span><select id="simple-currency"><option value="USD">USD · $</option><option value="SAR">SAR · ﷼</option><option value="AED">AED · د.إ</option><option value="QAR">QAR · ﷼</option><option value="KWD">KWD · د.ك</option><option value="BHD">BHD · د.ب</option><option value="OMR">OMR · ﷼</option><option value="JOD">JOD · د.ا</option><option value="EGP">EGP · E£</option><option value="EUR">EUR · €</option><option value="GBP">GBP · £</option><option value="INR">INR · ₹</option><option value="PKR">PKR · ₨</option><option value="BDT">BDT · ৳</option><option value="CNY">CNY · ¥</option><option value="JPY">JPY · ¥</option><option value="TRY">TRY · ₺</option><option value="CAD">CAD · C$</option><option value="AUD">AUD · A$</option><option value="BRL">BRL · R$</option><option value="MXN">MXN · $</option><option value="ARS">ARS · $</option><option value="CLP">CLP · $</option><option value="COP">COP · $</option><option value="KES">KES · KSh</option><option value="ZAR">ZAR · R</option><option value="NGN">NGN · ₦</option><option value="MAD">MAD · د.م.</option><option value="DZD">DZD · دج</option><option value="TND">TND · د.ت</option><option value="IDR">IDR · Rp</option><option value="MYR">MYR · RM</option><option value="THB">THB · ฿</option><option value="PHP">PHP · ₱</option><option value="RUB">RUB · ₽</option></select><small id="simple-currency-status">Automatically chosen from the selected country. You can change it.</small>';
   $('#simple-location-context')?.after(simpleCurrencyField);
   const simpleAbout = $('#simple-about-dialog');
   simpleAbout?.querySelector('.simple-about-profile')?.remove();
@@ -495,6 +526,10 @@ function init() {
       renderReports();
       renderEconomics();
       renderFeedback();
+      renderSimpleFlow();
+      if (!$('[data-simple-stage="4"]')?.hidden) renderSimpleResults();
+      const activeTip = $('#simple-agri-tip')?.dataset.topic;
+      if (activeTip) showSimpleAgriTip(activeTip);
     },
   });
   initSimpleToolbar();
@@ -591,6 +626,7 @@ function renderSimpleFlow() {
     : '<span>◎ ' + escapeHTML(t('Country')) + ': ' + escapeHTML(t('waiting')) + '</span><span>¤ ' + escapeHTML(t('Currency')) + ': ' + escapeHTML(t('waiting')) + '</span><span>☁ ' + escapeHTML(t('Weather')) + ': ' + escapeHTML(t('waiting')) + '</span>';
   const currencySelect = $('#simple-currency');
   if (currencySelect) currencySelect.value = simpleCurrency();
+  renderSimpleCurrencyStatus();
   const form = $('#simple-farm-form');
   if (form) Object.entries(state.simpleFarm).forEach(([key, value]) => { if (form.elements[key]) form.elements[key].value = value; });
   $$('input[name="crops"]', $('#simple-crops-form')).forEach(input => { input.checked = (state.simpleFarm.crops || []).includes(input.value); });
@@ -617,6 +653,7 @@ function syncSimpleToolbar(language = state.preferences.language) {
   $('#simple-settings-language') && ($('#simple-settings-language').value = language);
   $('#simple-appearance') && ($('#simple-appearance').value = state.preferences.theme);
   $('#simple-weather-units') && ($('#simple-weather-units').value = state.preferences.units);
+  $('#simple-farmer-mode') && ($('#simple-farmer-mode').value = document.body.classList.contains('simple-farmer') ? 'simple' : 'advanced');
   $$('[data-simple-theme-choice]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.simpleThemeChoice === state.preferences.theme)));
   $$('[data-simple-copy]').forEach(element => { element.textContent = words[element.dataset.simpleCopy] || element.textContent; });
   const title = $('[data-simple-copy="title"]');
@@ -640,6 +677,12 @@ function initSimpleToolbar() {
   });
   $('#simple-appearance')?.addEventListener('change', event => { state.preferences.theme = event.currentTarget.value; applyPreferences(); syncSimpleToolbar(); });
   $('#simple-weather-units')?.addEventListener('change', event => { state.preferences.units = event.currentTarget.value; applyPreferences(); if (state.weather) renderWeather(); syncSimpleToolbar(); });
+  $('#simple-farmer-mode')?.addEventListener('change', event => {
+    const mode = event.currentTarget.value === 'simple' ? 'simple' : 'advanced';
+    $('#simple-settings-dialog')?.close();
+    switchFarmerMode(mode);
+    toast(mode === 'simple' ? t('Guided workspace enabled.') : t('Full controls enabled.'));
+  });
   $$('[data-simple-theme-choice]').forEach(button => button.addEventListener('click', () => { state.preferences.theme = button.dataset.simpleThemeChoice; applyPreferences(); syncSimpleToolbar(); }));
   window.addEventListener('fieldshift:language', event => syncSimpleToolbar(event.detail));
 }
@@ -660,21 +703,38 @@ const simplePlanningBenchmarks = {
   cotton: { yield: 1.8, priceUsd: 1650, costUsd: 1250 },
   sunflower: { yield: 1.6, priceUsd: 480, costUsd: 540 },
 };
-const simpleFallbackRates = { USD: 1, SAR: 3.75, EGP: 50, EUR: .92, GBP: .79, INR: 84, KES: 129, CNY: 7.25, BRL: 5.45, ZAR: 18.3, NGN: 1550 };
+const simpleFallbackRates = { USD:1,SAR:3.75,AED:3.6725,QAR:3.64,KWD:.307,BHD:.376,OMR:.385,JOD:.709,EGP:50,EUR:.92,GBP:.79,INR:84,PKR:279,BDT:120,CNY:7.25,JPY:153,TRY:34,CAD:1.39,AUD:1.53,BRL:5.45,MXN:20.3,ARS:1000,CLP:970,COP:4400,KES:129,ZAR:18.3,NGN:1550,MAD:10,DZD:134,TND:3.1,IDR:15800,MYR:4.4,THB:34.5,PHP:58,RUB:98 };
 function simpleCurrency() { return state.simpleFarm.currency || countryCurrencies[state.location.country] || 'USD'; }
 function simpleMoney(value, currency) {
-  return new Intl.NumberFormat({ en: 'en-US', fr: 'fr-FR', ar: 'ar-SA' }[currentLanguage()] || 'en-US', { style: 'currency', currency, maximumFractionDigits: 0 }).format(value);
+  return new Intl.NumberFormat(localeForLanguage(), { style: 'currency', currency, maximumFractionDigits: 0 }).format(value);
+}
+function renderSimpleCurrencyStatus() {
+  const status = $('#simple-currency-status');
+  const fx = state.simpleFx;
+  if (!status) return;
+  if (!fx || fx.currency !== simpleCurrency()) {
+    status.textContent = t('Automatically chosen from the selected country. You can change it.');
+    return;
+  }
+  status.textContent = fx.live
+    ? t('Live exchange rate connected') + ' · 1 USD = ' + new Intl.NumberFormat(localeForLanguage(), { maximumFractionDigits: 4 }).format(fx.rate) + ' ' + fx.currency
+    : t('Live rate unavailable; clearly labeled reference rate is being used.');
 }
 async function updateSimpleCurrency() {
   const currency = simpleCurrency();
   state.economicsInputs.currency = currency;
-  let rate = simpleFallbackRates[currency] || 1, source = 'planning reference conversion';
+  let rate = simpleFallbackRates[currency] || 1, source = currency === 'USD' ? 'USD base rate' : 'offline reference rate', live = currency === 'USD', retrievedAt = currency === 'USD' ? new Date().toISOString() : null;
   if (currency !== 'USD') try {
     const response = await fetch('https://open.er-api.com/v6/latest/USD', { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(5000) });
     const data = await response.json();
-    if (response.ok && Number(data?.rates?.[currency]) > 0) { rate = Number(data.rates[currency]); source = 'latest available exchange-rate conversion'; }
+    if (response.ok && data?.result === 'success' && Number(data?.rates?.[currency]) > 0) {
+      rate = Number(data.rates[currency]); source = 'open.er-api.com · USD reference'; live = true;
+      retrievedAt = data.time_last_update_utc || new Date().toISOString();
+    }
   } catch { /* The transparent reference rate keeps the simple report usable offline. */ }
-  state.simpleFx = { currency, rate, source };
+  state.simpleFx = { currency, rate, source, live, retrievedAt };
+  renderSimpleCurrencyStatus();
+  return state.simpleFx;
 }
 
 function simpleFactorStatus(value, requirement, kind = 'number') {
@@ -755,8 +815,14 @@ function renderSimpleResults() {
     weather && number(firstDay?.rain) < 2 ? t('Review irrigation access because little rain appears in the short forecast.') : t('Check rainfall again before planting or irrigation.'),
     benchmark ? t('Confirm selling price and input costs with a local buyer before acting.') : t('Choose a crop to unlock a planning margin.'),
   ];
+  const readinessSignals = [
+    [t('Location'), true], [t('Live weather'), Boolean(weather)], [t('Crop choice'), cropNames.length > 0],
+    [t('Local soil input'), Boolean(state.simpleFarm.soilPH || (state.simpleFarm.soilTexture && state.simpleFarm.soilTexture !== 'unknown'))],
+    [t('Live currency'), Boolean(fx.live)],
+  ];
+  const readinessCount = readinessSignals.filter(([, connected]) => connected).length;
   reportHero.innerHTML = '<article class="simple-weather-report simple-weather-' + scene + '"><div class="simple-weather-shade"></div><div class="simple-weather-main"><span class="eyebrow">' + escapeHTML(t('LIVE FIELD WEATHER')) + '</span><h2>' + escapeHTML(state.location.name) + '</h2><p>' + escapeHTML(cropNames.length ? t('Selected crops') + ': ' + cropNames.map(t).join(', ') : t('No crop selected')) + '</p><div class="simple-weather-current"><span aria-hidden="true">' + weatherGlyph + '</span><strong>' + escapeHTML(weather ? temp(current?.temperature) : '—') + '</strong><div><b>' + escapeHTML(weather ? t(formatWeatherCode(weatherCode)) : t('Forecast unavailable.')) + '</b><small>' + escapeHTML(weather ? t('Wind') + ' ' + wind(current?.wind) + ' · ' + t('Humidity') + ' ' + (current?.humidity ?? '—') + '%' : t('Select or refresh your location to retry the live forecast')) + '</small></div></div></div><div class="simple-weather-forecast"><span class="eyebrow">' + escapeHTML(t('FOUR DAY OUTLOOK')) + '</span>' + forecastItems + '</div></article>' +
-    '<div class="simple-report-facts"><article><span>' + escapeHTML(t('Location')) + '</span><b>' + escapeHTML(state.location.name) + '</b><small>' + escapeHTML(state.location.country || t('Selected region')) + '</small></article><article><span>' + escapeHTML(t('Crops')) + '</span><b>' + escapeHTML(cropNames.map(t).join(', ') || t('Not selected')) + '</b><small>' + escapeHTML(t('Primary crop and alternatives')) + '</small></article><article><span>' + escapeHTML(t('Field details')) + '</span><b>' + escapeHTML(t(state.simpleFarm.waterSource === 'irrigated' ? 'Irrigation available' : state.simpleFarm.waterSource === 'rainfed' ? 'Rain-fed only' : 'Water source unknown')) + '</b><small>' + escapeHTML(t('Soil texture') + ': ' + t(state.simpleFarm.soilTexture || 'unknown')) + '</small></article><article><span>' + escapeHTML(t('Profit estimate')) + '</span><b>' + escapeHTML(benchmark ? simpleMoney(margin, fx.currency) : '—') + '</b><small>' + escapeHTML(t('Planning margin per hectare')) + '</small></article></div><article class="simple-decision-brief"><div><span class="eyebrow">' + escapeHTML(t('NEXT BEST ACTIONS')) + '</span><h3>' + escapeHTML(t('Your decision brief')) + '</h3><p>' + escapeHTML(t('Use these as checks, not automatic instructions. Local knowledge remains essential.')) + '</p></div><ol>' + decisionTips.map(tip => '<li>' + escapeHTML(tip) + '</li>').join('') + '</ol></article>';
+    '<div class="simple-report-facts"><article><span>' + escapeHTML(t('Location')) + '</span><b>' + escapeHTML(state.location.name) + '</b><small>' + escapeHTML(state.location.country || t('Selected region')) + '</small></article><article><span>' + escapeHTML(t('Crops')) + '</span><b>' + escapeHTML(cropNames.map(t).join(', ') || t('Not selected')) + '</b><small>' + escapeHTML(t('Primary crop and alternatives')) + '</small></article><article><span>' + escapeHTML(t('Field details')) + '</span><b>' + escapeHTML(t(state.simpleFarm.waterSource === 'irrigated' ? 'Irrigation available' : state.simpleFarm.waterSource === 'rainfed' ? 'Rain-fed only' : 'Water source unknown')) + '</b><small>' + escapeHTML(t('Soil texture') + ': ' + t(state.simpleFarm.soilTexture || 'unknown')) + '</small></article><article><span>' + escapeHTML(t('Profit estimate')) + '</span><b>' + escapeHTML(benchmark ? simpleMoney(margin, fx.currency) : '—') + '</b><small>' + escapeHTML(t('Planning margin per hectare')) + '</small></article></div><section class="simple-report-readiness"><div><span class="eyebrow">' + escapeHTML(t('DECISION READINESS')) + '</span><b>' + readinessCount + ' / ' + readinessSignals.length + ' ' + escapeHTML(t('signals connected')) + '</b></div><div>' + readinessSignals.map(([label, connected]) => '<span class="' + (connected ? 'connected' : '') + '"><i></i>' + escapeHTML(label) + '</span>').join('') + '</div></section><article class="simple-decision-brief"><div><span class="eyebrow">' + escapeHTML(t('NEXT BEST ACTIONS')) + '</span><h3>' + escapeHTML(t('Your decision brief')) + '</h3><p>' + escapeHTML(t('Use these as checks, not automatic instructions. Local knowledge remains essential.')) + '</p></div><ol>' + decisionTips.map(tip => '<li>' + escapeHTML(tip) + '</li>').join('') + '</ol></article>';
   summary.textContent = weather ? 'Your automatic report is ready for ' + state.location.name + '. Currency: ' + fx.currency + '.' : 'Your location is saved. Weather retrieval is unavailable right now, so missing information is shown clearly.';
   host.innerHTML = [
     simpleCard(assessments.length ? 'Crop conditions' : 'Crop profiles', 'screening', cropBody, assessments.length ? t('Profile screening only; confirm with local evidence.') : t('Choose a crop for factor-by-factor conditions.')),
@@ -805,6 +871,7 @@ function showSimpleAgriTip(topic) {
     profit: [t('Your planning margin'), benchmark ? simpleMoney(margin, fx.currency) + ' ' + t('per hectare') + '. ' + t('This uses planning benchmarks; replace them with local prices and costs.') : t('Choose a crop to create a planning estimate.')],
   };
   const [title, body] = tips[topic] || [t('Start with your land'), t('Choose a location and crop, then tap a topic to see a short, practical explanation.')];
+  host.dataset.topic = topic;
   host.innerHTML = '<span class="eyebrow">' + escapeHTML(t('QUICK FIELD TIP')) + '</span><h3>' + escapeHTML(title) + '</h3><p>' + escapeHTML(body) + '</p>';
   $$('[data-agri-tip]').forEach(button => button.classList.toggle('active', button.dataset.agriTip === topic));
 }
@@ -979,13 +1046,16 @@ function bindEvents() {
   $("#place-search-form").addEventListener("submit", searchLocation);
   $('#simple-place-search')?.addEventListener('submit', searchSimpleLocation);
   $$('[data-agri-tip]').forEach(button => button.addEventListener('click', () => showSimpleAgriTip(button.dataset.agriTip)));
-  $('#simple-currency')?.addEventListener('change', event => {
+  $('#simple-currency')?.addEventListener('change', async event => {
     state.simpleFarm.currency = event.currentTarget.value;
     state.economicsInputs.currency = event.currentTarget.value;
     state.simpleFx = null;
     write('fieldshift.simpleFarm', state.simpleFarm);
     renderSimpleFlow();
-    text('#simple-save-status', 'Currency saved');
+    text('#simple-save-status', t('Connecting live currency…'));
+    await updateSimpleCurrency();
+    if (!$('[data-simple-stage="4"]')?.hidden) renderSimpleResults();
+    text('#simple-save-status', t('Currency saved'));
   });
   $("#geojson-import").addEventListener("change", importBoundary);
   $("#economics-form").addEventListener("submit", (event) => {
@@ -1576,6 +1646,7 @@ function selectLocation(point, move = true) {
   renderLocation();
   renderSimpleFlow();
   loadWeather();
+  updateSimpleCurrency().then(() => { if (!$('[data-simple-stage="4"]')?.hidden) renderSimpleResults(); });
 }
 async function searchSimpleLocation(event) {
   event.preventDefault();
