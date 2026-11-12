@@ -184,8 +184,6 @@ const state = {
   plans: read("fieldshift.plans", []),
   weather: null,
   nasa: null,
-  historyMetric: "rain",
-  historyYear: Math.min(2030, Math.max(2020, new Date().getUTCFullYear() - 1)),
   economics: null,
   rotationOptions: [],
   selectedPlan: "soil",
@@ -488,7 +486,6 @@ function init() {
   if (hasLocation()) state.map.setLocation(state.location);
   if (state.location.boundary) state.map.setBoundary(state.location.boundary);
   bindEvents();
-  if ($('#history-year-select')) $('#history-year-select').value = String(state.historyYear);
   initAgriSystem();
   initSeasonSimulator();
   applyPreferences();
@@ -686,7 +683,6 @@ function navigate() {
     "water",
     "crops",
     "profit",
-    "analytics",
     "reports",
     "explore",
     "feedback",
@@ -715,7 +711,6 @@ function navigate() {
       water: "Water",
       crops: "Crop planner",
       profit: "Profit & scenarios",
-      analytics: "Past analytics",
       reports: "Reports",
       explore: "Explore",
       feedback: "Comments & feedback",
@@ -731,10 +726,6 @@ function navigate() {
   target?.append($("#map-dock"));
   document.body.classList.remove("menu-open");
   requestAnimationFrame(() => state.map?.resize());
-  if (state.route === 'analytics') {
-    renderHistoricalLocalRecords();
-    if (state.nasa) renderHistoricalAnalytics(state.nasa);
-  }
   if (state.ready) window.scrollTo({ top: 0, behavior: "instant" });
 }
 
@@ -1272,7 +1263,6 @@ function bindEvents() {
       "export-csv": exportCSV,
       print: () => window.print(),
       nasa: loadNasa,
-      "history-load": loadNasa,
       "delete-feedback": () => {
         state.feedback = state.feedback.filter(
           (item) => item.id !== action.dataset.id,
@@ -1327,11 +1317,6 @@ function bindEvents() {
   $("#place-search-form").addEventListener("submit", searchLocation);
   $('#simple-place-search')?.addEventListener('submit', searchSimpleLocation);
   $$('[data-agri-tip]').forEach(button => button.addEventListener('click', () => showSimpleAgriTip(button.dataset.agriTip)));
-  $$('[data-history-metric]').forEach(button => button.addEventListener('click', () => {
-    state.historyMetric = button.dataset.historyMetric;
-    $$('[data-history-metric]').forEach(item => item.classList.toggle('active', item === button));
-    if (state.nasa) renderHistoricalAnalytics(state.nasa);
-  }));
   $('#simple-currency')?.addEventListener('change', async event => {
     state.simpleFarm.currency = event.currentTarget.value;
     state.economicsInputs.currency = event.currentTarget.value;
@@ -3421,35 +3406,20 @@ function renderHistoricalAnalytics(result) {
 }
 async function loadNasa() {
   const container = $("#nasa-result");
-  const selectedYear = Number($('#history-year-select')?.value || state.historyYear);
-  state.historyYear = Math.min(2030,Math.max(2020,selectedYear));
   if (!hasLocation()) {
-    if (container) container.innerHTML = '<p class="empty">Choose a field before requesting NASA climate context.</p>';
-    const analytics = $('#analytics-result');
-    if (analytics) analytics.innerHTML = '<p class="empty">Choose a field before requesting NASA climate context.</p>';
+    container.innerHTML = '<p class="empty">Choose a field before requesting NASA climate context.</p>';
     return;
   }
   state.nasaController?.abort();
   state.nasaController = new AbortController();
   const key = fieldKey();
-  if (container) container.innerHTML = '<p class="empty">Requesting historical NASA POWER data…</p>';
-  if ($('#analytics-result')) $('#analytics-result').innerHTML = '<p class="empty">Requesting historical NASA POWER data…</p>';
+  container.innerHTML = '<p class="empty">Requesting historical NASA POWER data…</p>';
   try {
-    const latestCompletedYear = new Date().getUTCFullYear() - 1;
-    let result;
-    if (state.historyYear <= latestCompletedYear) {
-      result = await fetchNasa(state.location, { signal: state.nasaController.signal, year: state.historyYear });
-    } else {
-      const [start,latest] = await Promise.all([
-        fetchNasa(state.location,{signal:state.nasaController.signal,year:2020}),
-        fetchNasa(state.location,{signal:state.nasaController.signal,year:latestCompletedYear}),
-      ]);
-      result = historicalOutlook(start,latest,state.historyYear);
-    }
+    const result = await fetchNasa(state.location, { signal: state.nasaController.signal });
     if (key !== fieldKey()) return;
     state.nasa = result;
     const max = Math.max(1, ...result.months.map((m) => m.rain ?? 0));
-    if (container) container.innerHTML =
+    container.innerHTML =
       '<span class="eyebrow">' +
       result.year +
       ' MONTHLY RAINFALL · MM</span><div class="nasa-months">' +
@@ -3472,14 +3442,10 @@ async function loadNasa() {
       '</p><span class="eyebrow">NASA POWER · RETRIEVED ' +
       new Date(result.retrievedAt).toLocaleDateString() +
       "</span>";
-    renderHistoricalAnalytics(result);
     notifyFieldUpdate();
   } catch (error) {
-    if (error.name !== "AbortError" && key === fieldKey()) {
-      const message = '<p class="empty">' + escapeHTML(error.message) + ' You can retry using the button.</p>';
-      if (container) container.innerHTML = message;
-      if ($('#analytics-result')) $('#analytics-result').innerHTML = message;
-    }
+    if (error.name !== "AbortError" && key === fieldKey())
+      container.innerHTML = '<p class="empty">' + escapeHTML(error.message) + ' You can retry using the button.</p>';
   }
 }
 // Keep the orbit and plant animation smooth while the map engine is idle.

@@ -121,8 +121,6 @@
           ><svg><use href="#i-leaf" /></svg><span>Crop planner</span></a
         ><a href="#/profit" data-route="profit"
           ><svg><use href="#i-chart" /></svg><span>Profit & scenarios</span></a
-        ><a href="#/analytics" data-route="analytics"
-          ><svg><use href="#i-clock" /></svg><span>Past analytics</span></a
         ><a href="#/reports" data-route="reports"
           ><svg><use href="#i-file" /></svg><span>Reports</span></a
         ><a href="#/explore" data-route="explore"
@@ -991,33 +989,6 @@
             >
           </div>
         </div>
-      </section>
-      <section class="view" id="view-analytics" hidden aria-labelledby="analytics-title">
-        <div class="page-heading analytics-heading">
-          <div><span class="eyebrow">HISTORICAL ANALYTICS + PLANNING OUTLOOK</span><h1 id="analytics-title">Understand the past. Prepare for what’s next<span>.</span></h1><p>Choose 2020–2030. Completed years use NASA POWER observations; future years are clearly labeled statistical planning outlooks.</p></div>
-          <div class="history-year-picker"><label for="history-year-select">Analysis year</label><select id="history-year-select"><option>2020</option><option>2021</option><option>2022</option><option>2023</option><option>2024</option><option>2025</option><option>2026</option><option>2027</option><option>2028</option><option>2029</option><option>2030</option></select><button class="button" type="button" data-action="history-load"><svg><use href="#i-clock" /></svg> Analyse year</button></div>
-        </div>
-        <section class="historical-hero panel">
-          <div><span class="eyebrow" id="history-classification">REGIONAL CLIMATE MEMORY</span><h2 id="history-location">Choose your field to begin</h2><p id="history-summary">AgriPulse requests historical NASA POWER data only when you ask for it.</p><span class="history-source-chip" id="history-source-chip">Waiting for a selected year</span></div>
-          <div class="history-year-orbit"><span id="history-year">—</span><small id="history-year-label">ANALYSIS YEAR</small></div>
-        </section>
-        <div class="history-metrics" aria-live="polite">
-          <article><span>Average temperature</span><strong id="history-temp">—</strong><small>Annual monthly mean</small></article>
-          <article><span>Recorded rainfall</span><strong id="history-rain">—</strong><small>Complete monthly totals only</small></article>
-          <article><span>Average solar energy</span><strong id="history-solar">—</strong><small>NASA POWER regional grid</small></article>
-          <article><span>Strongest signal</span><strong id="history-peak">—</strong><small id="history-peak-note">Load data to compare months</small></article>
-        </div>
-        <section class="history-verdict panel" id="history-verdict"><div class="history-verdict-mark"><span>—</span><small>SEASON SIGNAL</small></div><div><span class="eyebrow">AGRICULTURAL YEAR REVIEW</span><h2 id="history-verdict-title">Load a year to review its agricultural conditions.</h2><p id="history-verdict-copy">The review will explain heat, rainfall distribution, solar energy, opportunities, and risks without pretending regional data measures the farm itself.</p><div id="history-verdict-tags"></div></div></section>
-        <section class="panel history-workbench">
-          <header><div><span class="eyebrow">12-MONTH EXPLORER</span><h2>Move through the year.</h2></div><div class="history-tabs" role="group" aria-label="Historical metric"><button class="active" type="button" data-history-metric="rain">Rainfall</button><button type="button" data-history-metric="temperature">Temperature</button><button type="button" data-history-metric="solar">Solar</button></div></header>
-          <div id="analytics-result" class="history-chart"><p class="empty">Select a field, then load historical data.</p></div>
-          <div class="history-detail-table" id="history-detail-table"></div>
-          <footer><span><i></i> NASA POWER · historical regional context</span><a href="https://power.larc.nasa.gov/" target="_blank" rel="noopener noreferrer">Inspect the source ↗</a></footer>
-        </section>
-        <section class="history-insight-grid">
-          <article class="panel"><span class="eyebrow">HOW TO USE THIS</span><h3>Look for timing, not certainty.</h3><p>Compare wetter, hotter, or brighter months with your crop calendar. One historical year is context—not a climate normal or a farm measurement.</p></article>
-          <article class="panel history-memory"><span class="eyebrow">FIELD MEMORY</span><h3>Your evidence stays connected.</h3><div id="history-local-records"><p class="empty">Soil samples and field notes for the selected land will appear here.</p></div></article>
-        </section>
       </section>
       <section class="view" id="view-reports" hidden>
         <div class="page-heading">
