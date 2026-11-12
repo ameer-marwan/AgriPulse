@@ -301,6 +301,12 @@
               <button class="agri-system-all" type="button" data-system-show-all>Show the full pathway</button>
             </div>
           </header>
+          <div class="agri-live-signal-bar" aria-label="Current field signals">
+            <span><i class="signal-live"></i><small>LIVE WEATHER</small><b id="system-live-weather">Choose a field</b></span>
+            <span><i></i><small>WATER CONTEXT</small><b id="system-live-water">Waiting for forecast</b></span>
+            <span><i></i><small>SOIL EVIDENCE</small><b id="system-live-soil">No local details</b></span>
+            <span><i></i><small>DECISION READINESS</small><b id="system-live-readiness">0 / 4 connected</b></span>
+          </div>
           <div class="agri-system-canvas">
             <div class="agri-earth-stage" aria-label="Animated Earth observation globe">
               <div class="agri-earth" role="button" tabindex="0" aria-label="Drag or use arrow keys to rotate the Earth">
@@ -341,6 +347,22 @@
               <a id="agri-system-detail-link" href="#/weather">Open weather intelligence →</a>
             </aside>
           </div>
+        </section>
+        <section class="season-simulator" aria-labelledby="season-simulator-title">
+          <header>
+            <div><span class="eyebrow">INTERACTIVE SEASON LAB</span><h2 id="season-simulator-title">Stress-test the season before it arrives.</h2><p>Move the climate controls to explore direction—not a forecast—and see which field priorities become more important.</p></div>
+            <span class="pill">COMPLEX FARMER · SCENARIO</span>
+          </header>
+          <div class="season-simulator-grid">
+            <div class="season-simulator-controls">
+              <label><span>Temperature shift <b id="sim-temperature-value">+0°C</b></span><input id="sim-temperature" type="range" min="-3" max="5" step="1" value="0"></label>
+              <label><span>Rainfall shift <b id="sim-rain-value">0%</b></span><input id="sim-rain" type="range" min="-50" max="50" step="10" value="0"></label>
+              <div class="sim-presets"><button type="button" data-sim-preset="hotdry">Hotter &amp; drier</button><button type="button" data-sim-preset="wet">Wetter season</button><button type="button" data-sim-preset="baseline">Reset</button></div>
+            </div>
+            <div class="season-simulator-orbit" aria-hidden="true"><span id="sim-risk-ring"><i></i></span><strong id="sim-risk-score">LOW</strong><small>PLANNING PRESSURE</small></div>
+            <div class="season-simulator-result"><span class="eyebrow">SCENARIO RESPONSE</span><h3 id="sim-result-title">Current baseline</h3><p id="sim-result-copy">Choose a field to connect the simulator to current weather, or explore a general planning scenario now.</p><div id="sim-priorities"></div><a href="#/crops">Compare rotation strategies →</a></div>
+          </div>
+          <p class="fine-print">This is a sensitivity tool, not a seasonal prediction. It changes the selected scenario only and does not overwrite live weather.</p>
         </section>
         <div class="metrics">
           <article class="metric-card">

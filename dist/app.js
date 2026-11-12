@@ -393,7 +393,7 @@ function init() {
     <aside class="simple-community"><div><span class="eyebrow">AGRIPULSE COMMUNITY</span><b>Help us build better field decisions.</b></div><div><button type="button" data-action="simple-feedback">Share feedback</button><button type="button" data-action="simple-about">Learn about us</button></div></aside>
     <dialog class="simple-info-dialog" id="simple-feedback-dialog"><header><div><span class="eyebrow">YOUR FEEDBACK</span><h2>Help AgriPulse grow</h2></div><button class="simple-tool-icon" type="button" data-action="close-simple-dialog" aria-label="Close">×</button></header><p>Tell us what would make the guided farmer experience clearer or more useful.</p><form id="simple-feedback-form"><label>Rating<select name="rating"><option value="5">5 · Excellent</option><option value="4">4 · Good</option><option value="3">3 · Okay</option><option value="2">2 · Needs work</option><option value="1">1 · Poor</option></select></label><label>Comment<textarea name="comment" minlength="5" maxlength="600" required placeholder="Write your feedback"></textarea></label><button class="button" type="submit">Save feedback</button></form></dialog>
     <dialog class="simple-info-dialog" id="simple-about-dialog"><header><div><span class="eyebrow">ABOUT AGRIPULSE</span><h2>Built by students. Grounded in purpose.</h2></div><button class="simple-tool-icon" type="button" data-action="close-simple-dialog" aria-label="Close">×</button></header><div class="simple-about-profile"><img src="assets/dunia-alajial-logo.jpg" alt="Dunia Alajial International School logo"><div><b>Dunia Alajial International School</b><p>AgriPulse connects NASA Earth observations with farmer knowledge to support clearer crop, water, soil, and planning decisions.</p></div></div><div class="button-row"><a class="button secondary" href="https://share.google/ZDHDGsGC8tVU8AKJr" target="_blank" rel="noopener">Learn more ↗</a><a class="button secondary" href="https://github.com/a7mdel5taeeb-eng" target="_blank" rel="noopener">Tech team ↗</a></div></dialog>
-    <button class="simple-agri-guide-toggle" type="button" data-action="agri-guide" aria-expanded="false"><span>✦</span><b>Agri Toggle</b><small>Field tips</small></button><aside class="simple-agri-guide" id="simple-agri-guide" hidden><header><div><span class="eyebrow">AGRIPULSE FIELD GUIDE</span><h2>What would you like to understand?</h2></div><button type="button" data-action="agri-guide" aria-label="Close">×</button></header><p>No typing needed. Tap a topic for a quick explanation based on your selected land.</p><div class="simple-agri-tip-topics"><button type="button" data-agri-tip="weather"><span aria-hidden="true">☀</span> Weather</button><button type="button" data-agri-tip="soil"><span aria-hidden="true">◉</span> Soil</button><button type="button" data-agri-tip="water"><span aria-hidden="true">◒</span> Water</button><button type="button" data-agri-tip="crop"><span aria-hidden="true">❋</span> Crops</button><button type="button" data-agri-tip="profit"><span aria-hidden="true">↗</span> Profit</button></div><article id="simple-agri-tip"><span class="eyebrow">QUICK FIELD TIP</span><h3>Start with your land</h3><p>Choose a location and crop, then tap a topic to see a short, practical explanation.</p></article></aside>`;
+    <button class="simple-agri-guide-toggle" type="button" data-action="agri-guide" aria-expanded="false"><span>✦</span><b>Agri Toggle</b><small>Field tips</small></button><aside class="simple-agri-guide" id="simple-agri-guide" hidden><header><div><span class="eyebrow">AGRIPULSE FIELD GUIDE</span><h2>What would you like to understand?</h2></div><button type="button" data-action="agri-guide" aria-label="Close">×</button></header><p>No typing needed. Tap a topic or generate a land-aware tip using your selected field and current weather.</p><button class="simple-generate-tip" type="button" data-action="generate-land-tip"><span>✦</span><b>Generate a tip for this land</b><small>Weather · water · crops · next action</small></button><div class="simple-agri-tip-topics"><button type="button" data-agri-tip="weather"><span aria-hidden="true">☀</span> Weather</button><button type="button" data-agri-tip="soil"><span aria-hidden="true">◉</span> Soil</button><button type="button" data-agri-tip="water"><span aria-hidden="true">◒</span> Water</button><button type="button" data-agri-tip="crop"><span aria-hidden="true">❋</span> Crops</button><button type="button" data-agri-tip="profit"><span aria-hidden="true">↗</span> Profit</button></div><article id="simple-agri-tip"><span class="eyebrow">QUICK FIELD TIP</span><h3>Start with your land</h3><p>Choose a location and crop, then tap a topic to see a short, practical explanation.</p></article></aside>`;
   $("main").insertBefore(simpleView, $(".app-footer"));
   const simpleMapHost = document.createElement('div');
   simpleMapHost.id = 'simple-map-host';
@@ -404,6 +404,10 @@ function init() {
   simpleCurrencyField.className = 'simple-currency-choice';
   simpleCurrencyField.innerHTML = '<span>Report currency</span><select id="simple-currency"><option value="USD">USD · $</option><option value="SAR">SAR · ﷼</option><option value="AED">AED · د.إ</option><option value="QAR">QAR · ﷼</option><option value="KWD">KWD · د.ك</option><option value="BHD">BHD · د.ب</option><option value="OMR">OMR · ﷼</option><option value="JOD">JOD · د.ا</option><option value="EGP">EGP · E£</option><option value="EUR">EUR · €</option><option value="GBP">GBP · £</option><option value="INR">INR · ₹</option><option value="PKR">PKR · ₨</option><option value="BDT">BDT · ৳</option><option value="CNY">CNY · ¥</option><option value="JPY">JPY · ¥</option><option value="TRY">TRY · ₺</option><option value="CAD">CAD · C$</option><option value="AUD">AUD · A$</option><option value="BRL">BRL · R$</option><option value="MXN">MXN · $</option><option value="ARS">ARS · $</option><option value="CLP">CLP · $</option><option value="COP">COP · $</option><option value="KES">KES · KSh</option><option value="ZAR">ZAR · R</option><option value="NGN">NGN · ₦</option><option value="MAD">MAD · د.م.</option><option value="DZD">DZD · دج</option><option value="TND">TND · د.ت</option><option value="IDR">IDR · Rp</option><option value="MYR">MYR · RM</option><option value="THB">THB · ฿</option><option value="PHP">PHP · ₱</option><option value="RUB">RUB · ₽</option></select><small id="simple-currency-status">Automatically chosen from the selected country. You can change it.</small>';
   $('#simple-location-context')?.after(simpleCurrencyField);
+  const simpleAutoNote = document.createElement('aside');
+  simpleAutoNote.className = 'simple-auto-note';
+  simpleAutoNote.id = 'simple-auto-note';
+  $('.simple-crop-tools')?.before(simpleAutoNote);
   const simpleAbout = $('#simple-about-dialog');
   simpleAbout?.querySelector('.simple-about-profile')?.remove();
   if (simpleAbout) {
@@ -483,6 +487,7 @@ function init() {
   if (state.location.boundary) state.map.setBoundary(state.location.boundary);
   bindEvents();
   initAgriSystem();
+  initSeasonSimulator();
   applyPreferences();
   clearInterval(themeClock);
   themeClock = setInterval(() => {
@@ -617,7 +622,53 @@ function initAgriSystem() {
     renderAgriSystemDetail(selected);
     const control = section.querySelector('[data-system-tour]');
     if (control) control.innerHTML = '<span>' + (tourTimer ? 'Ⅱ' : '▶') + '</span> ' + t(tourTimer ? 'Pause guided tour' : 'Play guided tour');
+    renderAgriSystemLiveSignals();
   });
+  window.addEventListener('fieldshift:updated', renderAgriSystemLiveSignals);
+  renderAgriSystemLiveSignals();
+}
+
+function renderAgriSystemLiveSignals() {
+  const weather = state.weather, forecast = weather?.daily?.slice(0,7) || [];
+  const rainTotal = forecast.reduce((sum,day) => sum + (number(day.rain) ? day.rain : 0),0);
+  const etTotal = forecast.reduce((sum,day) => sum + (number(day.et0) ? day.et0 : 0),0);
+  text('#system-live-weather', weather ? temp(weather.current?.temperature) + ' · ' + t(formatWeatherCode(weather.current?.weatherCode)) : t(hasLocation() ? 'Connecting…' : 'Choose a field'));
+  text('#system-live-water', weather ? rain(rainTotal) + ' ' + t('rain') + ' · ET₀ ' + rain(etTotal) : t('Waiting for forecast'));
+  const localSoil = state.samples.filter(sample => sample.fieldKey === fieldKey()).length;
+  text('#system-live-soil', localSoil ? localSoil + ' ' + t('local record(s)') : hasLocation() ? t('Automatic land context') : t('No local details'));
+  const connected = [hasLocation(),Boolean(weather),localSoil > 0,Boolean(state.economics)].filter(Boolean).length;
+  text('#system-live-readiness', connected + ' / 4 ' + t('connected'));
+  $$('.agri-live-signal-bar>span').forEach((item,index) => item.classList.toggle('connected',[hasLocation(),Boolean(weather),localSoil > 0,Boolean(state.economics)][index]));
+  const nodeCopy = {
+    climate: weather ? temp(weather.current?.temperature) + ' · ' + wind(weather.current?.wind) : t('Heat · rain · wind'),
+    water: weather ? rain(rainTotal) + ' · ET₀ ' + rain(etTotal) : t('Rain · ET₀ · moisture'),
+    land: hasLocation() ? state.location.name : t('Soil · boundary · history'),
+    economics: state.economics ? money(state.economics.marginPerHa) + ' / ha' : t('Yield · costs · currency'),
+  };
+  Object.entries(nodeCopy).forEach(([key,value]) => { const small = $('[data-system-node="'+key+'"] small'); if (small) small.textContent = value; });
+}
+
+function initSeasonSimulator() {
+  const temperature = $('#sim-temperature'), rainfall = $('#sim-rain'); if (!temperature || !rainfall) return;
+  const render = () => {
+    const tempShift = Number(temperature.value), rainShift = Number(rainfall.value);
+    text('#sim-temperature-value',(tempShift >= 0 ? '+' : '') + tempShift + '°C');
+    text('#sim-rain-value',(rainShift >= 0 ? '+' : '') + rainShift + '%');
+    const baseTemp = number(state.weather?.current?.temperature) ? state.weather.current.temperature : 25;
+    const projectedTemp = baseTemp + tempShift;
+    let pressure = Math.max(0,tempShift) * 12 + Math.max(0,-rainShift) * .65 + (projectedTemp >= 35 ? 22 : projectedTemp >= 30 ? 10 : 0) + (rainShift >= 30 ? 13 : 0);
+    pressure = Math.min(100,Math.round(pressure));
+    const level = pressure >= 65 ? t('HIGH') : pressure >= 30 ? t('MODERATE') : t('LOW');
+    const title = pressure >= 65 ? t('Resilience becomes the priority') : pressure >= 30 ? t('Review water and timing') : t('Current baseline');
+    const copy = pressure >= 65 ? t('This scenario increases crop and water stress. Compare heat-tolerant rotations, irrigation limits, soil cover, and market risk before acting.') : rainShift >= 25 ? t('A wetter scenario raises drainage, disease, and field-access concerns even when water supply improves.') : t('The scenario remains close to baseline. Use local soil evidence and planting windows to refine the plan.');
+    text('#sim-risk-score',level); text('#sim-result-title',title); text('#sim-result-copy',copy);
+    const ring = $('#sim-risk-ring'); if (ring) { ring.style.setProperty('--sim-pressure',pressure); ring.dataset.level = pressure >= 65 ? 'high' : pressure >= 30 ? 'medium' : 'low'; }
+    const priorities = pressure >= 65 ? [t('Heat tolerance'),t('Efficient irrigation'),t('Soil cover')] : rainShift >= 25 ? [t('Drainage'),t('Disease watch'),t('Field access')] : [t('Planting window'),t('Soil evidence'),t('Market check')];
+    $('#sim-priorities').innerHTML = priorities.map(item => '<span>'+escapeHTML(item)+'</span>').join('');
+  };
+  temperature.addEventListener('input',render); rainfall.addEventListener('input',render);
+  $$('[data-sim-preset]').forEach(button => button.addEventListener('click',() => { const preset=button.dataset.simPreset; temperature.value=preset==='hotdry'?4:preset==='wet'?1:0; rainfall.value=preset==='hotdry'?-40:preset==='wet'?40:0; render(); }));
+  window.addEventListener('fieldshift:updated',render); window.addEventListener('fieldshift:language',render); render();
 }
 
 function navigate() {
@@ -709,6 +760,56 @@ function renderSimpleFlow() {
   const form = $('#simple-farm-form');
   if (form) Object.entries(state.simpleFarm).forEach(([key, value]) => { if (form.elements[key]) form.elements[key].value = value; });
   $$('input[name="crops"]', $('#simple-crops-form')).forEach(input => { input.checked = (state.simpleFarm.crops || []).includes(input.value); });
+  const autoNote = $('#simple-auto-note');
+  if (autoNote && hasLocation()) {
+    const profile = simpleLandProfile(), names = profile.recommendedCrops.map(id => simpleCropEvidence[id]?.name).filter(Boolean).map(t);
+    autoNote.innerHTML = '<span>✦</span><div><b>' + escapeHTML(t('Automatic land-aware starting point')) + '</b><p>' + escapeHTML(t('Based on the selected location and available weather, AgriPulse preselected') + ' ' + names.join(', ') + '. ' + t('These are planning assumptions; change any choice if you know your field better.')) + '</p></div>';
+  }
+}
+
+function simpleLandProfile() {
+  const forecast = state.weather?.daily?.slice(0, 7) || [];
+  const rainTotal = forecast.reduce((sum, day) => sum + (number(day.rain) ? day.rain : 0), 0);
+  const currentTemp = state.weather?.current?.temperature;
+  const aridCountries = ['Saudi Arabia','United Arab Emirates','Qatar','Kuwait','Bahrain','Oman','Egypt','Jordan','Morocco','Algeria','Tunisia'];
+  const aridRegion = aridCountries.includes(state.location.country) || (Math.abs(state.location.lat) >= 18 && Math.abs(state.location.lat) <= 35 && rainTotal < 12);
+  const hot = number(currentTemp) ? currentTemp >= 30 : aridRegion;
+  const cold = number(currentTemp) ? currentTemp <= 17 : Math.abs(state.location.lat) > 45;
+  const wet = forecast.length ? rainTotal >= 25 : false;
+  const dry = forecast.length ? rainTotal < 8 : aridRegion;
+  const texture = aridRegion ? 'light' : wet ? 'heavy' : 'medium';
+  const pH = aridRegion ? '7.5' : wet ? '6.5' : '7.0';
+  const waterSource = dry ? 'irrigated' : 'rainfed';
+  const drainage = wet ? 'well' : aridRegion ? 'excessive' : 'well';
+  const objective = dry || hot ? 'water' : wet ? 'soil' : 'risk';
+  const scores = Object.keys(simpleCropEvidence).map(id => {
+    const profile = simpleCropEvidence[id]; let score = 0;
+    score += simpleFactorStatus(Number(pH), profile.ph) === 'SUITABLE' ? 3 : simpleFactorStatus(Number(pH), profile.ph) === 'MARGINAL' ? 1 : -3;
+    score += simpleFactorStatus(texture, profile.texture, 'category') === 'SUITABLE' ? 2 : simpleFactorStatus(texture, profile.texture, 'category') === 'MARGINAL' ? 1 : -2;
+    if (hot) score += ({ cotton:4,sunflower:3,chickpea:2,barley:1,alfalfa:1,potato:-3,rice:-1 }[id] || 0);
+    if (cold) score += ({ wheat:3,barley:3,potato:2,cotton:-3,rice:-2 }[id] || 0);
+    if (dry) score += ({ barley:3,chickpea:3,sunflower:2,cotton:1,rice:-5,tomato:-1 }[id] || 0);
+    if (wet) score += ({ rice:5,maize:2,barley:-1,chickpea:-1 }[id] || 0);
+    if (waterSource === 'irrigated') score += ({ tomato:2,alfalfa:2,maize:1 }[id] || 0);
+    return [id, score];
+  }).sort((a,b) => b[1] - a[1]);
+  return { rainTotal, currentTemp, aridRegion, hot, cold, wet, dry, texture, pH, waterSource, drainage, objective, recommendedCrops: scores.slice(0,3).map(([id]) => id) };
+}
+function ensureSimpleAssumptions() {
+  if (!hasLocation()) return;
+  const profile = simpleLandProfile();
+  const automatic = { ...(state.simpleFarm._autoAssumptions || {}) };
+  for (const key of ['waterSource','soilTexture','drainage','soilPH','objective']) {
+    const missing = state.simpleFarm[key] === '' || state.simpleFarm[key] === 'unknown' || state.simpleFarm[key] == null;
+    if (missing || automatic[key]) { state.simpleFarm[key] = profile[key]; automatic[key] = true; }
+  }
+  if (!(state.simpleFarm.crops || []).length || state.simpleFarm._autoCrops) {
+    state.simpleFarm.crops = profile.recommendedCrops;
+    state.simpleFarm.crop = profile.recommendedCrops[0];
+    state.simpleFarm._autoCrops = true;
+  }
+  state.simpleFarm._autoAssumptions = automatic;
+  write('fieldshift.simpleFarm', state.simpleFarm);
 }
 
 const simpleToolbarCopy = {
@@ -891,7 +992,7 @@ function renderSimpleResults() {
   const weatherGlyph = weatherCode === 0 ? '☀' : weatherCode >= 51 ? '☂' : '☁';
   const forecastItems = weather?.daily?.slice(0, 4).map((day, index) => '<div><span>' + escapeHTML(index === 0 ? t('Today') : dateShort(day.date)) + '</span><b>' + escapeHTML(temp(day.high)) + '</b><small>' + escapeHTML(rain(day.rain)) + '</small></div>').join('') || '<p class="empty">' + escapeHTML(t('Forecast unavailable.')) + '</p>';
   const decisionTips = [
-    !state.simpleFarm.soilPH ? t('Measure soil pH to strengthen the crop comparison.') : t('Keep your soil sample date and method with this report.'),
+    state.simpleFarm._autoAssumptions?.soilPH ? t('Confirm the automatic soil estimate with a local soil test.') : t('Keep your soil sample date and method with this report.'),
     weather && number(firstDay?.rain) < 2 ? t('Review irrigation access because little rain appears in the short forecast.') : t('Check rainfall again before planting or irrigation.'),
     benchmark ? t('Confirm selling price and input costs with a local buyer before acting.') : t('Choose a crop to unlock a planning margin.'),
   ];
@@ -905,9 +1006,10 @@ function renderSimpleResults() {
   const weekEt0 = weather?.daily?.slice(0, 7).reduce((sum, day) => sum + (number(day.et0) ? day.et0 : 0), 0);
   const waterGap = number(weekRain) && number(weekEt0) ? weekRain - weekEt0 : null;
   const soilKnown = [state.simpleFarm.soilPH, state.simpleFarm.soilTexture, state.simpleFarm.drainage].filter(value => value && value !== 'unknown').length;
+  const automaticSoil = state.simpleFarm._autoAssumptions && ['soilPH','soilTexture','drainage'].some(key => state.simpleFarm._autoAssumptions[key]);
   const reportUpdated = weather?.retrievedAt ? new Date(weather.retrievedAt).toLocaleString(localeForLanguage()) : t('Not available');
   reportHero.innerHTML = '<article class="simple-weather-report simple-weather-' + scene + '"><div class="simple-weather-shade"></div><div class="simple-weather-main"><span class="eyebrow">' + escapeHTML(t('LIVE FIELD WEATHER')) + '</span><h2>' + escapeHTML(state.location.name) + '</h2><p>' + escapeHTML(cropNames.length ? t('Selected crops') + ': ' + cropNames.map(t).join(', ') : t('No crop selected')) + '</p><div class="simple-weather-current"><span aria-hidden="true">' + weatherGlyph + '</span><strong>' + escapeHTML(weather ? temp(current?.temperature) : '—') + '</strong><div><b>' + escapeHTML(weather ? t(formatWeatherCode(weatherCode)) : t('Forecast unavailable.')) + '</b><small>' + escapeHTML(weather ? t('Wind') + ' ' + wind(current?.wind) + ' · ' + t('Humidity') + ' ' + (current?.humidity ?? '—') + '%' : t('Select or refresh your location to retry the live forecast')) + '</small></div></div></div><div class="simple-weather-forecast"><span class="eyebrow">' + escapeHTML(t('FOUR DAY OUTLOOK')) + '</span>' + forecastItems + '</div></article>' +
-    '<div class="simple-report-facts"><article><span>' + escapeHTML(t('Location')) + '</span><b>' + escapeHTML(state.location.name) + '</b><small>' + escapeHTML(state.location.country || t('Selected region')) + '</small></article><article><span>' + escapeHTML(t('Crops')) + '</span><b>' + escapeHTML(cropNames.map(t).join(', ') || t('Not selected')) + '</b><small>' + escapeHTML(t('Primary crop and alternatives')) + '</small></article><article><span>' + escapeHTML(t('Field details')) + '</span><b>' + escapeHTML(t(state.simpleFarm.waterSource === 'irrigated' ? 'Irrigation available' : state.simpleFarm.waterSource === 'rainfed' ? 'Rain-fed only' : 'Water source unknown')) + '</b><small>' + escapeHTML(t('Soil texture') + ': ' + t(state.simpleFarm.soilTexture || 'unknown')) + '</small></article><article><span>' + escapeHTML(t('Profit estimate')) + '</span><b>' + escapeHTML(benchmark ? simpleMoney(margin, fx.currency) : '—') + '</b><small>' + escapeHTML(t('Planning margin per hectare')) + '</small></article></div><section class="simple-report-readiness"><div><span class="eyebrow">' + escapeHTML(t('DECISION READINESS')) + '</span><b>' + readinessCount + ' / ' + readinessSignals.length + ' ' + escapeHTML(t('signals connected')) + '</b></div><div>' + readinessSignals.map(([label, connected]) => '<span class="' + (connected ? 'connected' : '') + '"><i></i>' + escapeHTML(label) + '</span>').join('') + '</div></section><section class="simple-report-depth"><article><span class="eyebrow">' + escapeHTML(t('WATER BALANCE')) + '</span><h3>' + escapeHTML(number(waterGap) ? (waterGap >= 0 ? t('Rain exceeds reference demand') : t('Reference demand exceeds rain')) : t('Water balance unavailable')) + '</h3><dl><div><dt>' + escapeHTML(t('7-day rain')) + '</dt><dd>' + escapeHTML(number(weekRain) ? rain(weekRain) : '—') + '</dd></div><div><dt>' + escapeHTML(t('7-day reference ET₀')) + '</dt><dd>' + escapeHTML(number(weekEt0) ? rain(weekEt0) : '—') + '</dd></div><div><dt>' + escapeHTML(t('Difference')) + '</dt><dd>' + escapeHTML(number(waterGap) ? rain(Math.abs(waterGap)) : '—') + '</dd></div></dl></article><article><span class="eyebrow">' + escapeHTML(t('SOIL EVIDENCE')) + '</span><h3>' + soilKnown + ' / 3 ' + escapeHTML(t('details provided')) + '</h3><dl><div><dt>' + escapeHTML(t('Soil pH')) + '</dt><dd>' + escapeHTML(state.simpleFarm.soilPH || t('Unknown')) + '</dd></div><div><dt>' + escapeHTML(t('Texture')) + '</dt><dd>' + escapeHTML(t(state.simpleFarm.soilTexture || 'unknown')) + '</dd></div><div><dt>' + escapeHTML(t('Drainage')) + '</dt><dd>' + escapeHTML(t(state.simpleFarm.drainage || 'unknown')) + '</dd></div></dl></article><article><span class="eyebrow">' + escapeHTML(t('REPORT TRACE')) + '</span><h3>' + escapeHTML(readinessCount + ' / ' + readinessSignals.length + ' ' + t('signals connected')) + '</h3><dl><div><dt>' + escapeHTML(t('Weather updated')) + '</dt><dd>' + escapeHTML(reportUpdated) + '</dd></div><div><dt>' + escapeHTML(t('Exchange rate')) + '</dt><dd>' + escapeHTML(fx.live ? t('Live') : t('Reference')) + '</dd></div><div><dt>' + escapeHTML(t('Coordinates')) + '</dt><dd>' + escapeHTML(state.location.lat.toFixed(3) + ', ' + state.location.lon.toFixed(3)) + '</dd></div></dl></article></section><article class="simple-decision-brief"><div><span class="eyebrow">' + escapeHTML(t('NEXT BEST ACTIONS')) + '</span><h3>' + escapeHTML(t('Your decision brief')) + '</h3><p>' + escapeHTML(t('Use these as checks, not automatic instructions. Local knowledge remains essential.')) + '</p></div><ol>' + decisionTips.map(tip => '<li>' + escapeHTML(tip) + '</li>').join('') + '</ol></article>';
+    '<div class="simple-report-facts"><article><span>' + escapeHTML(t('Location')) + '</span><b>' + escapeHTML(state.location.name) + '</b><small>' + escapeHTML(state.location.country || t('Selected region')) + '</small></article><article><span>' + escapeHTML(t('Crops')) + '</span><b>' + escapeHTML(cropNames.map(t).join(', ') || t('Not selected')) + '</b><small>' + escapeHTML(state.simpleFarm._autoCrops ? t('Automatically selected starting profiles') : t('Primary crop and alternatives')) + '</small></article><article><span>' + escapeHTML(t('Field details')) + '</span><b>' + escapeHTML(t(state.simpleFarm.waterSource === 'irrigated' ? 'Irrigation available' : 'Rain-fed only')) + '</b><small>' + escapeHTML(t('Soil texture') + ': ' + t(state.simpleFarm.soilTexture) + (automaticSoil ? ' · ' + t('automatic estimate') : '')) + '</small></article><article><span>' + escapeHTML(t('Profit estimate')) + '</span><b>' + escapeHTML(benchmark ? simpleMoney(margin, fx.currency) : '—') + '</b><small>' + escapeHTML(t('Planning margin per hectare')) + '</small></article></div><section class="simple-report-readiness"><div><span class="eyebrow">' + escapeHTML(t('DECISION READINESS')) + '</span><b>' + readinessCount + ' / ' + readinessSignals.length + ' ' + escapeHTML(t('signals connected')) + '</b></div><div>' + readinessSignals.map(([label, connected]) => '<span class="' + (connected ? 'connected' : '') + '"><i></i>' + escapeHTML(label) + '</span>').join('') + '</div></section><section class="simple-report-depth"><article><span class="eyebrow">' + escapeHTML(t('WATER BALANCE')) + '</span><h3>' + escapeHTML(number(waterGap) ? (waterGap >= 0 ? t('Rain exceeds reference demand') : t('Reference demand exceeds rain')) : t('Water balance unavailable')) + '</h3><dl><div><dt>' + escapeHTML(t('7-day rain')) + '</dt><dd>' + escapeHTML(number(weekRain) ? rain(weekRain) : '—') + '</dd></div><div><dt>' + escapeHTML(t('7-day reference ET₀')) + '</dt><dd>' + escapeHTML(number(weekEt0) ? rain(weekEt0) : '—') + '</dd></div><div><dt>' + escapeHTML(t('Difference')) + '</dt><dd>' + escapeHTML(number(waterGap) ? rain(Math.abs(waterGap)) : '—') + '</dd></div></dl></article><article><span class="eyebrow">' + escapeHTML(t('SOIL CONTEXT')) + '</span><h3>' + escapeHTML(automaticSoil ? t('Automatic land-based planning estimate') : soilKnown + ' / 3 ' + t('details provided')) + '</h3><dl><div><dt>' + escapeHTML(t('Soil pH')) + '</dt><dd>' + escapeHTML(state.simpleFarm.soilPH) + '</dd></div><div><dt>' + escapeHTML(t('Texture')) + '</dt><dd>' + escapeHTML(t(state.simpleFarm.soilTexture)) + '</dd></div><div><dt>' + escapeHTML(t('Drainage')) + '</dt><dd>' + escapeHTML(t(state.simpleFarm.drainage)) + '</dd></div></dl></article><article><span class="eyebrow">' + escapeHTML(t('REPORT TRACE')) + '</span><h3>' + escapeHTML(readinessCount + ' / ' + readinessSignals.length + ' ' + t('signals connected')) + '</h3><dl><div><dt>' + escapeHTML(t('Weather updated')) + '</dt><dd>' + escapeHTML(reportUpdated) + '</dd></div><div><dt>' + escapeHTML(t('Exchange rate')) + '</dt><dd>' + escapeHTML(fx.live ? t('Live') : t('Reference')) + '</dd></div><div><dt>' + escapeHTML(t('Coordinates')) + '</dt><dd>' + escapeHTML(state.location.lat.toFixed(3) + ', ' + state.location.lon.toFixed(3)) + '</dd></div></dl></article></section><article class="simple-decision-brief"><div><span class="eyebrow">' + escapeHTML(t('NEXT BEST ACTIONS')) + '</span><h3>' + escapeHTML(t('Your decision brief')) + '</h3><p>' + escapeHTML(t('Use these as checks, not automatic instructions. Local knowledge remains essential.')) + '</p></div><ol>' + decisionTips.map(tip => '<li>' + escapeHTML(tip) + '</li>').join('') + '</ol></article>';
   summary.textContent = weather ? 'Your automatic report is ready for ' + state.location.name + '. Currency: ' + fx.currency + '.' : 'Your location is saved. Weather retrieval is unavailable right now, so missing information is shown clearly.';
   host.innerHTML = [
     simpleCard(assessments.length ? 'Crop conditions' : 'Crop profiles', 'screening', cropBody, assessments.length ? t('Profile screening only; confirm with local evidence.') : t('Choose a crop for factor-by-factor conditions.')),
@@ -994,7 +1096,29 @@ async function exportSimpleReport(event) {
   finally { button.disabled = false; button.textContent = t('Generate and download'); }
 }
 
+function generateLandTip(animate = false) {
+  const host = $('#simple-agri-tip'); if (!host) return;
+  if (!hasLocation()) {
+    host.innerHTML = '<span class="eyebrow">' + escapeHTML(t('LAND-AWARE TIP')) + '</span><h3>' + escapeHTML(t('Choose your land first')) + '</h3><p>' + escapeHTML(t('Select a location so Agri Toggle can combine its weather, water, and crop context.')) + '</p>';
+    return;
+  }
+  ensureSimpleAssumptions(); renderSimpleFlow();
+  const profile = simpleLandProfile(), cropNames = profile.recommendedCrops.map(id => simpleCropEvidence[id]?.name).filter(Boolean).map(t);
+  const temperature = number(profile.currentTemp) ? temp(profile.currentTemp) : t('not available');
+  const climateSignal = profile.hot ? t('Hot conditions increase water demand and heat stress.') : profile.cold ? t('Cool conditions favor crops that tolerate a shorter, cooler season.') : profile.wet ? t('Wet conditions increase drainage and disease-management importance.') : t('Conditions are moderate, so soil evidence and crop timing become the main checks.');
+  const waterSignal = profile.dry ? t('The short forecast is dry, so confirm irrigation capacity before selecting a water-demanding crop.') : profile.wet ? t('Rainfall is relatively high; protect drainage and avoid unnecessary irrigation.') : t('Keep watching forecast rain and reference ET₀ before irrigating.');
+  const action = profile.hot && profile.dry ? t('Prioritize heat-tolerant crops, morning fieldwork, mulch, and efficient irrigation checks.') : profile.wet ? t('Check drainage, leaf disease risk, and field access before planting.') : profile.cold ? t('Confirm the local planting window and avoid crops that require sustained heat.') : t('Confirm soil pH and local planting dates before making the final crop choice.');
+  if (animate) host.classList.add('is-generating');
+  setTimeout(() => {
+    host.dataset.topic = 'generated';
+    host.innerHTML = '<span class="eyebrow">' + escapeHTML(t('GENERATED FOR YOUR LAND')) + '</span><h3>' + escapeHTML(state.location.name) + '</h3><div class="generated-tip-signal"><span>☀ <b>' + escapeHTML(temperature) + '</b></span><span>☂ <b>' + escapeHTML(profile.rainTotal.toFixed(1) + ' mm / 7d') + '</b></span><span>◉ <b>' + escapeHTML(t(profile.texture)) + '</b></span></div><p><b>' + escapeHTML(t('Climate signal')) + ':</b> ' + escapeHTML(climateSignal) + '</p><p><b>' + escapeHTML(t('Water signal')) + ':</b> ' + escapeHTML(waterSignal) + '</p><div class="generated-tip-crops"><small>' + escapeHTML(t('Best starting crop profiles')) + '</small><b>' + escapeHTML(cropNames.join(' · ')) + '</b></div><p><b>' + escapeHTML(t('Next check')) + ':</b> ' + escapeHTML(action) + '</p><small>' + escapeHTML(t('Planning guidance only. Confirm varieties, planting dates, soil tests, water, pests, and markets locally.')) + '</small>';
+    host.classList.remove('is-generating');
+    $$('[data-agri-tip]').forEach(button => button.classList.remove('active'));
+  }, animate ? 420 : 0);
+}
+
 function showSimpleAgriTip(topic) {
+  if (topic === 'generated') return generateLandTip();
   const host = $('#simple-agri-tip');
   if (!host) return;
   const weather = state.weather;
@@ -1119,7 +1243,9 @@ function bindEvents() {
         if (!guide) return;
         guide.hidden = !guide.hidden;
         $('.simple-agri-guide-toggle')?.setAttribute('aria-expanded', String(!guide.hidden));
+        if (!guide.hidden && hasLocation()) generateLandTip();
       },
+      "generate-land-tip": () => generateLandTip(true),
       "reset-workspace": () => resetEntireWorkspace(),
       "restart-experience": () => restartExperience(),
       "simple-feedback": () => $('#simple-feedback-dialog')?.showModal(),
@@ -1272,7 +1398,7 @@ function bindEvents() {
     event.preventDefault();
     const choices = $$('input[name="crops"]:checked', event.currentTarget).map(input => input.value);
     if (!choices.length) { toast('Choose at least one crop.'); return; }
-    state.simpleFarm = { ...state.simpleFarm, crops: choices, crop: choices[0] };
+    state.simpleFarm = { ...state.simpleFarm, crops: choices, crop: choices[0], _autoCrops: false };
     write('fieldshift.simpleFarm', state.simpleFarm);
     text('#simple-save-status', 'Saved just now');
     if ($('#current-crop option[value="' + choices[0] + '"]')) $('#current-crop').value = choices[0];
@@ -1790,6 +1916,7 @@ function selectLocation(point, move = true) {
   restoreFieldSettings();
   if (move) state.map.setLocation(point);
   write("fieldshift.location", state.location);
+  ensureSimpleAssumptions();
   renderLocation();
   renderSimpleFlow();
   loadWeather();
@@ -2013,6 +2140,8 @@ async function loadWeather(force=false) {
     });
     if (request !== state.requestId) return;
     state.weather = weather;
+    ensureSimpleAssumptions();
+    renderSimpleFlow();
     renderWeather();
     renderRotations();
   } catch (error) {
