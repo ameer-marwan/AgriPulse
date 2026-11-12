@@ -243,6 +243,18 @@ const simpleUpgradeWords = {
   zh:{'Farmer workspace':'农户工作区','Simple farmer · guided':'简易农户 · 引导式','Complex farmer · full controls':'复杂农户 · 完整控制','Live exchange rate connected':'实时汇率已连接','Live rate unavailable; clearly labeled reference rate is being used.':'实时汇率不可用；正在使用明确标注的参考汇率。','Connecting live currency…':'正在连接实时汇率…','Currency saved':'货币已保存','Guided workspace enabled.':'引导工作区已启用。','Full controls enabled.':'完整控制已启用。','DECISION READINESS':'决策准备度','signals connected':'个信号已连接','Live weather':'实时天气','Crop choice':'作物选择','Local soil input':'本地土壤数据','Live currency':'实时货币'}
 };
 Object.entries(simpleUpgradeWords).forEach(([language, words]) => Object.assign(translations[language], words));
+const pathwayControlWords = {
+  fr:{'Play guided tour':'Lire la visite guidée','Pause guided tour':'Mettre la visite en pause','Show the full pathway':'Afficher le parcours complet','Drag to explore the planet':'Faites glisser pour explorer la planète'},
+  ar:{'Play guided tour':'تشغيل الجولة الموجهة','Pause guided tour':'إيقاف الجولة مؤقتاً','Show the full pathway':'عرض المسار الكامل','Drag to explore the planet':'اسحب لاستكشاف الكوكب'},
+  es:{'Play guided tour':'Iniciar recorrido guiado','Pause guided tour':'Pausar recorrido','Show the full pathway':'Mostrar la ruta completa','Drag to explore the planet':'Arrastra para explorar el planeta'},
+  de:{'Play guided tour':'Geführte Tour starten','Pause guided tour':'Tour pausieren','Show the full pathway':'Gesamten Pfad anzeigen','Drag to explore the planet':'Ziehen, um den Planeten zu erkunden'},
+  pt:{'Play guided tour':'Iniciar visita guiada','Pause guided tour':'Pausar visita','Show the full pathway':'Mostrar o caminho completo','Drag to explore the planet':'Arraste para explorar o planeta'},
+  tr:{'Play guided tour':'Rehberli turu başlat','Pause guided tour':'Turu duraklat','Show the full pathway':'Tüm yolu göster','Drag to explore the planet':'Gezegeni keşfetmek için sürükleyin'},
+  ur:{'Play guided tour':'رہنمائی دورہ چلائیں','Pause guided tour':'دورہ روکیں','Show the full pathway':'مکمل راستہ دکھائیں','Drag to explore the planet':'سیارہ دیکھنے کے لیے گھسیٹیں'},
+  hi:{'Play guided tour':'निर्देशित यात्रा चलाएँ','Pause guided tour':'यात्रा रोकें','Show the full pathway':'पूरा मार्ग दिखाएँ','Drag to explore the planet':'ग्रह देखने के लिए खींचें'},
+  zh:{'Play guided tour':'播放引导流程','Pause guided tour':'暂停引导流程','Show the full pathway':'显示完整路径','Drag to explore the planet':'拖动以探索地球'}
+};
+Object.entries(pathwayControlWords).forEach(([language, words]) => Object.assign(translations[language], words));
 const originalText = new WeakMap();
 const originalAttribute = new WeakMap();
 let active = 'en';

@@ -567,19 +567,55 @@ function initAgriSystem() {
   const section = $('.agri-system');
   if (!section || section.dataset.ready) return;
   section.dataset.ready = 'true';
-  section.querySelectorAll('[data-system-node]').forEach(button => button.addEventListener('click', () => {
+  const nodes = [...section.querySelectorAll('[data-system-node]')];
+  const detailPanel = section.querySelector('.agri-system-detail');
+  const progress = document.createElement('span');
+  progress.className = 'agri-system-progress';
+  progress.innerHTML = '<i></i>';
+  section.append(progress);
+  let tourTimer = null, tourIndex = 0;
+  const selectNode = (button) => {
     section.classList.remove('show-all');
-    section.querySelectorAll('[data-system-node]').forEach(node => node.classList.toggle('active', node === button));
-    renderAgriSystemDetail(button.dataset.systemNode);
-  }));
+    nodes.forEach(node => node.classList.toggle('active', node === button));
+    detailPanel?.classList.add('is-changing');
+    setTimeout(() => { renderAgriSystemDetail(button.dataset.systemNode); detailPanel?.classList.remove('is-changing'); }, 130);
+  };
+  const stopTour = () => {
+    clearInterval(tourTimer); tourTimer = null;
+    section.classList.remove('touring');
+    const control = section.querySelector('[data-system-tour]');
+    control?.setAttribute('aria-pressed', 'false');
+    if (control) control.innerHTML = '<span>▶</span> ' + t('Play guided tour');
+  };
+  const startTour = () => {
+    stopTour(); section.classList.add('touring');
+    const control = section.querySelector('[data-system-tour]');
+    control?.setAttribute('aria-pressed', 'true');
+    if (control) control.innerHTML = '<span>Ⅱ</span> ' + t('Pause guided tour');
+    tourIndex = Math.max(0, nodes.findIndex(node => node.classList.contains('active')));
+    tourTimer = setInterval(() => { tourIndex = (tourIndex + 1) % nodes.length; selectNode(nodes[tourIndex]); }, 3200);
+  };
+  nodes.forEach(button => button.addEventListener('click', () => { stopTour(); selectNode(button); }));
+  section.querySelector('[data-system-tour]')?.addEventListener('click', () => tourTimer ? stopTour() : startTour());
   section.querySelector('[data-system-show-all]')?.addEventListener('click', () => {
+    stopTour();
     section.classList.toggle('show-all');
-    section.querySelectorAll('[data-system-node]').forEach(node => node.classList.toggle('active', section.classList.contains('show-all')));
+    nodes.forEach(node => node.classList.toggle('active', section.classList.contains('show-all')));
     renderAgriSystemDetail(section.classList.contains('show-all') ? 'all' : 'climate');
   });
+  const earth = section.querySelector('.agri-earth');
+  let earthOffset = 50, dragging = false, startX = 0, startOffset = 50;
+  const setEarthPosition = value => { earthOffset = ((value % 200) + 200) % 200; earth.style.backgroundPosition = earthOffset + '% 50%'; };
+  earth?.addEventListener('pointerdown', event => { dragging = true; startX = event.clientX; startOffset = earthOffset; earth.setPointerCapture(event.pointerId); earth.classList.add('dragging'); });
+  earth?.addEventListener('pointermove', event => { if (dragging) setEarthPosition(startOffset + (startX - event.clientX) * .42); });
+  earth?.addEventListener('pointerup', event => { dragging = false; earth.releasePointerCapture(event.pointerId); earth.classList.remove('dragging'); });
+  earth?.addEventListener('pointercancel', () => { dragging = false; earth.classList.remove('dragging'); });
+  earth?.addEventListener('keydown', event => { if (!['ArrowLeft','ArrowRight'].includes(event.key)) return; event.preventDefault(); earth.classList.add('dragging'); setEarthPosition(earthOffset + (event.key === 'ArrowLeft' ? -8 : 8)); clearTimeout(earth._spinTimer); earth._spinTimer = setTimeout(() => earth.classList.remove('dragging'), 900); });
   window.addEventListener('fieldshift:language', () => {
     const selected = section.classList.contains('show-all') ? 'all' : section.querySelector('[data-system-node].active')?.dataset.systemNode || 'climate';
     renderAgriSystemDetail(selected);
+    const control = section.querySelector('[data-system-tour]');
+    if (control) control.innerHTML = '<span>' + (tourTimer ? 'Ⅱ' : '▶') + '</span> ' + t(tourTimer ? 'Pause guided tour' : 'Play guided tour');
   });
 }
 

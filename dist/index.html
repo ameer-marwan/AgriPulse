@@ -296,17 +296,22 @@
               <h2 id="agri-system-title">See how AgriPulse builds a decision.</h2>
               <p>Choose any signal or step to understand what it contributes.</p>
             </div>
-            <button class="agri-system-all" type="button" data-system-show-all>Show the full pathway</button>
+            <div class="agri-system-controls">
+              <button class="agri-system-tour" type="button" data-system-tour aria-pressed="false"><span>▶</span> Play guided tour</button>
+              <button class="agri-system-all" type="button" data-system-show-all>Show the full pathway</button>
+            </div>
           </header>
           <div class="agri-system-canvas">
             <div class="agri-earth-stage" aria-label="Animated Earth observation globe">
-              <div class="agri-earth" aria-hidden="true">
+              <div class="agri-earth" role="button" tabindex="0" aria-label="Drag or use arrow keys to rotate the Earth">
                 <span class="agri-earth-cloud cloud-one"></span>
                 <span class="agri-earth-cloud cloud-two"></span>
-                <i></i><b></b><em></em>
+                <span class="agri-earth-shine" aria-hidden="true"></span>
+                <span class="agri-earth-focus" aria-hidden="true"></span>
               </div>
               <div class="agri-earth-rings" aria-hidden="true"><i></i><i></i><i></i></div>
               <span class="agri-earth-label">EARTH OBSERVATION</span>
+              <small class="agri-earth-hint">Drag to explore the planet</small>
             </div>
             <div class="agri-system-flow" role="list" aria-label="AgriPulse decision pathway">
               <div class="agri-system-column">
