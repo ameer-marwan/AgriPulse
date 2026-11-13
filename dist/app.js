@@ -380,6 +380,15 @@ function init() {
   ].map(([name,copy,status,href],index)=>'<article><span>'+String(index+1).padStart(2,'0')+'</span><div><b>'+escapeHTML(name)+'</b><p>'+escapeHTML(copy)+'</p><small class="'+(status==='CONNECTED'||status==='MAP LAYER'?'connected':'')+'">'+escapeHTML(status)+'</small></div><a href="'+href+'" target="_blank" rel="noopener noreferrer" aria-label="Open '+escapeHTML(name)+'">↗</a></article>').join('')+'</div><p class="fine-print">NASA does not endorse non-U.S. Government entities. External resources retain their own data-use conditions.</p>';
   exploreView.querySelector('.learn-note')?.before(challengeResources);
   $("main").insertBefore(exploreView, $(".app-footer"));
+  const complexResources=document.createElement('section');
+  complexResources.className='complex-resource-strip panel';
+  complexResources.innerHTML='<header><div><span class="eyebrow">VERIFIED EVIDENCE</span><h2>Resources behind the workspace.</h2><p>See what is connected now and what is provided for validation. Unconnected resources never create values in your report.</p></div><a href="#/explore" data-route="explore">View full registry <span aria-hidden="true">→</span></a></header><div class="complex-resource-grid">'+[
+    ['NASA POWER','Live weather context','CONNECTED','https://power.larc.nasa.gov/'],
+    ['NASA GIBS','VIIRS & MODIS imagery','MAP LAYERS','https://worldview.earthdata.nasa.gov/'],
+    ['NASA SRTM','Elevation context','MAP LAYER','https://www.earthdata.nasa.gov/data/instruments/srtm'],
+    ['SMAP + GPM','Soil moisture & rainfall','AVAILABLE','https://gpm.nasa.gov/data']
+  ].map(([name,copy,status,href])=>'<a href="'+href+'" target="_blank" rel="noopener noreferrer"><span class="complex-resource-status '+(status==='CONNECTED'||status==='MAP LAYER'?'connected':'')+'">'+status+'</span><b>'+name+'</b><small>'+copy+'</small><i aria-hidden="true">↗</i></a>').join('')+'</div>';
+  $('#view-overview .field-data-controls')?.after(complexResources);
   const simpleView = document.createElement("section");
   simpleView.className = "view simple-farmer-view";
   simpleView.id = "view-simple";
@@ -403,6 +412,9 @@ function init() {
     <dialog class="simple-info-dialog" id="simple-about-dialog"><header><div><span class="eyebrow">ABOUT AGRIPULSE</span><h2>Built by students. Grounded in purpose.</h2></div><button class="simple-tool-icon" type="button" data-action="close-simple-dialog" aria-label="Close">×</button></header><div class="simple-about-profile"><img src="assets/dunia-alajial-logo.jpg" alt="Dunia Alajial International School logo"><div><b>Dunia Alajial International School</b><p>AgriPulse connects the NASA and partner resources supplied for the challenge with farmer-entered local knowledge.</p></div></div><div class="button-row"><a class="button secondary" href="https://power.larc.nasa.gov/" target="_blank" rel="noopener">NASA POWER ↗</a><a class="button secondary" href="https://gaez.fao.org/" target="_blank" rel="noopener">FAO GAEZ ↗</a></div></dialog>
     <button class="simple-agri-guide-toggle" type="button" data-action="agri-guide" aria-expanded="false"><span>✦</span><b>Agri Toggle</b><small>Field tips</small></button><aside class="simple-agri-guide" id="simple-agri-guide" hidden><header><div><span class="eyebrow">AGRIPULSE FIELD GUIDE</span><h2>What would you like to understand?</h2></div><button type="button" data-action="agri-guide" aria-label="Close">×</button></header><p>No typing needed. Tap a topic or generate a land-aware tip using your selected field and current weather.</p><button class="simple-generate-tip" type="button" data-action="generate-land-tip"><span>✦</span><b>Generate a tip for this land</b><small>Weather · water · crops · next action</small></button><div class="simple-agri-tip-topics"><button type="button" data-agri-tip="weather"><span aria-hidden="true">☀</span> Weather</button><button type="button" data-agri-tip="soil"><span aria-hidden="true">◉</span> Soil</button><button type="button" data-agri-tip="water"><span aria-hidden="true">◒</span> Water</button><button type="button" data-agri-tip="crop"><span aria-hidden="true">❋</span> Crops</button><button type="button" data-agri-tip="profit"><span aria-hidden="true">↗</span> Profit</button></div><article id="simple-agri-tip"><span class="eyebrow">QUICK FIELD TIP</span><h3>Start with your land</h3><p>Choose a location and crop, then tap a topic to see a short, practical explanation.</p></article></aside>`;
   $("main").insertBefore(simpleView, $(".app-footer"));
+  const sharedAgriToggle=simpleView.querySelector('.simple-agri-guide-toggle');
+  const sharedAgriGuide=simpleView.querySelector('#simple-agri-guide');
+  if(sharedAgriToggle&&sharedAgriGuide) document.body.append(sharedAgriToggle,sharedAgriGuide);
   const simpleMapHost = document.createElement('div');
   simpleMapHost.id = 'simple-map-host';
   simpleMapHost.className = 'simple-map-host';
