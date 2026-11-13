@@ -37,6 +37,9 @@ export function initScenes({ getState }) {
     const current = getState().weather?.current;
     const scene = weatherScene(current);
     weather.dataset.weatherScene = scene;
+    weather.classList.remove('weather-clear','weather-partly','weather-cloudy','weather-rain','weather-storm','weather-fog','weather-snow','weather-night','weather-unknown');
+    weather.classList.add('weather-' + scene);
+    atmosphere.dataset.weatherScene = scene;
     // Scene descriptions come from the existing conditions text, so decoration
     // stays silent for assistive technology and never substitutes for evidence.
     const glyph = document.querySelector('.weather-glyph');
