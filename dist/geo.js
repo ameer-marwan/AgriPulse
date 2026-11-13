@@ -135,7 +135,7 @@ export function createFieldMap(container, { onSelect = () => {}, onBoundary = ()
       style: {
         version: 8,
         sources: {
-          'satellite-raster': { type: 'raster', tiles: ['https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_SNPP_CorrectedReflectance_TrueColor/default/GoogleMapsCompatible_Level9/{z}/{x}/{y}.jpeg'], tileSize: 256, maxzoom: 9, attribution: 'NASA GIBS / VIIRS corrected reflectance' },
+          'satellite-raster': { type: 'raster', tiles: ['https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/{z}/{x}/{y}.jpeg'], tileSize: 256, maxzoom: 8, attribution: 'NASA GIBS / Blue Marble shaded relief' },
           'terrain-raster': { type: 'raster', tiles: ['https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/SRTM_Color_Index/default/GoogleMapsCompatible_Level12/{z}/{x}/{y}.png'], tileSize: 256, maxzoom: 12, attribution: 'NASA SRTM elevation' },
           'thermal-raster': { type: 'raster', tiles: ['https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_NDVI_8Day/default/GoogleMapsCompatible_Level9/{z}/{x}/{y}.png'], tileSize: 256, maxzoom: 9, attribution: 'Vegetation index: NASA GIBS / MODIS Terra NDVI' }
         },
