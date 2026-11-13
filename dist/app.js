@@ -351,7 +351,7 @@ function init() {
   exploreView.hidden = true;
   exploreView.innerHTML = `
     <header class="explore-world-hero">
-      <div><span class="eyebrow">GLOBAL AGRICULTURE</span><h1>Explore<span>.</span></h1><p>Explore how farmers across different climates combine knowledge, technology and local resources to feed their communities.</p></div>
+      <div><span class="eyebrow">GLOBAL AGRICULTURE</span><h1>Explore<span>.</span></h1><p>Explore how farmers across different climates combine knowledge, technology and local resources to feed their communities.</p><button class="button explore-journey-button" type="button" data-action="open-journey">✦ Follow our Space-to-Soil journey</button></div>
       <div class="explore-world-stats" aria-label="Explore page summary"><span><b>5</b> countries</span><span><b>4</b> continents</span><span><b>1</b> shared future</span></div>
     </header>
     <div class="explore-feature-grid">
@@ -367,7 +367,7 @@ function init() {
     <aside class="explore-world-note"><span>✦</span><p><b>No single model fits every farm.</b> The strongest ideas are adapted to local people, evidence, climate, soils and water.</p></aside>
     <div class="explore-world-section-heading explore-resources-heading"><div><span class="eyebrow">TRUSTED RESOURCES</span><h2>Learn more about agriculture.</h2></div><p>Continue exploring with Saudi agriculture, NASA Earth observation, and a global view of changing land.</p></div>
     <div class="learn-resources explore-resources"><article class="panel learn-card learn-ksa"><span class="learn-card-number">01</span><div class="icon-box lime"><svg><use href="#i-leaf"/></svg></div><span class="eyebrow">SAUDI ARABIA</span><h2>USDA Ag Data Commons</h2><p>Open agricultural datasets for soils, crops, climate, land management, water quality, and field research.</p><a class="button learn-resource-link" href="https://gaez.fao.org/" target="_blank" rel="noopener noreferrer">Open USDA Ag Data Commons <span aria-hidden="true">↗</span></a></article><article class="panel learn-card learn-nasa"><span class="learn-card-number">02</span><div class="icon-box blue"><svg><use href="#i-globe"/></svg></div><span class="eyebrow">EARTH OBSERVATION</span><h2>NASA POWER</h2><p>Explore NASA’s global agriculture and food-security program, connecting satellite Earth observations with practical decisions.</p><a class="button learn-resource-link" href="https://power.larc.nasa.gov/" target="_blank" rel="noopener noreferrer">Open NASA POWER <span aria-hidden="true">↗</span></a></article><article class="panel learn-card learn-earth"><span class="learn-card-number">03</span><div class="icon-box amber"><svg><use href="#i-map"/></svg></div><span class="eyebrow">EXPLORE THE PLANET</span><h2>NASA SRTM</h2><p>Use NASA elevation data to examine slope, runoff, erosion risk, and terrain-driven field context.</p><a class="button learn-resource-link" href="https://www.earthdata.nasa.gov/data/instruments/srtm" target="_blank" rel="noopener noreferrer">Open NASA SRTM <span aria-hidden="true">↗</span></a></article></div>
-    <aside class="learn-note"><span>✦</span><p><b>Keep learning beyond your field.</b> These websites open in a new tab, so your AgriPulse workspace stays exactly where you left it.</p></aside>`;
+    <aside class="learn-note"><span>✦</span><p><b>Keep learning beyond your field.</b> These websites open in a new tab, so your AgriPulse workspace stays exactly where you left it.</p></aside><dialog class="journey-dialog" id="journey-dialog"><header><div><span class="eyebrow">AGRIPULSE PRESENTATION</span><h2>From Space to Soil</h2></div><button class="simple-tool-icon" type="button" data-action="close-journey" aria-label="Close presentation">×</button></header><p>See the AgriPulse journey, from Earth observation to practical field decisions.</p><iframe title="AgriPulse Space to Soil presentation" src="https://github.com/ameer-marwan/AgriPulse/blob/main/media/AgriPulse_Space_to_Soil.pdf?raw=1"></iframe><a class="button secondary" href="https://github.com/ameer-marwan/AgriPulse/blob/main/media/AgriPulse_Space_to_Soil.pdf?raw=1" target="_blank" rel="noopener noreferrer">Open presentation in a new tab ↗</a></dialog>`;
   const challengeResources=document.createElement('section');
   challengeResources.className='challenge-resource-panel panel';
   challengeResources.innerHTML='<header><div><span class="eyebrow">NASA SPACE APPS · PROVIDED RESOURCES</span><h2>Evidence sources, with connection status.</h2><p>Only connected sources influence AgriPulse calculations. The others are official resources for validation and future integration—not simulated data.</p></div><span class="pill">NO SAMPLE VALUES</span></header><div class="challenge-resource-grid">'+[
@@ -1216,6 +1216,8 @@ function bindEvents() {
       explore: () => {
         location.hash = "/map";
       },
+      "open-journey": () => $("#journey-dialog")?.showModal(),
+      "close-journey": () => $("#journey-dialog")?.close(),
       theme: () => {
         const active = resolvedTheme();
         state.preferences.theme = active === "light" ? "dark" : "light";

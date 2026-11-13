@@ -1,3 +1,5 @@
+<p align="center"><img src="dist/assets/logo-new.png" alt="AgriPulse logo" width="130"></p>
+
 # 🌱 AgriPulse — your intelligent agricultural assistant
 
 > **From Earth observation to better field decisions.**
@@ -7,6 +9,8 @@ AgriPulse is an interactive agricultural decision workspace created for the **20
 ## 🚀 Try AgriPulse
 
 **[Open the public AgriPulse preview →](https://fieldshift-two.vercel.app/)**
+
+**[View the “From Space to Soil” presentation →](media/AgriPulse_Space_to_Soil.pdf)**
 
 ![AgriPulse field view](dist/assets/field-landscape.jpg)
 
