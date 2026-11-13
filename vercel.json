@@ -1,0 +1,8 @@
+{
+  "version": 2,
+  "buildCommand": "npm run package:final && cp release/FieldShift-Final.html release/index.html",
+  "outputDirectory": "release",
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "https://fieldshift-nasa.ameer-prince.chatgpt.site/api/:path*" }
+  ]
+}
