@@ -135,9 +135,9 @@ export function createFieldMap(container, { onSelect = () => {}, onBoundary = ()
       style: {
         version: 8,
         sources: {
-          'satellite-raster': { type: 'raster', tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'], tileSize: 256, maxzoom: 19, attribution: 'Imagery © Esri, Maxar, Earthstar Geographics, and the GIS User Community' },
-          'terrain-raster': { type: 'raster', tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize: 256, maxzoom: 19, attribution: '© OpenStreetMap contributors' },
-          'thermal-raster': { type: 'raster', tiles: ['https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_L3_Land_Surface_Temp_8Day_Day/default/GoogleMapsCompatible_Level7/{z}/{y}/{x}.png'], tileSize: 256, maxzoom: 7, attribution: 'Land surface temperature: NASA GIBS / MODIS Terra' }
+          'satellite-raster': { type: 'raster', tiles: ['https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_SNPP_CorrectedReflectance_TrueColor/default/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpeg'], tileSize: 256, maxzoom: 9, attribution: 'NASA GIBS / VIIRS corrected reflectance' },
+          'terrain-raster': { type: 'raster', tiles: ['https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/SRTM_Color_Index/default/GoogleMapsCompatible_Level12/{z}/{y}/{x}.png'], tileSize: 256, maxzoom: 12, attribution: 'NASA SRTM elevation' },
+          'thermal-raster': { type: 'raster', tiles: ['https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_NDVI_8Day/default/GoogleMapsCompatible_Level9/{z}/{y}/{x}.png'], tileSize: 256, maxzoom: 9, attribution: 'Vegetation index: NASA GIBS / MODIS Terra NDVI' }
         },
         layers: [
           { id: 'background', type: 'background', paint: { 'background-color': '#07120e' } },

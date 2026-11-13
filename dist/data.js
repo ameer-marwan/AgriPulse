@@ -121,58 +121,25 @@ export async function fetchNasa(point, { signal } = {}) {
 
 const fao = 'https://gaez.fao.org/';
 export const crops = [
-  { id: 'wheat', name: 'Wheat', family: 'Poaceae', type: 'grain', season: 'Cool season', waterDemand: 'Moderate', droughtTolerance: 'Moderate', phMin: 5.5, phMax: 7.5, notes: 'Winter and spring cultivars have different temperature and vernalization needs.' },
-  { id: 'maize', name: 'Maize', family: 'Poaceae', type: 'grain', season: 'Warm season', waterDemand: 'High', droughtTolerance: 'Low', phMin: 5.5, phMax: 7.5, notes: 'Water stress around flowering is particularly important. Irrigation access alone does not establish suitability.' },
-  { id: 'sorghum', name: 'Sorghum', family: 'Poaceae', type: 'grain', season: 'Warm season', waterDemand: 'Lower', droughtTolerance: 'Higher', phMin: 5.5, phMax: 8, notes: 'Often used under hot, dry conditions. Cultivar, establishment and local pests matter.' },
-  { id: 'barley', name: 'Barley', family: 'Poaceae', type: 'grain', season: 'Cool season', waterDemand: 'Lower', droughtTolerance: 'Moderate', phMin: 6, phMax: 8, notes: 'Cool-season option; salinity tolerance is cultivar- and growth-stage-dependent.' },
-  { id: 'soybean', name: 'Soybean', family: 'Fabaceae', type: 'legume', season: 'Warm season', waterDemand: 'Moderate', droughtTolerance: 'Moderate', phMin: 6, phMax: 7.5, notes: 'Biological nitrogen fixation depends on suitable rhizobia and management. Harvest removes substantial nutrients.' },
-  { id: 'chickpea', name: 'Chickpea', family: 'Fabaceae', type: 'legume', season: 'Cool season', waterDemand: 'Lower', droughtTolerance: 'Higher', phMin: 6, phMax: 8, notes: 'Avoid waterlogged ground. Planting season and disease pressure depend strongly on region.' },
-  { id: 'cowpea', name: 'Cowpea', family: 'Fabaceae', type: 'legume', season: 'Warm season', waterDemand: 'Lower', droughtTolerance: 'Higher', phMin: 5.5, phMax: 7.5, notes: 'Warm-season pulse or cover option. Verify local cultivar availability and market demand.' },
-  { id: 'sunflower', name: 'Sunflower', family: 'Asteraceae', type: 'oilseed', season: 'Warm season', waterDemand: 'Moderate', droughtTolerance: 'Higher', phMin: 6, phMax: 8, notes: 'Broadleaf diversification option. Disease history, rooting conditions and harvest facilities matter.' },
-  { id: 'rye', name: 'Cereal rye cover', family: 'Poaceae', type: 'cover', season: 'Cool season', waterDemand: 'Moderate', droughtTolerance: 'Moderate', phMin: 5, phMax: 7.5, notes: 'Can maintain cover between cash crops. Termination timing can affect water and nitrogen for the following crop.' },
-  { id: 'clover', name: 'Clover cover', family: 'Fabaceae', type: 'cover', season: 'Cool season', waterDemand: 'Moderate', droughtTolerance: 'Low', phMin: 6, phMax: 7.5, notes: 'Species selection changes adaptation. Nitrogen benefit depends on biomass, fixation and termination.' }
-].map(crop => ({ ...crop, reference: fao, evidence: 'General crop characteristics; local validation required' }));
+  ['wheat','Wheat','grain'], ['maize','Maize','grain'], ['sorghum','Sorghum','grain'],
+  ['barley','Barley','grain'], ['soybean','Soybean','legume'], ['chickpea','Chickpea','legume'],
+  ['cowpea','Cowpea','legume'], ['sunflower','Sunflower','oilseed'],
+  ['rye','Cereal rye cover','cover'], ['clover','Clover cover','cover']
+].map(([id,name,type]) => ({ id, name, type, family: 'Validate locally', season: 'Validate with FAO GAEZ',
+  waterDemand: 'Not loaded', droughtTolerance: 'Not loaded', phMin: null, phMax: null,
+  notes: 'AgriPulse does not assign crop suitability until an approved FAO GAEZ layer and local field evidence are available.',
+  reference: fao, evidence: 'FAO GAEZ validation resource; no suitability value has been inferred' }));
 
 export function recommendRotations({ priority = 'soil', currentCrop = 'wheat', irrigated = false, ph = null, waterBudget = null, weather = null } = {}) {
-  const current = crops.find(crop => crop.id === currentCrop || crop.name.toLowerCase() === String(currentCrop).toLowerCase());
-  const phValue = number(ph);
-  const budget = number(waterBudget);
-  const dry = !irrigated || (budget !== null && budget < 300);
   const concepts = [
-    { id: 'soil', name: 'Soil protection', favored: ['soybean', 'cowpea', 'chickpea'], reason: 'Integrates a legume and an intervening cover crop to diversify rooting and maintain soil cover.' },
-    { id: 'water', name: 'Water conservation', favored: ['sorghum', 'chickpea', 'cowpea', 'barley'], reason: 'Favors broadly drought-tolerant or lower-water-demand options, subject to planting season and local soil storage.' },
-    { id: 'risk', name: 'Crop diversification', favored: ['sunflower', 'cowpea', 'soybean', 'barley'], reason: 'Changes crop family and seasonal management exposure rather than assuming all crops have the same risk.' }
+    { id: 'soil', name: 'Soil protection' }, { id: 'water', name: 'Water conservation' }, { id: 'risk', name: 'Crop diversification' }
   ];
-  const limit = 'A scenario, not a planting prescription: local cultivar, planting window, market, pest history, soil profile and irrigation capacity need confirmation. Recent regional climate records cannot validate a multi-season rotation.';
-  return concepts.sort((a, b) => (a.id === priority ? -1 : b.id === priority ? 1 : 0)).map(concept => {
-    const eligible = crops.filter(crop => crop.type !== 'cover' && (!current || crop.family !== current.family) &&
-      (phValue === null || (phValue >= crop.phMin && phValue <= crop.phMax)));
-    const ordered = [...eligible].sort((a, b) => {
-      const rank = crop => {
-        let score = 20 - Math.max(0, concept.favored.indexOf(crop.id)) * 2;
-        if (!concept.favored.includes(crop.id)) score -= 12;
-        if (dry && crop.waterDemand === 'High') score -= 15;
-        if (dry && crop.droughtTolerance === 'Higher') score += 5;
-        return score;
-      };
-      return rank(b) - rank(a);
-    });
-    const first = ordered[0];
-    const second = crops.find(crop => crop.type !== 'cover' && crop.family !== first?.family && crop.id !== current?.id &&
-      (!dry || crop.waterDemand !== 'High') && (phValue === null || (phValue >= crop.phMin && phValue <= crop.phMax)));
-    const cover = crops.find(crop => crop.type === 'cover' && crop.family !== second?.family &&
-      (phValue === null || (phValue >= crop.phMin && phValue <= crop.phMax)));
-    const reasons = [concept.reason];
-    if (current) reasons.push(`The first suggested crop changes family after ${current.name}.`);
-    if (phValue !== null) reasons.push(`General pH screening uses the entered pH of ${phValue}; it is not a laboratory verification.`);
-    if (dry) reasons.push('Limited or unconfirmed irrigation reduces preference for high-demand crop options.');
-    if (weather?.current?.temperature !== null && number(weather?.current?.temperature) !== null) reasons.push('Available short-term weather is relevant to near-term field work, not proof of next-season suitability.');
-    if (!first || !second || !cover) reasons.push('Some sequence positions have no suitable option under the entered pH constraints. Collect local agronomic advice before planning.');
-    return { id: concept.id, name: concept.name, sequence: [first?.id, second?.id, cover?.id].filter(Boolean), reasons,
-      limitations: [limit, 'Cover-crop water use and termination can affect the following cash crop. No yield improvement is predicted.'],
-      waterLabel: concept.id === 'water' ? 'Lower-demand options prioritized' : 'Crop and season dependent',
-      sourceUrl: fao, evidence: 'Transparent trait screening, not a validated suitability model' };
-  });
+  return concepts.sort((a, b) => (a.id === priority ? -1 : b.id === priority ? 1 : 0)).map(concept => ({
+    id: concept.id, name: concept.name, sequence: [],
+    reasons: ['No crop sequence is generated without approved FAO GAEZ suitability evidence and farmer-entered local soil, water, and crop-history records.'],
+    limitations: ['Open FAO GAEZ and validate the selected crops with local agricultural expertise before creating a rotation.'],
+    waterLabel: 'Evidence required', sourceUrl: fao, evidence: 'No inferred suitability values'
+  }));
 }
 
 export function calculateEconomics(input = {}) {

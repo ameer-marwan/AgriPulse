@@ -42,16 +42,13 @@ test('economics applies local selling losses, transport and market fees', () => 
   assert.throws(() => calculateEconomics({ ...basic, marketFeePercent: -1 }));
 });
 
-test('rotation scenarios respond to priority, family and pH constraints', () => {
+test('rotation scenarios do not invent crop suitability without approved evidence', () => {
   const value = recommendRotations({ priority: 'water', currentCrop: 'wheat', irrigated: false, ph: 6.5 });
   assert.equal(value[0].id, 'water');
   assert.equal(value.length, 3);
-  assert.ok(value.every(plan => !('score' in plan)));
-  for (const plan of value) {
-    const first = crops.find(crop => crop.id === plan.sequence[0]);
-    assert.notEqual(first.family, 'Poaceae');
-    assert.ok(plan.limitations.length > 0);
-  }
+  assert.ok(value.every(plan => plan.sequence.length === 0));
+  assert.ok(value.every(plan => plan.evidence === 'No inferred suitability values'));
+  assert.ok(value.every(plan => plan.limitations.length > 0));
   assert.ok(recommendRotations({ ph: 14 }).every(plan => plan.sequence.length === 0));
 });
 
