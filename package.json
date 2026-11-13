@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "node scripts/serve-fullstack.mjs",
+    "build": "npm run package:final",
     "check": "node --check dist/app.js && node --check dist/storage.js && node --check dist/data.js && node --check dist/geo.js && node --check dist/planning.js && node --check dist/scenes.js && node --check dist/i18n.js && node --check dist/intro.js && node --check scripts/package-final.mjs",
     "package:final": "node scripts/package-final.mjs",
     "build:worker": "npm run package:final && node scripts/build-worker.mjs",
