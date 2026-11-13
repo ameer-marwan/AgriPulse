@@ -81,10 +81,24 @@ export async function searchPlaces(query, { signal } = {}) {
   const text = String(query || '').trim();
   if (signal?.aborted) throw new DOMException('Request cancelled', 'AbortError');
   const match = text.match(/^\s*(-?\d+(?:\.\d+)?)\s*[, ]\s*(-?\d+(?:\.\d+)?)\s*$/);
-  if (!match) throw new Error('Enter coordinates as latitude, longitude, or choose a point on the map.');
-  const lat = Number(match[1]), lon = Number(match[2]);
-  coordinates({ lat, lon });
-  return [{ id: `coordinates:${lat},${lon}`, name: `Coordinates ${lat.toFixed(4)}, ${lon.toFixed(4)}`, lat, lon, country: '', region: '', timezone: 'UTC' }];
+  if (match) {
+    const lat = Number(match[1]), lon = Number(match[2]);
+    coordinates({ lat, lon });
+    return [{ id: `coordinates:${lat},${lon}`, name: `Coordinates ${lat.toFixed(4)}, ${lon.toFixed(4)}`, lat, lon, country: '', region: '', timezone: 'UTC' }];
+  }
+  throw new Error('Enter coordinates as latitude, longitude, or choose a point on the map.');
+}
+
+export async function searchNamedPlaces(query, { signal } = {}) {
+  const text = String(query || '').trim();
+  if (signal?.aborted) throw new DOMException('Request cancelled', 'AbortError');
+  if (text.length < 2) return [];
+  const data = await request(`https://geocoding-api.open-meteo.com/v1/search?${new URLSearchParams({ name: text, count: '8', language: 'en', format: 'json' })}`, { signal, timeout: 12000 });
+  return (Array.isArray(data?.results) ? data.results : []).map(place => ({
+    id: `place:${place.latitude},${place.longitude}`,
+    name: [place.name, place.admin1, place.country].filter(Boolean).filter((value, index, values) => values.indexOf(value) === index).join(', '),
+    lat: Number(place.latitude), lon: Number(place.longitude), country: place.country || '', region: place.admin1 || '', timezone: place.timezone || 'UTC'
+  })).filter(place => Number.isFinite(place.lat) && Number.isFinite(place.lon));
 }
 
 /** Small offline place index for the guided flow; no third-party geocoder is used. */

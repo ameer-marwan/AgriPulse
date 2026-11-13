@@ -1,6 +1,7 @@
 import {
   fetchWeather,
   searchPlaces,
+  searchNamedPlaces,
   findNamedPlaces,
   fetchNasa,
   crops,
@@ -440,7 +441,7 @@ function init() {
   const simpleMapHost = document.createElement('div');
   simpleMapHost.id = 'simple-map-host';
   simpleMapHost.className = 'simple-map-host';
-  simpleMapHost.innerHTML = '<div class="simple-map-heading"><div><span class="eyebrow">SELECT ON MAP</span><b>Tap the map to choose your field</b></div><span>Interactive map</span></div>';
+  simpleMapHost.innerHTML = '<div class="simple-map-heading"><div><span class="eyebrow">SELECT ON MAP</span><b>Tap the map to choose your field</b></div><span>Interactive map · map or globe</span></div><div class="explorer-tools simple-map-tools"><div class="segmented"><button class="selected" data-map-mode="map"><svg><use href="#i-map"/></svg>Map</button><button data-map-mode="globe"><svg><use href="#i-globe"/></svg>3D globe</button></div><div class="segmented"><button class="selected" data-map-layer="satellite">Satellite</button><button data-map-layer="terrain">SRTM</button><button data-map-layer="thermal">NDVI</button><button data-map-layer="rain">GPM rain</button><button data-map-layer="moisture">SMAP</button></div></div>';
   $('#simple-place-results')?.after(simpleMapHost);
   const simpleCurrencyField = document.createElement('label');
   simpleCurrencyField.className = 'simple-currency-choice';
@@ -984,7 +985,8 @@ function renderSimpleResults() {
   const profitBody = benchmark ? t('Planning margin') + ': ' + simpleMoney(margin, fx.currency) + ' ' + t('per hectare') + '. ' + t('Estimated sales') + ': ' + simpleMoney(sales, fx.currency) + '. ' + t('Planning costs') + ': ' + simpleMoney(cost, fx.currency) + '.' : t('Choose at least one crop to create the planning estimate.');
   const cropNames = selectedCrops.map(id => simpleCropEvidence[id]?.name || crops.find(crop => crop.id === id)?.name || id).filter(Boolean);
   const weatherCode = number(current?.weatherCode) ? current.weatherCode : null;
-  const scene = weatherCode === null ? 'clouds' : weatherCode >= 51 ? 'storm' : weatherCode > 0 ? 'clouds' : 'clear';
+  const recentRain = weather?.daily?.slice(-3).reduce((sum, day) => sum + (number(day.rain) ? day.rain : 0), 0) || 0;
+  const scene = weatherCode === null ? (recentRain >= 8 ? 'storm' : 'clouds') : weatherCode >= 51 ? 'storm' : weatherCode > 0 ? 'clouds' : 'clear';
   const weatherGlyph = weatherCode === null ? '◎' : weatherCode === 0 ? '☀' : weatherCode >= 51 ? '☂' : '☁';
   const forecastItems = weather?.daily?.slice(-4).map(day => '<div><span>' + escapeHTML(dateShort(day.date)) + '</span><b>' + escapeHTML(temp(day.high)) + '</b><small>' + escapeHTML(rain(day.rain)) + '</small></div>').join('') || '<p class="empty">' + escapeHTML(t('Recent NASA record unavailable.')) + '</p>';
   const decisionTips = [
@@ -1856,7 +1858,9 @@ async function searchSimpleLocation(event) {
   host.innerHTML = '<p class="search-results-status">Finding your place…</p>';
   try {
     const coordinateQuery = /^\s*-?\d+(?:\.\d+)?\s*[, ]\s*-?\d+(?:\.\d+)?\s*$/.test(query);
-    const places = coordinateQuery ? await searchPlaces(query, { signal: state.searchController.signal }) : findNamedPlaces(query);
+    let places = [];
+    try { places = coordinateQuery ? await searchPlaces(query, { signal: state.searchController.signal }) : await searchNamedPlaces(query, { signal: state.searchController.signal }); }
+    catch (error) { if (error.name === 'AbortError') throw error; places = coordinateQuery ? [] : findNamedPlaces(query); }
     if (!places.length) { host.innerHTML = '<p class="search-results-status">Try a listed city name or enter latitude, longitude.</p>'; return; }
     host.replaceChildren(...places.map(place => {
       const button = document.createElement('button');
@@ -1883,7 +1887,9 @@ async function searchLocation(event) {
     '<p class="search-results-status">Checking coordinates…</p>';
   try {
     const coordinateQuery = /^\s*-?\d+(?:\.\d+)?\s*[, ]\s*-?\d+(?:\.\d+)?\s*$/.test(query);
-    const results = coordinateQuery ? await searchPlaces(query, { signal: state.searchController.signal }) : findNamedPlaces(query);
+    let results = [];
+    try { results = coordinateQuery ? await searchPlaces(query, { signal: state.searchController.signal }) : await searchNamedPlaces(query, { signal: state.searchController.signal }); }
+    catch (error) { if (error.name === 'AbortError') throw error; results = coordinateQuery ? [] : findNamedPlaces(query); }
     $("#search-results").replaceChildren();
     if (!results.length) {
       $("#search-results").innerHTML =
