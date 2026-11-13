@@ -91,7 +91,8 @@ export function createFieldMap(container, { onSelect = () => {}, onBoundary = ()
     if (!ready) return;
     map.setLayoutProperty('satellite-base', 'visibility', layer !== 'terrain' ? 'visible' : 'none');
     map.setLayoutProperty('terrain-base', 'visibility', layer === 'terrain' ? 'visible' : 'none');
-    map.setLayoutProperty('thermal-base', 'visibility', layer === 'thermal' ? 'visible' : 'none');
+    for (const name of ['thermal', 'rain', 'moisture'])
+      map.setLayoutProperty(`${name}-base`, 'visibility', layer === name ? 'visible' : 'none');
   }
   function finishDrawing() {
     if (!drawing) return null;
@@ -115,7 +116,7 @@ export function createFieldMap(container, { onSelect = () => {}, onBoundary = ()
       if (map && !alreadySelected) map.easeTo({ center: [location.lon, Math.max(-85, Math.min(85, location.lat))], zoom: Math.min(9, Math.max(map.getZoom(), 7.5)), duration: 420, essential: false });
     },
     setMode(next) { mode = next === 'globe' ? 'globe' : 'map'; if (drawing && mode === 'globe') api.cancelDrawing(); applyMode(); frameMode(); },
-    setLayer(next) { layer = ['terrain', 'thermal'].includes(next) ? next : 'satellite'; applyLayer(); },
+    setLayer(next) { layer = ['terrain', 'thermal', 'rain', 'moisture'].includes(next) ? next : 'satellite'; applyLayer(); },
     startDrawing() {
       if (!map || !ready) { status('Wait for the map to load before drawing.', 'error'); return; }
       mode = 'map'; applyMode(); drawing = true; vertices = []; map.doubleClickZoom.disable(); map.getCanvas().style.cursor = 'crosshair'; update();
@@ -137,13 +138,17 @@ export function createFieldMap(container, { onSelect = () => {}, onBoundary = ()
         sources: {
           'satellite-raster': { type: 'raster', tiles: ['https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/{z}/{y}/{x}.jpeg'], tileSize: 256, maxzoom: 8, attribution: 'NASA GIBS / Blue Marble shaded relief' },
           'terrain-raster': { type: 'raster', tiles: ['https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/SRTM_Color_Index/default/GoogleMapsCompatible_Level12/{z}/{y}/{x}.png'], tileSize: 256, maxzoom: 12, attribution: 'NASA SRTM elevation' },
-          'thermal-raster': { type: 'raster', tiles: ['https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_NDVI_8Day/default/GoogleMapsCompatible_Level9/{z}/{y}/{x}.png'], tileSize: 256, maxzoom: 9, attribution: 'Vegetation index: NASA GIBS / MODIS Terra NDVI' }
+          'thermal-raster': { type: 'raster', tiles: ['https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_NDVI_8Day/default/GoogleMapsCompatible_Level9/{z}/{y}/{x}.png'], tileSize: 256, maxzoom: 9, attribution: 'Vegetation index: NASA GIBS / MODIS Terra NDVI' },
+          'rain-raster': { type: 'raster', tiles: ['https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/IMERG_Precipitation_Rate/default/GoogleMapsCompatible_Level6/{z}/{y}/{x}.png'], tileSize: 256, maxzoom: 6, attribution: 'NASA GPM IMERG precipitation rate via GIBS' },
+          'moisture-raster': { type: 'raster', tiles: ['https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/SMAP_L4_Analyzed_Surface_Soil_Moisture/default/GoogleMapsCompatible_Level6/{z}/{y}/{x}.png'], tileSize: 256, maxzoom: 6, attribution: 'NASA SMAP L4 modeled surface soil moisture via GIBS' }
         },
         layers: [
           { id: 'background', type: 'background', paint: { 'background-color': '#07120e' } },
           { id: 'satellite-base', type: 'raster', source: 'satellite-raster', paint: { 'raster-saturation': -0.1, 'raster-brightness-max': 0.9 } },
           { id: 'terrain-base', type: 'raster', source: 'terrain-raster', layout: { visibility: 'none' }, paint: { 'raster-saturation': -0.3 } },
-          { id: 'thermal-base', type: 'raster', source: 'thermal-raster', layout: { visibility: 'none' }, paint: { 'raster-opacity': 0.85 } }
+          { id: 'thermal-base', type: 'raster', source: 'thermal-raster', layout: { visibility: 'none' }, paint: { 'raster-opacity': 0.85 } },
+          { id: 'rain-base', type: 'raster', source: 'rain-raster', layout: { visibility: 'none' }, paint: { 'raster-opacity': 0.9 } },
+          { id: 'moisture-base', type: 'raster', source: 'moisture-raster', layout: { visibility: 'none' }, paint: { 'raster-opacity': 0.9 } }
         ]
       },
       center: [18, 23], zoom: 1.8, maxZoom: 12, attributionControl: true, antialias: false,

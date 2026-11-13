@@ -370,9 +370,9 @@ function init() {
   challengeResources.className='challenge-resource-panel panel';
   challengeResources.innerHTML='<header><div><span class="eyebrow">NASA SPACE APPS · PROVIDED RESOURCES</span><h2>Evidence sources, with connection status.</h2><p>Only connected sources influence AgriPulse calculations. The others are official resources for validation and future integration—not simulated data.</p></div><span class="pill">NO SAMPLE VALUES</span></header><div class="challenge-resource-grid">'+[
     ['NASA POWER','Recent temperature, humidity, wind, solar and rainfall context.','CONNECTED','https://power.larc.nasa.gov/'],
-    ['MODIS / VIIRS vegetation','NASA GIBS corrected reflectance and NDVI map layers in Field Explorer.','MAP LAYER','https://worldview.earthdata.nasa.gov/'],
-    ['SMAP','Surface soil moisture and freeze/thaw observations.','AVAILABLE · NOT CONNECTED','https://www.earthdata.nasa.gov/data/instruments/smap'],
-    ['GPM / IMERG','Precipitation rate, accumulation and extreme-rain context.','AVAILABLE · NOT CONNECTED','https://gpm.nasa.gov/data'],
+    ['MODIS Terra NDVI','Vegetation greenness map imagery. Not a field measurement.','MAP LAYER','https://worldview.earthdata.nasa.gov/'],
+    ['SMAP L4','Modeled surface soil moisture imagery on the map; not used in calculations.','MAP LAYER','https://www.earthdata.nasa.gov/data/instruments/smap'],
+    ['GPM / IMERG','Precipitation-rate imagery on the map; not used in calculations.','MAP LAYER','https://gpm.nasa.gov/data'],
     ['Landsat / MODIS / VIIRS','Reflectance, NDVI, vegetation stress and seasonal change.','AVAILABLE · NOT CONNECTED','https://landsat.gsfc.nasa.gov/data/'],
     ['SRTM','Elevation, slope, runoff and erosion context.','AVAILABLE · NOT CONNECTED','https://www.earthdata.nasa.gov/data/instruments/srtm'],
     ['ECOSTRESS','Land-surface temperature and evapotranspiration.','AVAILABLE · NOT CONNECTED','https://ecostress.jpl.nasa.gov/'],
@@ -384,10 +384,10 @@ function init() {
   const complexResources=document.createElement('section');
   complexResources.className='complex-resource-strip panel';
   complexResources.innerHTML='<header><div><span class="eyebrow">VERIFIED EVIDENCE</span><h2>Resources behind the workspace.</h2><p>See what is connected now and what is provided for validation. Unconnected resources never create values in your report.</p></div><a href="#/explore" data-route="explore">View full registry <span aria-hidden="true">→</span></a></header><div class="complex-resource-grid">'+[
-    ['NASA POWER','Live weather context','CONNECTED','https://power.larc.nasa.gov/'],
-    ['NASA GIBS','VIIRS & MODIS imagery','MAP LAYERS','https://worldview.earthdata.nasa.gov/'],
+    ['NASA POWER','Recent historical climate context','CONNECTED','https://power.larc.nasa.gov/'],
+    ['NASA GIBS','MODIS, GPM & SMAP imagery','MAP LAYERS','https://worldview.earthdata.nasa.gov/'],
     ['NASA SRTM','Elevation context','MAP LAYER','https://www.earthdata.nasa.gov/data/instruments/srtm'],
-    ['SMAP + GPM','Soil moisture & rainfall','AVAILABLE','https://gpm.nasa.gov/data']
+    ['SMAP + GPM','Map imagery only','MAP LAYERS','https://gpm.nasa.gov/data']
   ].map(([name,copy,status,href])=>'<a href="'+href+'" target="_blank" rel="noopener noreferrer"><span class="complex-resource-status '+(status==='CONNECTED'||status==='MAP LAYER'?'connected':'')+'">'+status+'</span><b>'+name+'</b><small>'+copy+'</small><i aria-hidden="true">↗</i></a>').join('')+'</div>';
   $('#view-about')?.append(complexResources);
   const resourceDirectory=document.createElement('section');
@@ -1121,7 +1121,7 @@ function showSimpleAgriTip(topic) {
   const firstDay = weather?.daily?.[0];
   const { cropNames, benchmark, fx, margin } = simpleReportData();
   const tips = {
-    weather: [t('Weather on your land'), weather ? t('Current conditions') + ': ' + temp(weather.current?.temperature) + ', ' + t(formatWeatherCode(weather.current?.weatherCode)) + '. ' + t('Wind') + ' ' + wind(weather.current?.wind) + '.' : t('Choose a location to load live weather context.')],
+    weather: [t('Weather on your land'), weather ? t('Recent NASA POWER record') + ': ' + temp(weather.current?.temperature) + '. ' + t('Wind') + ' ' + wind(weather.current?.wind) + '.' : t('Choose a location to load recent NASA weather context.')],
     soil: [t('What the soil details mean'), state.simpleFarm.soilPH ? t('Your entered soil pH is') + ' ' + state.simpleFarm.soilPH + '. ' + t('Compare it with the selected crop profile and keep the sample method.') : t('Soil pH is unknown. A local soil test would make the crop comparison stronger.')],
     water: [t('Your recent water signal'), firstDay ? t('NASA POWER daily rainfall') + ': ' + rain(firstDay.rain) + '. ' + t('This is historical regional context, not an irrigation instruction or forecast.') : t('Choose a location to load recent NASA POWER rainfall context.')],
     crop: [t('Your crop choices'), cropNames.length ? cropNames.map(t).join(', ') + '. ' + t('Check local planting dates, seed availability, pests, and buyer requirements before choosing.') : t('Choose at least one crop to see its field profile.')],
@@ -1304,7 +1304,14 @@ function bindEvents() {
   $$("[data-map-layer]").forEach((button) =>
     button.addEventListener("click", () => {
       state.map.setLayer(button.dataset.mapLayer);
-      $('#thermal-legend').hidden = button.dataset.mapLayer !== 'thermal';
+      const legend = $('#thermal-legend');
+      const legends = {
+        thermal: '<b>NASA MODIS Terra NDVI</b><p>Latest available vegetation-greenness imagery. It does not identify crops or measure one field.</p>',
+        rain: '<b>NASA GPM IMERG precipitation rate</b><p>Latest available precipitation-rate imagery. It is not a rain gauge, rainfall total, or forecast.</p>',
+        moisture: '<b>NASA SMAP L4 surface soil moisture</b><p>Latest available modeled surface-moisture imagery. It does not measure root-zone water at your field.</p>'
+      };
+      legend.hidden = !legends[button.dataset.mapLayer];
+      legend.innerHTML = (legends[button.dataset.mapLayer] || '') + (legends[button.dataset.mapLayer] ? '<a href="https://worldview.earthdata.nasa.gov/" target="_blank" rel="noopener noreferrer">Explore NASA Worldview ↗</a>' : '');
       $$("[data-map-layer]").forEach((b) =>
         b.classList.toggle("selected", b === button),
       );
@@ -3047,7 +3054,7 @@ function renderAssistantContext() {
   const context = assistantFieldContext(),
     items = [
       ["Field", context.field ? context.field.name : "Not selected"],
-      ["Weather", context.weather ? "Live model connected" : "Not connected"],
+      ["Weather", context.weather ? "Recent NASA POWER record" : "Not connected"],
       [
         "Soil records",
         context.soil_records.length
@@ -3087,12 +3094,12 @@ function addAssistantMessage(role, content) {
 function instantAssistantReply(message) {
   const q = message.toLowerCase();
   const field = state.selectedField?.name || "your field";
-  if (/weather|rain|temperature|forecast|wind/.test(q)) return `For ${field}, open Weather to see the live forecast, rainfall, wind, and evapotranspiration. I can help you turn those readings into a planting or irrigation decision.`;
-  if (/water|irrigat|drought|moisture/.test(q)) return `Open Water for the latest water balance. Start with the current soil moisture and recent rainfall, then adjust irrigation in small steps and review the result after the next reading.`;
+  if (/weather|rain|temperature|forecast|wind/.test(q)) return `For ${field}, open Weather to inspect recent historical NASA POWER temperature, rainfall, and wind. Check a local forecast before making a time-sensitive decision.`;
+  if (/water|irrigat|drought|moisture/.test(q)) return `Open Water for recent NASA POWER rainfall and any local water records you entered. SMAP imagery can be inspected in Field Explorer, but no field moisture reading is inferred from it.`;
   if (/soil|ph|nitrogen|fertil/.test(q)) return `Open Soil to review pH, moisture, and nutrients. Keep a baseline sample, change one input at a time, and use the crop planner to compare rotations that protect soil health.`;
   if (/profit|price|money|cost|sell|revenue/.test(q)) return `Open Profit to enter your local selling price, yield, area, and costs. AgriPulse calculates revenue, costs, and margin from your numbers instead of assuming every market pays the same.`;
   if (/crop|rotation|plant|wheat|corn|rice/.test(q)) return `Open Crop planner to compare rotations. A strong plan balances expected margin with water demand, soil recovery, and the weather outlook for ${field}.`;
-  if (/nasa|satellite|earth|space/.test(q)) return `AgriPulse combines NASA POWER climate history with live weather and your local field inputs. Open NASA data to inspect the source and time range behind each insight.`;
+  if (/nasa|satellite|earth|space/.test(q)) return `AgriPulse uses NASA POWER historical regional records and NASA GIBS map imagery. Only POWER records feed calculations. Inspect the source and date before using an insight.`;
   return `I’m ready to help with ${field}. Try asking about weather, water, soil, crop rotation, profit, or NASA data. I’ll use the values in your workspace when they are available.`;
 }
 function initAssistant() {

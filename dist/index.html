@@ -299,7 +299,7 @@
             </div>
           </header>
           <div class="agri-live-signal-bar" aria-label="Current field signals">
-            <span><i class="signal-live"></i><small>LIVE WEATHER</small><b id="system-live-weather">Choose a field</b></span>
+            <span><i class="signal-live"></i><small>RECENT NASA RECORD</small><b id="system-live-weather">Choose a field</b></span>
             <span><i></i><small>WATER CONTEXT</small><b id="system-live-water">Waiting for NASA POWER</b></span>
             <span><i></i><small>SOIL EVIDENCE</small><b id="system-live-soil">No local details</b></span>
             <span><i></i><small>DECISION READINESS</small><b id="system-live-readiness">0 / 4 connected</b></span>
@@ -359,7 +359,7 @@
             <div class="season-simulator-orbit" aria-hidden="true"><span id="sim-risk-ring"><i></i></span><strong id="sim-risk-score">LOW</strong><small>PLANNING PRESSURE</small></div>
             <div class="season-simulator-result"><span class="eyebrow">SCENARIO RESPONSE</span><h3 id="sim-result-title">Current baseline</h3><p id="sim-result-copy">Choose a field to connect the simulator to current weather, or explore a general planning scenario now.</p><div id="sim-priorities"></div><a href="#/crops">Compare rotation strategies →</a></div>
           </div>
-          <p class="fine-print">This is a sensitivity tool, not a seasonal prediction. It changes the selected scenario only and does not overwrite live weather.</p>
+          <p class="fine-print">This is a sensitivity tool, not a seasonal prediction. It changes the selected scenario only and does not overwrite the recent NASA record.</p>
         </section>
         <section class="evidence-passport" aria-labelledby="evidence-passport-title">
           <header><div><span class="eyebrow">EVIDENCE PASSPORT</span><h2 id="evidence-passport-title">See what is live, modeled, and provided by you.</h2></div><a href="#/reports">Open evidence report →</a></header>
@@ -518,11 +518,11 @@
               <div class="segmented">
                 <button class="selected" data-map-layer="satellite">
                   Satellite</button
-                ><button data-map-layer="terrain">SRTM terrain</button><button data-map-layer="thermal">MODIS NDVI</button>
+                ><button data-map-layer="terrain">SRTM terrain</button><button data-map-layer="thermal">MODIS NDVI</button><button data-map-layer="rain">GPM rain</button><button data-map-layer="moisture">SMAP moisture</button>
               </div>
             </div>
             <div id="explorer-map-host"></div>
-            <div class="thermal-legend" id="thermal-legend" hidden><b>NASA MODIS vegetation index</b><p>Latest available eight-day MODIS Terra NDVI composite. It shows regional vegetation greenness, not crop identity, yield, or an individual field measurement. Clouds and missing observations can leave gaps.</p><img src="https://gibs.earthdata.nasa.gov/legends/MODIS_NDVI_H.svg" alt="NASA MODIS NDVI color legend"><a href="https://worldview.earthdata.nasa.gov/" target="_blank" rel="noopener noreferrer">Explore NASA Worldview ↗</a></div>
+            <div class="thermal-legend" id="thermal-legend" hidden aria-live="polite"></div>
             <div class="draw-toolbar">
               <button data-action="draw">
                 <svg><use href="#i-plus" /></svg>Draw boundary</button
@@ -588,7 +588,7 @@
         </div>
         <div class="weather-feature">
           <div>
-            <span class="eyebrow">CURRENT MODEL ANALYSIS</span
+            <span class="eyebrow">RECENT NASA POWER RECORD</span
             ><strong data-stat="temperature">—</strong>
             <h2 data-stat="conditions">Loading conditions</h2>
             <p data-stat="weatherTime">Time unavailable</p>
