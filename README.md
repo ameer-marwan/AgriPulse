@@ -8,7 +8,7 @@ AgriPulse is an interactive agricultural decision workspace created for the **20
 
 ## 🚀 Try AgriPulse
 
-**[Open the public AgriPulse preview →](https://fieldshift-two.vercel.app/)**
+**[Open the public AgriPulse preview →](https://agripulse-1.vercel.app/)**
 
 **[↓ Download the “From Space to Soil” presentation](https://github.com/ameer-marwan/AgriPulse/raw/main/media/AgriPulse_Space_to_Soil.pdf)**
 
