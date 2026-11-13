@@ -64,7 +64,7 @@ Some resources require provider accounts, API keys, licensing, or extra processi
 
 AgriPulse was built by a student technology team exploring how NASA Earth data can support clearer agricultural decisions.
 
-- 👨‍💻 **Ahmed** — [GitHub](https://github.com/a7mdel5taeeb-eng)
+- 👨‍💻 **Mr.Ahmed** — [GitHub](https://github.com/a7mdel5taeeb-eng)
 - 🛰️ **Ameer** — [GitHub](https://github.com/ameer-marwan)
 - 🔧 **Mostafa** — [GitHub](https://github.com/mostafabass1)
 
