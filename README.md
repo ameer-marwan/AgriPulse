@@ -1,88 +1,103 @@
-# FieldShift 3.0 — Final edition
+# 🌱 AgriPulse — your intelligent agricultural assistant
 
-An interactive field operations workspace for the 2026 NASA Space Apps Challenge. The existing Site identity is preserved in `.openai/hosting.json`.
+> **From Earth observation to better field decisions.**
 
-## Run FieldShift with accounts
+AgriPulse is an interactive agricultural decision workspace created for the **2026 NASA Space Apps Challenge**. It brings location, weather, Earth-observation layers, soil notes, water context, crop planning, transparent economics, and printable reports into one farmer-friendly experience.
 
-Install Node.js 22.13 or newer. Extract the complete project, open a terminal in the folder containing `package.json`, and run:
+## 🚀 Try AgriPulse
 
-```sh
+**[Open the public AgriPulse preview →](https://fieldshift-two.vercel.app/)**
+
+![AgriPulse field view](dist/assets/field-landscape.jpg)
+
+## ✨ What AgriPulse does
+
+- 🗺️ Search for a city or farm by name, enter coordinates, use device location, or select a point on the map.
+- 🌍 Explore satellite maps and an interactive 3D globe with NASA Earth-observation layers.
+- ☀️ See current modeled weather and a short forecast with animated sun, clouds, rain, snow, fog, and night scenes.
+- 💧 Review recent rainfall and water context without presenting historical records as a forecast.
+- 🪨 Record local soil samples, depth, collection method, texture, pH, and drainage.
+- 🌾 Compare crop profiles and plan rotations while keeping assumptions visible.
+- 📈 Calculate transparent economics from entered yield, price, cost, loss, transport, and market-fee assumptions.
+- 📝 Keep field notes, observations, irrigation records, and photos attached to the selected field.
+- 📄 Export reports, CSV data, printable PDF, or workspace JSON backups.
+- 🌐 Use the guided Simple farmer flow or the full Complex farmer workspace.
+- 🌙 Switch between daylight, forest dark, and automatic themes.
+
+## 🧭 Two ways to work
+
+### Simple farmer
+
+1. **Location** — search a place, enter coordinates, use your location, or open the map.
+2. **Soil & water** — enter only what you know; optional values stay clearly marked.
+3. **Crops** — choose crop profiles with friendly emoji markers and practical context.
+4. **Report** — review weather, rainfall, soil details, water context, crop screening, and planning margin.
+
+### Complex farmer
+
+The full workspace adds the field explorer, layer controls, boundary drawing, weather, soil intelligence, water, crop planner, profit scenarios, reports, evidence, feedback, and settings.
+
+## 🛰️ Data sources and evidence
+
+AgriPulse separates **live modeled forecasts**, **historical regional context**, **map imagery**, and **farmer-entered evidence**. It never substitutes invented values when a provider fails.
+
+### Connected public sources
+
+- [NASA POWER](https://power.larc.nasa.gov/) — regional temperature, rainfall, humidity, wind, and solar records.
+- [NASA GIBS / Worldview](https://worldview.earthdata.nasa.gov/) — Blue Marble, MODIS/VIIRS, SRTM, GPM/IMERG, and SMAP map layers.
+- [Open-Meteo forecast API](https://open-meteo.com/en/docs) — current modeled conditions and short-range forecast used for the live weather scene.
+- [Open-Meteo geocoding](https://geocoding-api.open-meteo.com/) — place-name search and coordinates.
+
+### NASA Space Apps resource directory
+
+The in-app Resources page links to the official challenge resources, including:
+
+🔹 [SMAP](https://www.earthdata.nasa.gov/data/instruments/smap) · [GPM / IMERG](https://gpm.nasa.gov/data) · [Landsat](https://landsat.gsfc.nasa.gov/data/) · [MODIS / VIIRS](https://worldview.earthdata.nasa.gov/) · [NASA POWER](https://power.larc.nasa.gov/) · [SRTM](https://www.earthdata.nasa.gov/data/instruments/srtm) · [ECOSTRESS](https://ecostress.jpl.nasa.gov/) · [GEDI](https://gedi.umd.edu/)
+
+🔹 [USDA Ag Data Commons](https://agdatacommons.nal.usda.gov/) · [Web Soil Survey](https://websoilsurvey.nrcs.usda.gov/) · [CropScape / CDL](https://nassgeodata.gmu.edu/CropScape/) · [SSURGO](https://www.nrcs.usda.gov/resources/data-and-reports/soil-survey-geographic-database-ssurgo) · [NAIP](https://www.fsa.usda.gov/programs-and-services/aerial-photography/imagery-programs/naip-imagery/) · [USDA NASS QuickStats](https://quickstats.nass.usda.gov/) · [USDA AMS Market News](https://www.ams.usda.gov/market-news)
+
+🔹 [USGS NLCD](https://www.usgs.gov/centers/eros/science/national-land-cover-database) · [USGS NWIS](https://waterdata.usgs.gov/nwis) · [NLDAS / GLDAS](https://search.earthdata.nasa.gov/) · [PRISM](https://prism.oregonstate.edu/) · [OpenET](https://openetdata.org/) · [LANDFIRE](https://landfire.gov/) · [FAO GAEZ](https://gaez.fao.org/) · [CoCoRaHS](https://www.cocorahs.org/) · [Copernicus Sentinel-2](https://dataspace.copernicus.eu/explore-data/data-collections/sentinel-data/sentinel-2) · [ERA5](https://www.ecmwf.int/en/forecasts/dataset/ecmwf-reanalysis-v5)
+
+Some resources require provider accounts, API keys, licensing, or extra processing before they can safely become live numerical inputs. The interface labels those as resources rather than pretending they are connected.
+
+## 👥 About the team
+
+AgriPulse was built by a student technology team exploring how NASA Earth data can support clearer agricultural decisions.
+
+- 👨‍💻 **Ahmed** — [GitHub](https://github.com/a7mdel5taeeb-eng)
+- 🛰️ **Ameer** — [GitHub](https://github.com/ameer-marwan)
+- 🔧 **Mostafa** — [GitHub](https://github.com/mostafabass1)
+
+## 🛠️ Run locally
+
+Requires **Node.js 22.13+**.
+
+```bash
 npm run dev
 ```
 
-Open **http://127.0.0.1:4173** in a browser and keep the terminal open. Create a username and password, or enter as a guest. Accounts and their workspaces are saved in `.local/fieldshift.sqlite` on the computer running the server; back up this file to keep those local accounts. Local accounts are separate from accounts on the published website. Guest work lasts only in the current browser tab.
+Open `http://127.0.0.1:4173`.
 
-The portable `release/FieldShift-Final.html` contains the visual website, but opening it alone or running it on a static-only web host does not start the account server. Account creation and login require the complete project and server above, or the published AgriPulse site. Internet access is needed for NASA POWER records, NASA GIBS map tiles, and the public site account API.
+Useful checks:
 
-## What is new in this edition
-
-- The introduction opens on a moving farmland background with the FieldShift logo, description, and entry button. It can be replayed from Settings and follows English, French, and Arabic selections.
-- The FieldShift emblem now accompanies the intro title, and a dedicated About us page introduces Dunia Alajial International School and the Tech Team in all three interface languages. The school card includes its official logo and an external Learn more link.
-
-- Section-specific scenic backgrounds: selected-field weather controls the sky, sun/moon, cloud, rain and snow overlays; Water has ocean imagery and Soil has a forest backdrop. These decorative scenes stay inside their sections, retain contrast in both appearances, and respect reduced-motion preferences. An unavailable forecast clears the previous weather scene.
-
-- Every selected coordinate has its own economics, crop-planner inputs, season schedule, scenario settings, soil records and observations. Returning to a field restores its records. A drawn/imported boundary supplies geometric area; changing land never transfers the previous field's yield or price assumptions.
-- Saved rotation plans can be restored and removed for the selected field, with the assumptions they were saved with.
-- Editable five-stage season timeline with planting date, stage durations and calendar dates. Durations are scheduling assumptions, not crop growth predictions.
-- Forecast screening for heat, frost, heavy rain and strong wind, with visible rule thresholds and missing-data behavior.
-- Temperature and rainfall sensitivity scenarios based on the selected point's forecast. Missing source values remain unavailable.
-- Dated field notes and resized photo attachments, saved locally by field, with backup export and removal.
-- Evidence completeness cards and a guided setup checklist. These distinguish user records, modeled values and planning assumptions.
-- Printable field report including the selected rotation, economics assumptions, soil records, schedule, scenario and observations.
-- Field selector accessible from every page; responsive phone and desktop layouts.
-
-The introduction offers account sign-in, account creation, or guest entry. Save a workspace backup from Settings and a season/photo backup after adding records. The portable file includes no personal field records.
-
-## Run locally
-
-Requires Node.js 22.13 or newer. The application is buildless and needs no runtime package installation.
-
-```sh
-npm run dev
-# Open http://127.0.0.1:4173
+```bash
 npm run check
 npm test
-npm run test:final
 ```
 
-For browser checks, install development dependencies (`npm install`) and Chromium (`npx playwright install chromium`), or use `/usr/bin/chromium`. Run `npm run test:browser` while the preview server is running. `FIELDSHIFT_PREVIEW` can select a different preview origin. Browser fixtures are restricted to automated tests; they are never shipped as environmental values.
+The local server stores local account/workspace data in `.local/fieldshift.sqlite`. Do not commit that directory.
 
-## Working capabilities
+## 🔐 Data honesty and limitations
 
-- Eleven hash routes with browser navigation, phone navigation, dark/daylight themes, and metric/imperial weather units.
-- A shared selected point, optional device location, place search, manual coordinates, satellite map, and stationary interactive globe.
-- Drawn or GeoJSON field boundaries, geodesic area, self-intersection validation, dateline-aware reference points, and local field persistence. The editor supports a single polygon outer ring, not holes or multipolygons.
-- Seven-day weather, hourly temperatures, precipitation, reference ET0, and modeled 0–1 cm soil moisture. Requests cancel on location changes and failures remain unavailable.
-- Dated user soil samples including collection depth and method, irrigation journal records, crop-trait rotation comparisons, and saved plans.
-- Hectare/tonne economics with editable assumptions, currency labels, losses, break-even values, and sensitivity cases.
-- CSV export, printable reports/PDF via the browser print dialog, a workspace JSON backup, and on-demand NASA POWER historical summaries.
+- Weather and Earth-observation values are model or regional-grid outputs, not field sensors.
+- A drawn boundary calculates geometric area; it does not create a spatially averaged soil measurement.
+- Soil pH, soil texture, irrigation access, crop history, prices, yields, and costs come from the farmer unless an explicitly connected provider supplies them.
+- Profit is a planning estimate based on entered assumptions, not a guaranteed market result.
+- Crop profiles are screening references and do not replace local agronomy or extension advice.
+- Provider outages remain visible; AgriPulse does not silently insert sample values.
 
-## Data sources and interpretation
+## 📚 Credits
 
-- [NASA POWER](https://power.larc.nasa.gov/docs/services/api/temporal/daily/): recent and prior complete calendar-year regional records for temperature, rainfall, humidity, wind, and solar context. These are historical records, not a live forecast or field measurement.
-- [NASA POWER](https://power.larc.nasa.gov/docs/services/api/temporal/daily/): prior complete calendar year, summarized into monthly temperature, rain, and solar context. Coarse source grids are regional context, not field measurements. A single year is not a climate normal. Missing monthly rainfall remains unavailable.
-- [NASA GIBS](https://worldview.earthdata.nasa.gov/): Blue Marble, SRTM, MODIS NDVI, GPM IMERG, and SMAP imagery layers. These are visual inspection layers and do not become numeric field measurements or crop recommendations.
-- [FAO crop information](https://www.fao.org/land-water/databases-and-software/crop-information/en/): general crop references. The library is broad trait screening and requires regional validation.
-- Landscape banner: [Unsplash photograph](https://images.unsplash.com/photo-1500382017468-9049fed747ef), used as an illustrative landscape, not as evidence about the selected place.
-- Section imagery from Unsplash: [sea](https://images.unsplash.com/photo-1518837695005-2083093ee35b), [forest](https://images.unsplash.com/photo-1448375240586-882707db888b), [clear sky](https://images.unsplash.com/photo-1601297183305-6df142704ea2), [clouds](https://images.unsplash.com/photo-1517483000871-1dbf64a6e1c6), and [storm sky](https://images.unsplash.com/photo-1534088568595-a066f410bcda). Images are bundled locally and are illustrative, not imagery of the chosen field.
-- MapLibre GL JS v5.6.1 and its CSS are vendored from the official distribution; see included license.
+AgriPulse uses official NASA, USDA, USGS, FAO, ESA/Copernicus, Open-Meteo, MapLibre, and other linked public resources. External providers retain their own terms and attribution requirements.
 
-## Important boundaries
-
-The published application stores signed-in account workspaces in its hosted database; local installations use their own SQLite database. Guest work lasts only in the current tab. A selected point uses the provider's reference grid. A drawn polygon gives geometric area; the application does not pretend to calculate a spatially aggregated soil/weather measurement over that polygon.
-
-Soil pH/carbon values come only from user-entered samples. Regional SoilGrids property maps are not connected. Economics uses entered assumptions, not a live commodity feed; it excludes costs that were not entered. Rotation results explain broad trait rules and do not predict yield or certify suitability.
-
-FieldShift focuses on field records, weather, water, soil, rotations, scenarios, and reports. No OpenAI service or secret is configured. No credentials are needed for the currently connected public data requests.
-
-## Deployment
-
-The static deployment directory is `dist`. Preserve the exact project ID and current private audience. Push the verified source state before packaging `.openai/hosting.json` and `dist` into a deployment archive. Use native Sites save/deploy operations for the same project. Source helper scripts are not installed in this workspace, so source pushes use ordinary Git with short-lived access supplied through stdin, never committed credentials.
-
-Implementation status and the remaining lightweight roadmap are tracked in [PROGRESS.md](PROGRESS.md).
-
-## QA
-
-The unit suite covers missing versus zero data, economics arithmetic, losses, crop constraints, provider errors, cancellation, NASA missing months, and geographic validation. The browser suite covers startup, ten routes, saved records, economics, guide responses, themes, and phone/desktop overflow. Additional live checks verify NASA POWER, NASA GIBS tiles, globe rendering, and location request races.
-
-The final browser suite additionally checks selected-field isolation/restoration for economics, crop planning, timelines, scenarios, notes and photo attachments, report content, unavailable source data, and desktop/mobile layouts. Provider fixtures are used only by tests, never by the shipped website.
+Built with care for the **NASA Space Apps Challenge** 🌍🌾
