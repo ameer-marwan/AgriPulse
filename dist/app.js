@@ -829,6 +829,18 @@ function simpleLandProfile() {
   const objective = dry || hot ? 'water' : wet ? 'soil' : 'risk';
   return { rainTotal, currentTemp, hot, cold, wet, dry, objective };
 }
+function simpleAutoPlan() {
+  const profile = simpleLandProfile();
+  const cropId = profile.hot && profile.dry ? 'sorghum' : profile.cold ? 'barley' : profile.wet ? 'rice' : 'chickpea';
+  const crop = crops.find(item => item.id === cropId)?.name || 'Chickpea';
+  return {
+    cropId, crop,
+    water: profile.hot || profile.dry ? 'Plan efficient irrigation checks' : profile.wet ? 'Prioritize drainage checks' : 'Monitor rainfall before irrigating',
+    texture: profile.wet ? 'Medium / well-drained planning profile' : profile.dry ? 'Medium / moisture-conserving planning profile' : 'Medium planning profile',
+    drainage: profile.wet ? 'Check drainage before planting' : 'Normal drainage planning profile',
+    reason: profile.hot && profile.dry ? 'heat and low recent rainfall' : profile.cold ? 'cool recent conditions' : profile.wet ? 'recent rainfall and drainage risk' : 'moderate recent weather'
+  };
+}
 function ensureSimpleAssumptions() {
   if (!hasLocation()) return;
   const profile = simpleLandProfile();
@@ -958,7 +970,7 @@ function renderSimpleResults() {
     return;
   }
   const weather = state.weather;
-  const selectedCrops = (state.simpleFarm.crops || []).length ? state.simpleFarm.crops : [state.simpleFarm.crop].filter(id => id && id !== 'recommend');
+  const selectedCrops = (state.simpleFarm.crops || []).length ? state.simpleFarm.crops : [state.simpleFarm.crop].filter(id => id && id !== 'recommend').concat(state.simpleFarm.crop === 'recommend' ? [simpleAutoPlan().cropId] : []);
   const selectedCrop = selectedCrops[0] || 'recommend';
   const priority = state.simpleFarm.objective || 'water';
   const irrigated = state.simpleFarm.waterSource === 'irrigated';
@@ -971,6 +983,7 @@ function renderSimpleResults() {
     ? assessments.map(item => t(item.profile.name) + ': ' + t(item.overall) + (item.limiting.length ? ' (' + t('watch') + ': ' + item.limiting.map(t).join(', ') + ')' : '')).join('. ') + '.'
     : candidates.length ? candidates.map(t).join(', ') + '. ' + t('These are crop profiles for comparison, not automatic recommendations.') : t('Choose a crop to evaluate the available profile factors.');
   const current = weather?.current;
+  const autoPlan = simpleAutoPlan();
   const firstDay = weather?.daily?.[0];
   const forecastBody = weather
     ? 'Recent NASA POWER record: ' + temp(current?.temperature) + ', wind ' + wind(current?.wind) + '. Seven recent daily records are available for this selected location.'
@@ -1104,7 +1117,7 @@ function generateLandTip(animate = false) {
     return;
   }
   ensureSimpleAssumptions(); renderSimpleFlow();
-  const profile = simpleLandProfile(), cropNames = (state.simpleFarm.crops || []).map(id => simpleCropEvidence[id]?.name).filter(Boolean).map(t);
+  const profile = simpleLandProfile(), autoPlan = simpleAutoPlan(), cropNames = (state.simpleFarm.crops || []).map(id => simpleCropEvidence[id]?.name).filter(Boolean).map(t);
   const temperature = number(profile.currentTemp) ? temp(profile.currentTemp) : t('not available');
   const climateSignal = profile.hot ? t('Hot conditions increase water demand and heat stress.') : profile.cold ? t('Cool conditions favor crops that tolerate a shorter, cooler season.') : profile.wet ? t('Wet conditions increase drainage and disease-management importance.') : t('Conditions are moderate, so soil evidence and crop timing become the main checks.');
   const waterSignal = profile.dry ? t('Recent NASA POWER rainfall was limited; confirm current conditions and irrigation capacity locally.') : profile.wet ? t('Recent regional rainfall was relatively high; inspect drainage and current field conditions locally.') : t('Use the recent NASA record as context, then check a current official local forecast before irrigating.');
@@ -1112,7 +1125,7 @@ function generateLandTip(animate = false) {
   if (animate) host.classList.add('is-generating');
   setTimeout(() => {
     host.dataset.topic = 'generated';
-    host.innerHTML = '<span class="eyebrow">' + escapeHTML(t('GENERATED FOR YOUR LAND')) + '</span><h3>' + escapeHTML(state.location.name) + '</h3><div class="generated-tip-signal"><span>☀ <b>' + escapeHTML(temperature) + '</b></span><span>☂ <b>' + escapeHTML(profile.rainTotal.toFixed(1) + ' mm / 7d') + '</b></span><span>◉ <b>' + escapeHTML(t('NASA POWER')) + '</b></span></div><p><b>' + escapeHTML(t('Climate signal')) + ':</b> ' + escapeHTML(climateSignal) + '</p><p><b>' + escapeHTML(t('Water signal')) + ':</b> ' + escapeHTML(waterSignal) + '</p><div class="generated-tip-crops"><small>' + escapeHTML(t('Crops selected by you')) + '</small><b>' + escapeHTML(cropNames.join(' · ') || t('None selected')) + '</b></div><p><b>' + escapeHTML(t('Next check')) + ':</b> ' + escapeHTML(action) + '</p><small>' + escapeHTML(t('Planning guidance only. Confirm varieties, planting dates, soil tests, water, pests, and markets locally.')) + '</small>';
+    host.innerHTML = '<span class="eyebrow">' + escapeHTML(t('GENERATED FOR YOUR LAND')) + '</span><h3>' + escapeHTML(state.location.name) + '</h3><div class="generated-tip-signal"><span>☀ <b>' + escapeHTML(temperature) + '</b></span><span>☂ <b>' + escapeHTML(profile.rainTotal.toFixed(1) + ' mm / 7d') + '</b></span><span>◉ <b>' + escapeHTML(t('NASA POWER')) + '</b></span></div><p><b>' + escapeHTML(t('Climate signal')) + ':</b> ' + escapeHTML(climateSignal) + '</p><p><b>' + escapeHTML(t('Best starting crop profile')) + ':</b> ' + escapeHTML(cropNames.join(' · ') || autoPlan.crop) + ' — ' + escapeHTML('chosen from ' + autoPlan.reason) + '.</p><p><b>' + escapeHTML(t('Water signal')) + ':</b> ' + escapeHTML(waterSignal) + ' ' + escapeHTML(autoPlan.water) + '.</p><div class="generated-tip-crops"><small>' + escapeHTML(t('Planning profile')) + '</small><b>' + escapeHTML(autoPlan.texture) + '</b></div><p><b>' + escapeHTML(t('Next check')) + ':</b> ' + escapeHTML(action) + '</p><small>' + escapeHTML(t('Planning guidance only. Confirm varieties, planting dates, soil tests, water, pests, and markets locally.')) + '</small>';
     host.classList.remove('is-generating');
     $$('[data-agri-tip]').forEach(button => button.classList.remove('active'));
   }, animate ? 420 : 0);
