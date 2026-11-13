@@ -351,7 +351,7 @@ function init() {
   exploreView.hidden = true;
   exploreView.innerHTML = `
     <header class="explore-world-hero">
-      <div><span class="eyebrow">GLOBAL AGRICULTURE</span><h1>Explore<span>.</span></h1><p>Explore how farmers across different climates combine knowledge, technology and local resources to feed their communities.</p><a class="button explore-journey-button" href="https://github.com/ameer-marwan/AgriPulse/raw/main/media/AgriPulse_Space_to_Soil.pdf" download="AgriPulse_Space_to_Soil.pdf">↓ Download the Space-to-Soil journey</a></div>
+      <div><span class="eyebrow">GLOBAL AGRICULTURE</span><h1>Explore<span>.</span></h1><p>Explore how farmers across different climates combine knowledge, technology and local resources to feed their communities.</p><div class="explore-downloads"><a class="button explore-journey-button" href="https://github.com/ameer-marwan/AgriPulse/raw/main/media/AgriPulse_Space_to_Soil.pdf" download="AgriPulse_Space_to_Soil.pdf">↓ Download the Space-to-Soil journey</a><a class="button secondary explore-journey-button" href="https://github.com/ameer-marwan/AgriPulse/raw/main/media/how-nasa-data-solves-farming.mp4" download="How_NASA_Data_Solves_Farming.mp4">↓ Download the NASA farming video</a></div></div>
       <div class="explore-world-stats" aria-label="Explore page summary"><span><b>5</b> countries</span><span><b>4</b> continents</span><span><b>1</b> shared future</span></div>
     </header>
     <div class="explore-feature-grid">

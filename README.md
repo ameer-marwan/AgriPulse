@@ -12,6 +12,8 @@ AgriPulse is an interactive agricultural decision workspace created for the **20
 
 **[↓ Download the “From Space to Soil” presentation](https://github.com/ameer-marwan/AgriPulse/raw/main/media/AgriPulse_Space_to_Soil.pdf)**
 
+**[↓ Download “How NASA Data Solves Farming’s Biggest Problem”](https://github.com/ameer-marwan/AgriPulse/raw/main/media/how-nasa-data-solves-farming.mp4)**
+
 ![AgriPulse field view](dist/assets/field-landscape.jpg)
 
 ## ✨ What AgriPulse does
