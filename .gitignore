@@ -8,3 +8,4 @@ worker-dist/
 playwright-report/
 test-results/
 .local/
+.openai/
