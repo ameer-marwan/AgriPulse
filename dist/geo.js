@@ -85,7 +85,7 @@ export function createFieldMap(container, { onSelect = () => {}, onBoundary = ()
     pendingModeCamera = false;
     const current = map.getCenter();
     const center = selected ? [selected.lon, Math.max(-85, Math.min(85, selected.lat))] : [current.lng, current.lat];
-    map.flyTo({ center, zoom: mode === 'globe' ? 1.45 : 11, pitch: 0, bearing: 0, duration: 900, essential: false });
+    map.easeTo({ center, zoom: mode === 'globe' ? 1.35 : 8.7, pitch: 0, bearing: 0, duration: 420, essential: false });
   }
   function applyLayer() {
     if (!ready) return;
@@ -112,7 +112,7 @@ export function createFieldMap(container, { onSelect = () => {}, onBoundary = ()
       if (!finiteCoordinate([location?.lon, location?.lat])) { status('Use valid latitude and longitude.', 'error'); return; }
       const alreadySelected = selected && Math.abs(selected.lat - location.lat) < 1e-8 && Math.abs(selected.lon - location.lon) < 1e-8;
       selected = { lat: location.lat, lon: location.lon }; update();
-      if (map && !alreadySelected) map.flyTo({ center: [location.lon, Math.max(-85, Math.min(85, location.lat))], zoom: Math.max(map.getZoom(), 10), duration: 700, essential: false });
+      if (map && !alreadySelected) map.easeTo({ center: [location.lon, Math.max(-85, Math.min(85, location.lat))], zoom: Math.min(9, Math.max(map.getZoom(), 7.5)), duration: 420, essential: false });
     },
     setMode(next) { mode = next === 'globe' ? 'globe' : 'map'; if (drawing && mode === 'globe') api.cancelDrawing(); applyMode(); frameMode(); },
     setLayer(next) { layer = ['terrain', 'thermal'].includes(next) ? next : 'satellite'; applyLayer(); },
@@ -146,7 +146,8 @@ export function createFieldMap(container, { onSelect = () => {}, onBoundary = ()
           { id: 'thermal-base', type: 'raster', source: 'thermal-raster', layout: { visibility: 'none' }, paint: { 'raster-opacity': 0.85 } }
         ]
       },
-      center: [18, 23], zoom: 1.8, maxZoom: 19, attributionControl: true, antialias: true
+      center: [18, 23], zoom: 1.8, maxZoom: 12, attributionControl: true, antialias: false,
+      fadeDuration: 0, refreshExpiredTiles: false, maxTileCacheSize: 64, cooperativeGestures: true
     });
     map.addControl(new globalThis.maplibregl.NavigationControl({ showCompass: true }), 'bottom-right');
     map.on('load', () => {

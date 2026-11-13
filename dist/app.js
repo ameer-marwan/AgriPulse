@@ -389,6 +389,21 @@ function init() {
     ['SMAP + GPM','Soil moisture & rainfall','AVAILABLE','https://gpm.nasa.gov/data']
   ].map(([name,copy,status,href])=>'<a href="'+href+'" target="_blank" rel="noopener noreferrer"><span class="complex-resource-status '+(status==='CONNECTED'||status==='MAP LAYER'?'connected':'')+'">'+status+'</span><b>'+name+'</b><small>'+copy+'</small><i aria-hidden="true">↗</i></a>').join('')+'</div>';
   $('#view-overview .field-data-controls')?.after(complexResources);
+  const nasaLens=document.createElement('section');
+  nasaLens.className='nasa-observation-lens panel';
+  nasaLens.innerHTML='<header><div><span class="eyebrow">NASA OBSERVATION LENS</span><h2>One field. Different signals from space.</h2><p>Choose a signal to understand what it can contribute—and what it cannot prove on its own.</p></div><span class="pill">EVIDENCE, NOT GUESSWORK</span></header><div class="nasa-lens-layout"><div class="nasa-lens-orbit" aria-hidden="true"><span>EARTH</span><i></i><i></i><i></i></div><div class="nasa-lens-tabs" role="tablist"><button class="active" type="button" data-nasa-lens="rain" role="tab" aria-selected="true"><b>GPM / IMERG</b><small>Rainfall</small></button><button type="button" data-nasa-lens="soil" role="tab" aria-selected="false"><b>SMAP</b><small>Soil moisture</small></button><button type="button" data-nasa-lens="crop" role="tab" aria-selected="false"><b>MODIS / VIIRS</b><small>Vegetation</small></button><button type="button" data-nasa-lens="terrain" role="tab" aria-selected="false"><b>SRTM</b><small>Terrain</small></button></div><article class="nasa-lens-detail" id="nasa-lens-detail" aria-live="polite"><span class="eyebrow">RAINFALL CONTEXT</span><h3>See where rain is moving.</h3><p>GPM and IMERG support regional precipitation-rate, accumulation, and extreme-rain context. They do not replace a field rain gauge.</p><a href="https://gpm.nasa.gov/data" target="_blank" rel="noopener noreferrer">Open official resource ↗</a></article></div>';
+  complexResources.after(nasaLens);
+  const lensDetails={
+    rain:['RAINFALL CONTEXT','See where rain is moving.','GPM and IMERG support regional precipitation-rate, accumulation, and extreme-rain context. They do not replace a field rain gauge.','https://gpm.nasa.gov/data'],
+    soil:['SOIL MOISTURE CONTEXT','Understand the surface moisture signal.','SMAP observes regional surface soil moisture and freeze/thaw state. It is not a local soil test and is not currently connected to calculations.','https://www.earthdata.nasa.gov/data/instruments/smap'],
+    crop:['VEGETATION CONTEXT','Read seasonal greenness from orbit.','MODIS and VIIRS imagery can reveal vegetation patterns and seasonal change. Clouds, resolution, and timing can leave gaps.','https://worldview.earthdata.nasa.gov/'],
+    terrain:['TERRAIN CONTEXT','See how elevation shapes water movement.','SRTM elevation supports slope, runoff, and erosion context. It describes terrain—not current soil condition or crop health.','https://www.earthdata.nasa.gov/data/instruments/srtm']
+  };
+  nasaLens.querySelectorAll('[data-nasa-lens]').forEach(button=>button.addEventListener('click',()=>{
+    nasaLens.querySelectorAll('[data-nasa-lens]').forEach(item=>{const active=item===button;item.classList.toggle('active',active);item.setAttribute('aria-selected',String(active));});
+    const [eyebrow,title,copy,href]=lensDetails[button.dataset.nasaLens];
+    $('#nasa-lens-detail').innerHTML='<span class="eyebrow">'+eyebrow+'</span><h3>'+title+'</h3><p>'+copy+'</p><a href="'+href+'" target="_blank" rel="noopener noreferrer">Open official resource ↗</a>';
+  }));
   const simpleView = document.createElement("section");
   simpleView.className = "view simple-farmer-view";
   simpleView.id = "view-simple";
@@ -750,7 +765,10 @@ function navigate() {
       : $("#home-map-host");
   target?.append($("#map-dock"));
   document.body.classList.remove("menu-open");
-  requestAnimationFrame(() => state.map?.resize());
+  requestAnimationFrame(() => {
+    state.map?.resize();
+    requestAnimationFrame(() => state.map?.resize());
+  });
   if (state.ready) window.scrollTo({ top: 0, behavior: "instant" });
 }
 
