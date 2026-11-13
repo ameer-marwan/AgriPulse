@@ -1869,9 +1869,8 @@ async function searchLocation(event) {
   $("#search-results").innerHTML =
     '<p class="search-results-status">Checking coordinates…</p>';
   try {
-    const results = await searchPlaces(query, {
-      signal: state.searchController.signal,
-    });
+    const coordinateQuery = /^\s*-?\d+(?:\.\d+)?\s*[, ]\s*-?\d+(?:\.\d+)?\s*$/.test(query);
+    const results = coordinateQuery ? await searchPlaces(query, { signal: state.searchController.signal }) : findNamedPlaces(query);
     $("#search-results").replaceChildren();
     if (!results.length) {
       $("#search-results").innerHTML =
