@@ -1613,10 +1613,10 @@ function renderFieldHealth() {
     Object.values(scores).reduce((sum, value) => sum + value, 0) / 4,
   );
   text("#field-health-score", overall);
-  text("#health-weather-score", scores.weather + "/100");
-  text("#health-water-score", scores.water + "/100");
-  text("#health-soil-score", scores.soil + "/100");
-  text("#health-profit-score", scores.profit + "/100");
+  text("#health-weather-score", scores.weather ? "Connected" : "Missing");
+  text("#health-water-score", scores.water ? "Connected" : "Missing");
+  text("#health-soil-score", scores.soil ? "Entered" : "Missing");
+  text("#health-profit-score", scores.profit ? "Entered" : "Missing");
   const ring = $("#field-health-ring");
   if (ring) ring.style.strokeDashoffset = String(283 - (283 * overall) / 100);
   text(
