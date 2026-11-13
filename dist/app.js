@@ -1,5 +1,6 @@
 import {
   fetchWeather,
+  fetchLiveWeather,
   searchPlaces,
   searchNamedPlaces,
   findNamedPlaces,
@@ -2065,10 +2066,20 @@ async function loadWeather(force=false) {
   state.weather = null;
   resetWeather("loading");
   try {
-    const weather = await fetchWeather(state.location, {
-      signal: AbortSignal.any([state.weatherController.signal, AbortSignal.timeout(30000)]),
-      force,
-    });
+    let weather;
+    try {
+      weather = await fetchLiveWeather(state.location, {
+        signal: AbortSignal.any([state.weatherController.signal, AbortSignal.timeout(22000)]),
+        force,
+      });
+    } catch (liveError) {
+      // Keep the NASA historical context available when the live forecast provider is unavailable.
+      weather = await fetchWeather(state.location, {
+        signal: AbortSignal.any([state.weatherController.signal, AbortSignal.timeout(30000)]),
+        force,
+      });
+      weather.liveFallback = liveError.message;
+    }
     if (request !== state.requestId) return;
     state.weather = weather;
     ensureSimpleAssumptions();

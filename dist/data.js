@@ -77,6 +77,23 @@ export async function fetchWeather(point, { signal, force = false } = {}) {
   return value;
 }
 
+// Current forecast adapter used for the live weather scene. NASA POWER remains
+// the historical regional context; this endpoint supplies current conditions
+// and a real short-range forecast rather than presenting old records as live.
+export async function fetchLiveWeather(point, { signal, force = false } = {}) {
+  const { lat, lon } = coordinates(point);
+  const key = `open-meteo-live:${lat},${lon}`;
+  const saved = cache.get(key);
+  if (!force && saved && Date.now() - saved.at < 15 * 60 * 1000) return { ...saved.value, cached: true };
+  const query = new URLSearchParams({ latitude: lat, longitude: lon, current: 'temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,is_day', daily: 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max', forecast_days: '7', timezone: 'auto' });
+  const data = await request(`https://api.open-meteo.com/v1/forecast?${query}`, { signal, timeout: 20000 });
+  if (!data?.current || !Array.isArray(data?.daily?.time)) throw new Error('Live forecast returned no usable conditions for this location.');
+  const daily = data.daily.time.map((date, i) => ({ date, high: arrayValue(data.daily, 'temperature_2m_max', i), low: arrayValue(data.daily, 'temperature_2m_min', i), rain: arrayValue(data.daily, 'precipitation_sum', i), rainProbability: arrayValue(data.daily, 'precipitation_probability_max', i), weatherCode: arrayValue(data.daily, 'weather_code', i), et0: null, windMax: null, mean: null, humidity: null, solar: null }));
+  const value = { location: { lat, lon }, gridLocation: { lat, lon }, current: { temperature: number(data.current.temperature_2m), feelsLike: number(data.current.apparent_temperature), humidity: number(data.current.relative_humidity_2m), wind: number(data.current.wind_speed_10m), weatherCode: number(data.current.weather_code), isDay: Boolean(data.current.is_day), time: data.current.time }, daily, hourly: [], timezone: data.timezone || 'auto', elevation: number(data.elevation), retrievedAt: new Date().toISOString(), source: 'Open-Meteo live forecast', sourceUrl: 'https://open-meteo.com/en/docs', classification: 'Live modeled forecast — not a field measurement', cached: false, units: { temperature: '°C', wind: 'km/h', rain: 'mm/day', humidity: '%', soilMoisture: null, et0: null }, limitations: 'Live numerical weather model output; verify conditions locally before acting.' };
+  cache.set(key, { at: Date.now(), value });
+  return value;
+}
+
 export async function searchPlaces(query, { signal } = {}) {
   const text = String(query || '').trim();
   if (signal?.aborted) throw new DOMException('Request cancelled', 'AbortError');
