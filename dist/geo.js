@@ -135,9 +135,9 @@ export function createFieldMap(container, { onSelect = () => {}, onBoundary = ()
       style: {
         version: 8,
         sources: {
-          'satellite-raster': { type: 'raster', tiles: ['https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_SNPP_CorrectedReflectance_TrueColor/default/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpeg'], tileSize: 256, maxzoom: 9, attribution: 'NASA GIBS / VIIRS corrected reflectance' },
-          'terrain-raster': { type: 'raster', tiles: ['https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/SRTM_Color_Index/default/GoogleMapsCompatible_Level12/{z}/{y}/{x}.png'], tileSize: 256, maxzoom: 12, attribution: 'NASA SRTM elevation' },
-          'thermal-raster': { type: 'raster', tiles: ['https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_NDVI_8Day/default/GoogleMapsCompatible_Level9/{z}/{y}/{x}.png'], tileSize: 256, maxzoom: 9, attribution: 'Vegetation index: NASA GIBS / MODIS Terra NDVI' }
+          'satellite-raster': { type: 'raster', tiles: ['https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_SNPP_CorrectedReflectance_TrueColor/default/GoogleMapsCompatible_Level9/{z}/{x}/{y}.jpeg'], tileSize: 256, maxzoom: 9, attribution: 'NASA GIBS / VIIRS corrected reflectance' },
+          'terrain-raster': { type: 'raster', tiles: ['https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/SRTM_Color_Index/default/GoogleMapsCompatible_Level12/{z}/{x}/{y}.png'], tileSize: 256, maxzoom: 12, attribution: 'NASA SRTM elevation' },
+          'thermal-raster': { type: 'raster', tiles: ['https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_NDVI_8Day/default/GoogleMapsCompatible_Level9/{z}/{x}/{y}.png'], tileSize: 256, maxzoom: 9, attribution: 'Vegetation index: NASA GIBS / MODIS Terra NDVI' }
         },
         layers: [
           { id: 'background', type: 'background', paint: { 'background-color': '#07120e' } },
@@ -147,7 +147,8 @@ export function createFieldMap(container, { onSelect = () => {}, onBoundary = ()
         ]
       },
       center: [18, 23], zoom: 1.8, maxZoom: 12, attributionControl: true, antialias: false,
-      fadeDuration: 0, refreshExpiredTiles: false, maxTileCacheSize: 64, cooperativeGestures: true
+      fadeDuration: 0, refreshExpiredTiles: false, maxTileCacheSize: 64, cooperativeGestures: false,
+      scrollZoom: false, dragRotate: false, touchPitch: false
     });
     map.addControl(new globalThis.maplibregl.NavigationControl({ showCompass: true }), 'bottom-right');
     map.on('load', () => {

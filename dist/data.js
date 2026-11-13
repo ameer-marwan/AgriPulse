@@ -87,6 +87,15 @@ export async function searchPlaces(query, { signal } = {}) {
   return [{ id: `coordinates:${lat},${lon}`, name: `Coordinates ${lat.toFixed(4)}, ${lon.toFixed(4)}`, lat, lon, country: '', region: '', timezone: 'UTC' }];
 }
 
+/** Small offline place index for the guided flow; no third-party geocoder is used. */
+export function findNamedPlaces(query) {
+  const text = String(query || '').trim().toLowerCase();
+  if (text.length < 2) return [];
+  return [
+    ['Riyadh, Saudi Arabia',24.7136,46.6753,'Saudi Arabia'],['Jeddah, Saudi Arabia',21.4858,39.1925,'Saudi Arabia'],['Cairo, Egypt',30.0444,31.2357,'Egypt'],['Amman, Jordan',31.9454,35.9284,'Jordan'],['Dubai, United Arab Emirates',25.2048,55.2708,'United Arab Emirates'],['Doha, Qatar',25.2854,51.5310,'Qatar'],['Muscat, Oman',23.5880,58.3829,'Oman'],['New Delhi, India',28.6139,77.2090,'India'],['Nairobi, Kenya',-1.2921,36.8219,'Kenya'],['São Paulo, Brazil',-23.5505,-46.6333,'Brazil'],['Amsterdam, Netherlands',52.3676,4.9041,'Netherlands']
+  ].filter(([name]) => name.toLowerCase().includes(text)).slice(0,6).map(([name,lat,lon,country]) => ({ id:`place:${lat},${lon}`, name, lat, lon, country, region:'', timezone:'UTC' }));
+}
+
 export async function fetchNasa(point, { signal } = {}) {
   const { lat, lon } = coordinates(point);
   const year = new Date().getUTCFullYear() - 1;
