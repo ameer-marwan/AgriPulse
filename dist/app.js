@@ -483,6 +483,10 @@ function init() {
   horizon.innerHTML =
     '<div class="panel-heading"><div><span class="eyebrow">SEASON HORIZON</span><h2>Plan the next stages</h2></div><span class="pill">PLANNING VIEW</span></div><div id="season-horizon"></div><p class="fine-print">A planning horizon based on your selected rotation. Confirm local planting and harvest dates before acting.</p>';
   $("#view-crops").insertBefore(horizon, $("#view-crops .data-note"));
+  const challengeCenter = document.createElement("section");
+  challengeCenter.className = "challenge-center panel";
+  challengeCenter.innerHTML = '<header><div><span class="eyebrow">FIELD DECISION STUDIO</span><h2>One field. One clear next move.</h2><p>Move from a selected place to a traceable decision in under a minute.</p></div><a class="button secondary small" href="#/map">Choose a field</a></header><div id="challenge-center-content"></div><section class="signal-explainers" aria-label="Earth observation signal explainers"><article><span>☂</span><div><b>GPM / IMERG</b><p>Regional rainfall context. It supports rain awareness, not a farm rain gauge.</p></div><a href="https://gpm.nasa.gov/data" target="_blank" rel="noopener noreferrer">Source ↗</a></article><article><span>◉</span><div><b>SMAP</b><p>Modeled surface soil-moisture imagery. It does not replace a soil sample.</p></div><a href="https://www.earthdata.nasa.gov/data/instruments/smap" target="_blank" rel="noopener noreferrer">Source ↗</a></article><article><span>❋</span><div><b>MODIS NDVI</b><p>Vegetation greenness imagery for visual inspection, not a crop-health diagnosis.</p></div><a href="https://worldview.earthdata.nasa.gov/" target="_blank" rel="noopener noreferrer">Source ↗</a></article><article><span>△</span><div><b>SRTM</b><p>Terrain context for slope and water movement, not current field conditions.</p></div><a href="https://www.earthdata.nasa.gov/data/instruments/srtm" target="_blank" rel="noopener noreferrer">Source ↗</a></article></section></section>';
+  $("#view-overview .decision-briefing")?.after(challengeCenter);
   const satellite = document.createElement("div");
   satellite.className = "satellite-status";
   satellite.innerHTML =
@@ -1788,6 +1792,23 @@ function renderDecisionBriefing() {
         )
         .join("")
     : '<div class="briefing-clear"><span>✓</span><div><b>No urgent signal</b><small>Connected data does not show a threshold alert right now.</small></div></div>';
+  renderChallengeCenter();
+}
+function renderChallengeCenter() {
+  const host = $('#challenge-center-content');
+  if (!host) return;
+  if (!hasLocation()) {
+    host.innerHTML = '<div class="challenge-empty"><span>01</span><div><b>Choose a real field to begin</b><p>AgriPulse will then connect the selected point to live weather, NASA historical context, imagery layers, and your local evidence.</p></div><a class="button" href="#/map">Start with location →</a></div>';
+    return;
+  }
+  const weather = state.weather?.current;
+  const weeklyRain = state.weather ? total(state.weather.daily, 'rain') : null;
+  const samples = state.samples.filter(sample => sample.field === fieldKey()).length;
+  const priceVerified = state.economicsInputs.priceSource && !['none', 'estimate'].includes(state.economicsInputs.priceSource);
+  const weatherSummary = weather ? (formatWeatherCode(weather.weatherCode) + ' · ' + temp(weather.temperature) + ' · ' + (number(weeklyRain) ? rain(weeklyRain) + ' in 7 days' : 'rain record pending')) : 'Live weather is still loading';
+  const waterAction = number(weeklyRain) && weeklyRain < 10 ? 'Check irrigation timing and conserve moisture.' : 'Review drainage and only irrigate after checking field conditions.';
+  const readiness = [Boolean(weather), samples > 0, Boolean(priceVerified)].filter(Boolean).length;
+  host.innerHTML = '<div class="challenge-decision-grid"><article class="challenge-current"><span class="eyebrow">FIELD NOW</span><h3>' + escapeHTML(state.location.name) + '</h3><p>' + escapeHTML(weatherSummary) + '</p><small>Selected point · ' + escapeHTML(state.location.lat.toFixed(3) + ', ' + state.location.lon.toFixed(3)) + '</small></article><article><span class="eyebrow">WATER-SMART CHECK</span><h3>' + escapeHTML(waterAction) + '</h3><p>Based on the connected weather record. Confirm local irrigation access, soil moisture, and crop stage before acting.</p><a href="#/water">Open water context →</a></article><article><span class="eyebrow">EVIDENCE READINESS</span><h3>' + readiness + ' / 3 connected</h3><p>' + (samples ? 'Local soil evidence added.' : 'Add a dated soil sample.') + ' ' + (priceVerified ? 'Local price verified.' : 'Add a dated local price.') + '</p><a href="#/reports">Open decision report →</a></article></div><div class="challenge-path"><span><b>1</b> Select location</span><i></i><span><b>2</b> Read weather + NASA context</span><i></i><span><b>3</b> Add local soil / market evidence</span><i></i><span><b>4</b> Export your decision brief</span></div>';
 }
 function renderSeasonHorizon() {
   const host = $("#season-horizon");
