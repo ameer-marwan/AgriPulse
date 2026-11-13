@@ -638,6 +638,10 @@ function renderAgriSystemLiveSignals() {
   text('#system-live-soil', localSoil ? localSoil + ' ' + t('local record(s)') : hasLocation() ? t('Automatic land context') : t('No local details'));
   const connected = [hasLocation(),Boolean(weather),localSoil > 0,Boolean(state.economics)].filter(Boolean).length;
   text('#system-live-readiness', connected + ' / 4 ' + t('connected'));
+  text('#passport-weather', weather ? temp(weather.current?.temperature) + ' · ' + rain(rainTotal) + ' ' + t('rain in 7 days') : t(hasLocation() ? 'Connecting live forecast…' : 'Choose a field to connect the forecast.'));
+  text('#passport-local', localSoil ? localSoil + ' ' + t('local soil record(s) connected.') : t('No local soil records connected yet.'));
+  text('#passport-readiness', connected + ' ' + t('of 4 decision signals connected.'));
+  $$('[data-evidence-card]').forEach((card,index) => card.classList.toggle('connected',[Boolean(weather),hasLocation(),localSoil>0,connected>=3][index]));
   $$('.agri-live-signal-bar>span').forEach((item,index) => item.classList.toggle('connected',[hasLocation(),Boolean(weather),localSoil > 0,Boolean(state.economics)][index]));
   const nodeCopy = {
     climate: weather ? temp(weather.current?.temperature) + ' · ' + wind(weather.current?.wind) : t('Heat · rain · wind'),
@@ -694,6 +698,7 @@ function navigate() {
   $$(".view").forEach((view) => {
     view.hidden = view.id !== "view-" + state.route;
   });
+  document.body.dataset.route = state.route;
   $$("[data-route]").forEach((link) => {
     const active = link.dataset.route === state.route;
     link.classList.toggle("active", active);

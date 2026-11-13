@@ -267,8 +267,22 @@ const reportExportWords = {
   zh:{'Export report':'导出报告','REPORT EXPORT':'报告导出','Download your farm report':'下载农场报告','Report language':'报告语言','File type':'文件类型','Generate and download':'生成并下载','Generating report…':'正在生成报告…','Learn more':'了解更多','Show less':'收起','What this means':'这意味着什么','WATER BALANCE':'水分平衡','Rain exceeds reference demand':'降雨高于参考需水量','Reference demand exceeds rain':'参考需水量高于降雨','Water balance unavailable':'水分平衡不可用','7-day rain':'7天降雨','Difference':'差值','SOIL EVIDENCE':'土壤证据','details provided':'项详情已提供','REPORT TRACE':'报告追踪','Weather updated':'天气更新时间','Exchange rate':'汇率','Live':'实时','Reference':'参考','Coordinates':'坐标','FARM DECISION REPORT':'农场决策报告','SEVEN DAY OUTLOOK':'七天天气展望','Economics':'经济分析','Evidence and limitations':'证据与局限','Field evidence':'农田证据','Signals connected':'信号已连接','Next best actions':'下一步最佳行动','Weather is modeled for the selected point, not measured on the farm.':'天气为所选点的模型数据，并非农场实测。','Crop suitability is a profile screening, not a planting prescription.':'作物适宜性是概况筛查，不是种植处方。','Profit values are planning references until local prices and costs are entered.':'输入本地价格和成本前，利润仅为规划参考。','Report export failed.':'报告导出失败。'}
 };
 Object.entries(reportExportWords).forEach(([language, words]) => Object.assign(translations[language], words));
+const experienceUpgradeWords = {
+  fr:{'Generate a tip for this land':'Générer un conseil pour ce terrain','Weather · water · crops · next action':'Météo · eau · cultures · prochaine action','Automatic land-aware starting point':'Point de départ automatique adapté au terrain','Climate signal':'Signal climatique','Water signal':'Signal hydrique','Best starting crop profiles':'Meilleurs profils de culture initiaux','Next check':'Prochaine vérification','INTERACTIVE SEASON LAB':'LABORATOIRE SAISONNIER INTERACTIF','Stress-test the season before it arrives.':'Testez la saison avant son arrivée.','EVIDENCE PASSPORT':'PASSEPORT DES DONNÉES','See what is live, modeled, and provided by you.':'Identifiez ce qui est en direct, modélisé ou fourni par vous.'},
+  ar:{'Generate a tip for this land':'إنشاء نصيحة لهذه الأرض','Weather · water · crops · next action':'الطقس · المياه · المحاصيل · الخطوة التالية','Automatic land-aware starting point':'نقطة بداية تلقائية حسب الأرض','Climate signal':'إشارة المناخ','Water signal':'إشارة المياه','Best starting crop profiles':'أفضل المحاصيل المبدئية','Next check':'الفحص التالي','INTERACTIVE SEASON LAB':'مختبر الموسم التفاعلي','Stress-test the season before it arrives.':'اختبر الموسم قبل وصوله.','EVIDENCE PASSPORT':'جواز الأدلة','See what is live, modeled, and provided by you.':'اعرف ما هو مباشر أو مُنمذج أو مقدم منك.'},
+  es:{'Generate a tip for this land':'Generar consejo para esta tierra','Weather · water · crops · next action':'Clima · agua · cultivos · siguiente acción','Automatic land-aware starting point':'Punto de partida automático según el terreno','Climate signal':'Señal climática','Water signal':'Señal hídrica','Best starting crop profiles':'Mejores perfiles iniciales de cultivo','Next check':'Siguiente comprobación','INTERACTIVE SEASON LAB':'LABORATORIO ESTACIONAL INTERACTIVO','Stress-test the season before it arrives.':'Pon a prueba la temporada antes de que llegue.','EVIDENCE PASSPORT':'PASAPORTE DE EVIDENCIAS','See what is live, modeled, and provided by you.':'Distingue datos en vivo, modelados y aportados por ti.'},
+  de:{'Generate a tip for this land':'Tipp für diese Fläche erzeugen','Weather · water · crops · next action':'Wetter · Wasser · Kulturen · nächster Schritt','Automatic land-aware starting point':'Automatischer flächenbezogener Startpunkt','Climate signal':'Klimasignal','Water signal':'Wassersignal','Best starting crop profiles':'Beste anfängliche Kulturprofile','Next check':'Nächste Prüfung','INTERACTIVE SEASON LAB':'INTERAKTIVES SAISONLABOR','Stress-test the season before it arrives.':'Testen Sie die Saison vorab.','EVIDENCE PASSPORT':'DATENPASS','See what is live, modeled, and provided by you.':'Erkennen Sie Live-, Modell- und eigene Daten.'},
+  pt:{'Generate a tip for this land':'Gerar dica para esta terra','Weather · water · crops · next action':'Clima · água · culturas · próxima ação','Automatic land-aware starting point':'Ponto inicial automático conforme a terra','Climate signal':'Sinal climático','Water signal':'Sinal hídrico','Best starting crop profiles':'Melhores perfis iniciais de cultivo','Next check':'Próxima verificação','INTERACTIVE SEASON LAB':'LABORATÓRIO SAZONAL INTERATIVO','Stress-test the season before it arrives.':'Teste a estação antes de ela chegar.','EVIDENCE PASSPORT':'PASSAPORTE DE EVIDÊNCIAS','See what is live, modeled, and provided by you.':'Veja o que é ao vivo, modelado e fornecido por você.'},
+  tr:{'Generate a tip for this land':'Bu arazi için ipucu üret','Weather · water · crops · next action':'Hava · su · ürünler · sonraki adım','Automatic land-aware starting point':'Araziye göre otomatik başlangıç','Climate signal':'İklim sinyali','Water signal':'Su sinyali','Best starting crop profiles':'En iyi başlangıç ürün profilleri','Next check':'Sonraki kontrol','INTERACTIVE SEASON LAB':'ETKİLEŞİMLİ SEZON LABORATUVARI','Stress-test the season before it arrives.':'Sezonu gelmeden test edin.','EVIDENCE PASSPORT':'KANIT PASAPORTU','See what is live, modeled, and provided by you.':'Canlı, modellenmiş ve sizin sağladığınız verileri görün.'},
+  ur:{'Generate a tip for this land':'اس زمین کے لیے مشورہ بنائیں','Weather · water · crops · next action':'موسم · پانی · فصلیں · اگلا قدم','Automatic land-aware starting point':'زمین کے مطابق خودکار آغاز','Climate signal':'آب و ہوا کا اشارہ','Water signal':'پانی کا اشارہ','Best starting crop profiles':'بہترین ابتدائی فصلیں','Next check':'اگلی جانچ','INTERACTIVE SEASON LAB':'انٹرایکٹو موسمی لیب','Stress-test the season before it arrives.':'موسم آنے سے پہلے جانچیں۔','EVIDENCE PASSPORT':'شواہد پاسپورٹ','See what is live, modeled, and provided by you.':'براہ راست، ماڈل اور اپنے ڈیٹا کو پہچانیں۔'},
+  hi:{'Generate a tip for this land':'इस भूमि के लिए सुझाव बनाएँ','Weather · water · crops · next action':'मौसम · पानी · फसलें · अगला कदम','Automatic land-aware starting point':'भूमि के अनुसार स्वचालित शुरुआत','Climate signal':'जलवायु संकेत','Water signal':'जल संकेत','Best starting crop profiles':'सर्वोत्तम शुरुआती फसल प्रोफ़ाइल','Next check':'अगली जाँच','INTERACTIVE SEASON LAB':'इंटरैक्टिव सीज़न लैब','Stress-test the season before it arrives.':'मौसम आने से पहले उसका परीक्षण करें।','EVIDENCE PASSPORT':'साक्ष्य पासपोर्ट','See what is live, modeled, and provided by you.':'लाइव, मॉडल और आपके दिए डेटा को पहचानें।'},
+  zh:{'Generate a tip for this land':'为这块土地生成建议','Weather · water · crops · next action':'天气 · 水分 · 作物 · 下一步','Automatic land-aware starting point':'基于土地的自动起点','Climate signal':'气候信号','Water signal':'水分信号','Best starting crop profiles':'最佳初始作物组合','Next check':'下一项检查','INTERACTIVE SEASON LAB':'互动季节实验室','Stress-test the season before it arrives.':'在季节到来前进行压力测试。','EVIDENCE PASSPORT':'证据护照','See what is live, modeled, and provided by you.':'区分实时、模型和用户提供的数据。'}
+};
+Object.entries(experienceUpgradeWords).forEach(([language, words]) => Object.assign(translations[language], words));
 const originalText = new WeakMap();
 const originalAttribute = new WeakMap();
+const translatedText = new WeakMap();
+const translatedAttributes = new WeakMap();
 let active = 'en';
 const supportedLanguages = ['en','fr','ar','es','de','pt','tr','ur','hi','zh'];
 const base = value => String(value ?? '').replace(/\s+/g, ' ').trim();
@@ -280,14 +294,14 @@ function translateNode(node) {
   if (node.nodeType !== Node.TEXT_NODE || !node.nodeValue.trim() || node.parentElement?.closest('script,style,svg,[data-field-name],[data-stat],[data-coordinates],#field-area,#mapped-area,#report-area')) return;
   if (!originalText.has(node)) originalText.set(node, node.nodeValue);
   const next = translate(originalText.get(node));
-  if (node.nodeValue !== next) node.nodeValue = next;
+  if (node.nodeValue !== next) { translatedText.set(node, next); node.nodeValue = next; }
 }
 function translateAttributes(el) {
   for (const name of ['placeholder','aria-label','title']) {
     if (!el.hasAttribute?.(name)) continue;
     let attrs = originalAttribute.get(el); if (!attrs) { attrs = {}; originalAttribute.set(el, attrs); }
     if (!(name in attrs)) attrs[name] = el.getAttribute(name);
-    const next = translate(attrs[name]); if (el.getAttribute(name) !== next) el.setAttribute(name, next);
+    const next = translate(attrs[name]); if (el.getAttribute(name) !== next) { let expected = translatedAttributes.get(el); if (!expected) { expected = {}; translatedAttributes.set(el, expected); } expected[name] = next; el.setAttribute(name, next); }
   }
 }
 function apply(root = document.body) {
@@ -307,8 +321,12 @@ export function initI18n({preferences, save, rerender}) {
   settings.prepend(label);
   const picker = label.querySelector('select'); picker.value = active;
   picker.addEventListener('change', () => { active = picker.value; preferences.language = active; save(preferences); rerender?.(); apply(); window.dispatchEvent(new CustomEvent('fieldshift:language',{detail:active})); });
-  const observer = new MutationObserver(records => { for (const record of records) for (const node of record.addedNodes) { if (node.nodeType === Node.TEXT_NODE) translateNode(node); else if (node.nodeType === Node.ELEMENT_NODE) apply(node); } });
-  observer.observe(document.body, {childList:true,characterData:true,subtree:true});
+  const observer = new MutationObserver(records => { for (const record of records) {
+    if (record.type === 'characterData') { const node = record.target, expected = translatedText.get(node); if (expected === node.nodeValue) { translatedText.delete(node); continue; } originalText.set(node,node.nodeValue); translateNode(node); continue; }
+    if (record.type === 'attributes') { const el=record.target,name=record.attributeName,expected=translatedAttributes.get(el); if (expected?.[name] === el.getAttribute(name)) { delete expected[name]; continue; } let attrs=originalAttribute.get(el); if(!attrs){attrs={};originalAttribute.set(el,attrs);} attrs[name]=el.getAttribute(name); translateAttributes(el); continue; }
+    for (const node of record.addedNodes) { if (node.nodeType === Node.TEXT_NODE) translateNode(node); else if (node.nodeType === Node.ELEMENT_NODE) apply(node); }
+  } });
+  observer.observe(document.body, {childList:true,characterData:true,attributes:true,attributeFilter:['placeholder','aria-label','title'],subtree:true});
   apply();
 }
 
