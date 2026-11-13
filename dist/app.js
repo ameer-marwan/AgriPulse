@@ -165,7 +165,7 @@ const priceSourceNames = {
   farmgate: "Farm-gate quote",
   cooperative: "Cooperative or contract",
   wholesale: "Wholesale market quote",
-  benchmark: "Published benchmark",
+  benchmark: "USDA AMS or published source",
 };
 const state = {
   location:
@@ -196,21 +196,21 @@ const state = {
   ready: false,
   fieldSettings: read("fieldshift.fieldSettings", {}),
   economicsInputs: { ...defaultEconomics },
-  simpleFarm: { objective: "water", waterSource: "unknown", crop: "recommend", crops: [], soilPH: "", soilTexture: "unknown", drainage: "unknown", ...read("fieldshift.simpleFarm", {}) },
+  simpleFarm: { objective: "water", waterSource: "unknown", crop: "recommend", crops: [], soilPH: "", soilTexture: "unknown", drainage: "unknown", localYield: "", localPrice: "", localCost: "", ...read("fieldshift.simpleFarm", {}) },
 };
 // Reviewed Simple-mode crop records adapted from the FieldShift AI reference repository.
 // They deliberately produce factor labels, never a numeric score or planting instruction.
 const simpleCropEvidence = {
-  wheat: { name: 'Wheat', ph: { optimum: [6, 7], absolute: [5.5, 8.5] }, texture: { optimum: ['medium', 'organic'], absolute: ['heavy', 'medium'] }, drainage: { optimum: ['well'], absolute: ['well'] }, source: 'FAO ECOCROP 2114' },
-  barley: { name: 'Barley', ph: { optimum: [6.5, 7.5], absolute: [6, 8] }, texture: { optimum: ['medium'], absolute: ['heavy', 'medium', 'light'] }, drainage: { optimum: ['well'], absolute: ['well'] }, source: 'FAO ECOCROP 1232' },
-  chickpea: { name: 'Chickpea', ph: { optimum: [6, 8.5], absolute: [4.7, 9.5] }, texture: { optimum: ['heavy', 'medium'], absolute: ['heavy', 'medium', 'light'] }, drainage: { optimum: ['well'], absolute: ['well', 'excessive'] }, source: 'FAO ECOCROP 2479' },
-  alfalfa: { name: 'Alfalfa', ph: { optimum: [6.5, 7.5], absolute: [4.3, 8.7] }, texture: { optimum: ['medium', 'light'], absolute: ['medium', 'light'] }, drainage: { optimum: ['well'], absolute: ['well', 'excessive'] }, source: 'FAO ECOCROP 1428' },
-  maize: { name: 'Maize', ph: { optimum: [5.8, 7.0], absolute: [5, 8] }, texture: { optimum: ['medium'], absolute: ['heavy', 'medium', 'light'] }, drainage: { optimum: ['well'], absolute: ['well'] }, source: 'FAO ECOCROP profile' },
-  rice: { name: 'Rice', ph: { optimum: [5.5, 6.5], absolute: [4.5, 8] }, texture: { optimum: ['heavy'], absolute: ['heavy', 'medium'] }, drainage: { optimum: ['well'], absolute: ['well'] }, source: 'FAO ECOCROP profile' },
-  tomato: { name: 'Tomato', ph: { optimum: [6, 6.8], absolute: [5, 7.5] }, texture: { optimum: ['medium'], absolute: ['medium', 'light', 'organic'] }, drainage: { optimum: ['well'], absolute: ['well'] }, source: 'FAO ECOCROP profile' },
-  potato: { name: 'Potato', ph: { optimum: [5.2, 6.5], absolute: [4.5, 8] }, texture: { optimum: ['light', 'medium'], absolute: ['light', 'medium'] }, drainage: { optimum: ['well'], absolute: ['well'] }, source: 'FAO ECOCROP profile' },
-  cotton: { name: 'Cotton', ph: { optimum: [5.5, 8], absolute: [5, 9] }, texture: { optimum: ['medium'], absolute: ['heavy', 'medium', 'light'] }, drainage: { optimum: ['well'], absolute: ['well'] }, source: 'FAO ECOCROP profile' },
-  sunflower: { name: 'Sunflower', ph: { optimum: [6, 7.5], absolute: [5, 8.5] }, texture: { optimum: ['medium'], absolute: ['heavy', 'medium', 'light'] }, drainage: { optimum: ['well'], absolute: ['well'] }, source: 'FAO ECOCROP profile' },
+  wheat: { name: 'Wheat', ph: { optimum: [6, 7], absolute: [5.5, 8.5] }, texture: { optimum: ['medium', 'organic'], absolute: ['heavy', 'medium'] }, drainage: { optimum: ['well'], absolute: ['well'] }, source: 'Comparison profile · validate with FAO GAEZ' },
+  barley: { name: 'Barley', ph: { optimum: [6.5, 7.5], absolute: [6, 8] }, texture: { optimum: ['medium'], absolute: ['heavy', 'medium', 'light'] }, drainage: { optimum: ['well'], absolute: ['well'] }, source: 'Comparison profile · validate with FAO GAEZ' },
+  chickpea: { name: 'Chickpea', ph: { optimum: [6, 8.5], absolute: [4.7, 9.5] }, texture: { optimum: ['heavy', 'medium'], absolute: ['heavy', 'medium', 'light'] }, drainage: { optimum: ['well'], absolute: ['well', 'excessive'] }, source: 'Comparison profile · validate with FAO GAEZ' },
+  alfalfa: { name: 'Alfalfa', ph: { optimum: [6.5, 7.5], absolute: [4.3, 8.7] }, texture: { optimum: ['medium', 'light'], absolute: ['medium', 'light'] }, drainage: { optimum: ['well'], absolute: ['well', 'excessive'] }, source: 'Comparison profile · validate with FAO GAEZ' },
+  maize: { name: 'Maize', ph: { optimum: [5.8, 7.0], absolute: [5, 8] }, texture: { optimum: ['medium'], absolute: ['heavy', 'medium', 'light'] }, drainage: { optimum: ['well'], absolute: ['well'] }, source: 'Comparison profile · validate with FAO GAEZ' },
+  rice: { name: 'Rice', ph: { optimum: [5.5, 6.5], absolute: [4.5, 8] }, texture: { optimum: ['heavy'], absolute: ['heavy', 'medium'] }, drainage: { optimum: ['well'], absolute: ['well'] }, source: 'Comparison profile · validate with FAO GAEZ' },
+  tomato: { name: 'Tomato', ph: { optimum: [6, 6.8], absolute: [5, 7.5] }, texture: { optimum: ['medium'], absolute: ['medium', 'light', 'organic'] }, drainage: { optimum: ['well'], absolute: ['well'] }, source: 'Comparison profile · validate with FAO GAEZ' },
+  potato: { name: 'Potato', ph: { optimum: [5.2, 6.5], absolute: [4.5, 8] }, texture: { optimum: ['light', 'medium'], absolute: ['light', 'medium'] }, drainage: { optimum: ['well'], absolute: ['well'] }, source: 'Comparison profile · validate with FAO GAEZ' },
+  cotton: { name: 'Cotton', ph: { optimum: [5.5, 8], absolute: [5, 9] }, texture: { optimum: ['medium'], absolute: ['heavy', 'medium', 'light'] }, drainage: { optimum: ['well'], absolute: ['well'] }, source: 'Comparison profile · validate with FAO GAEZ' },
+  sunflower: { name: 'Sunflower', ph: { optimum: [6, 7.5], absolute: [5, 8.5] }, texture: { optimum: ['medium'], absolute: ['heavy', 'medium', 'light'] }, drainage: { optimum: ['well'], absolute: ['well'] }, source: 'Comparison profile · validate with FAO GAEZ' },
 };
 const simpleCropStickers = { wheat:{icon:'🌾',category:'grain'}, barley:{icon:'🌾',category:'grain'}, chickpea:{icon:'🫘',category:'legume'}, alfalfa:{icon:'🌱',category:'forage'}, maize:{icon:'🌽',category:'grain'}, rice:{icon:'🍚',category:'grain'}, tomato:{icon:'🍅',category:'vegetable'}, potato:{icon:'🥔',category:'vegetable'}, cotton:{icon:'☁️',category:'fiber'}, sunflower:{icon:'🌻',category:'oilseed'} };
 const hasLocation = () =>
@@ -371,6 +371,20 @@ function init() {
     <div class="explore-world-section-heading explore-resources-heading"><div><span class="eyebrow">TRUSTED RESOURCES</span><h2>Learn more about agriculture.</h2></div><p>Continue exploring with Saudi agriculture, NASA Earth observation, and a global view of changing land.</p></div>
     <div class="learn-resources explore-resources"><article class="panel learn-card learn-ksa"><span class="learn-card-number">01</span><div class="icon-box lime"><svg><use href="#i-leaf"/></svg></div><span class="eyebrow">SAUDI ARABIA</span><h2>KSA Agriculture</h2><p>Discover Saudi agriculture, industry events, technologies, and initiatives supporting the Kingdom’s farming sector.</p><a class="button learn-resource-link" href="https://saudi-agriculture.com/" target="_blank" rel="noopener noreferrer">Open KSA Agriculture <span aria-hidden="true">↗</span></a></article><article class="panel learn-card learn-nasa"><span class="learn-card-number">02</span><div class="icon-box blue"><svg><use href="#i-globe"/></svg></div><span class="eyebrow">EARTH OBSERVATION</span><h2>NASA Harvest</h2><p>Explore NASA’s global agriculture and food-security program, connecting satellite Earth observations with practical decisions.</p><a class="button learn-resource-link" href="https://www.nasaharvest.org" target="_blank" rel="noopener noreferrer">Open NASA Harvest <span aria-hidden="true">↗</span></a></article><article class="panel learn-card learn-earth"><span class="learn-card-number">03</span><div class="icon-box amber"><svg><use href="#i-map"/></svg></div><span class="eyebrow">EXPLORE THE PLANET</span><h2>Google Earth</h2><p>Travel across the globe, inspect landscapes, and understand the geographic context around farms and fields.</p><a class="button learn-resource-link" href="https://earth.google.com/web/@0,-1.38870016,0a,22251752.77375655d,35y,0h,0t,0r/data=CgRCAggBMikKJwolCiExM0FFVHlOV21hSXJSMUxBZjZvdy1Da05iczc1dHFhX3cgAToDCgEwQgIIAEoHCJvAuHEQAQ" target="_blank" rel="noopener noreferrer">Open Google Earth <span aria-hidden="true">↗</span></a></article></div>
     <aside class="learn-note"><span>✦</span><p><b>Keep learning beyond your field.</b> These websites open in a new tab, so your AgriPulse workspace stays exactly where you left it.</p></aside>`;
+  const challengeResources=document.createElement('section');
+  challengeResources.className='challenge-resource-panel panel';
+  challengeResources.innerHTML='<header><div><span class="eyebrow">NASA SPACE APPS · PROVIDED RESOURCES</span><h2>Evidence sources, with connection status.</h2><p>Only connected sources influence AgriPulse calculations. The others are official resources for validation and future integration—not simulated data.</p></div><span class="pill">NO SAMPLE VALUES</span></header><div class="challenge-resource-grid">'+[
+    ['NASA POWER','Recent temperature, humidity, wind, solar and rainfall context.','CONNECTED','https://power.larc.nasa.gov/'],
+    ['MODIS Land Surface Temperature','NASA GIBS thermal map layer in Field Explorer.','MAP LAYER','https://worldview.earthdata.nasa.gov/'],
+    ['SMAP','Surface soil moisture and freeze/thaw observations.','AVAILABLE · NOT CONNECTED','https://www.earthdata.nasa.gov/data/instruments/smap'],
+    ['GPM / IMERG','Precipitation rate, accumulation and extreme-rain context.','AVAILABLE · NOT CONNECTED','https://gpm.nasa.gov/data'],
+    ['Landsat / MODIS / VIIRS','Reflectance, NDVI, vegetation stress and seasonal change.','AVAILABLE · NOT CONNECTED','https://landsat.gsfc.nasa.gov/data/'],
+    ['SRTM','Elevation, slope, runoff and erosion context.','AVAILABLE · NOT CONNECTED','https://www.earthdata.nasa.gov/data/instruments/srtm'],
+    ['ECOSTRESS','Land-surface temperature and evapotranspiration.','AVAILABLE · NOT CONNECTED','https://ecostress.jpl.nasa.gov/'],
+    ['FAO GAEZ','Global crop suitability, water and soil constraints.','VALIDATION RESOURCE','https://gaez.fao.org/'],
+    ['USDA Ag Data Commons','Open agricultural research and ground context.','VALIDATION RESOURCE','https://agdatacommons.nal.usda.gov/']
+  ].map(([name,copy,status,href],index)=>'<article><span>'+String(index+1).padStart(2,'0')+'</span><div><b>'+escapeHTML(name)+'</b><p>'+escapeHTML(copy)+'</p><small class="'+(status==='CONNECTED'||status==='MAP LAYER'?'connected':'')+'">'+escapeHTML(status)+'</small></div><a href="'+href+'" target="_blank" rel="noopener noreferrer" aria-label="Open '+escapeHTML(name)+'">↗</a></article>').join('')+'</div><p class="fine-print">NASA does not endorse non-U.S. Government entities. External resources retain their own data-use conditions.</p>';
+  exploreView.querySelector('.learn-note')?.before(challengeResources);
   $("main").insertBefore(exploreView, $(".app-footer"));
   const simpleView = document.createElement("section");
   simpleView.className = "view simple-farmer-view";
@@ -385,8 +399,8 @@ function init() {
     <section class="simple-agri-backdrop" aria-label="Agricultural field"><div><span class="eyebrow">FROM EARTH DATA TO YOUR FIELD</span><h2>A clearer season starts with your land.</h2><p>Choose a location, add what you know, and turn weather, soil, water, crop, and market context into one practical report.</p></div><span class="simple-agri-badge">NASA EARTH OBSERVATIONS · FARMER KNOWLEDGE</span></section>
     <dialog class="simple-settings-dialog" id="simple-settings-dialog"><header><div><span class="eyebrow">AGRIPULSE AI</span><h2 data-simple-copy="settings">Settings</h2></div><button class="simple-tool-icon" type="button" data-action="close-simple-settings" aria-label="Close settings">×</button></header><p data-simple-copy="settingsHelp">Change language or theme without leaving the guided farmer flow.</p><div class="simple-settings-actions"><div class="simple-appearance-options" role="group" aria-label="Choose appearance"><button type="button" data-simple-theme-choice="auto"><span>◐</span><b>Automatic</b><small>Follows local time</small></button><button type="button" data-simple-theme-choice="light"><span>☀</span><b>Daylight</b><small>Bright and fresh</small></button><button type="button" data-simple-theme-choice="dark"><span>☾</span><b>Forest dark</b><small>Calm and focused</small></button></div><label>Appearance<select id="simple-appearance"><option value="auto">Automatic · follows local time</option><option value="dark">Forest dark</option><option value="light">Daylight</option></select></label><label>Weather units<select id="simple-weather-units"><option value="metric">Metric · °C, mm, km/h</option><option value="imperial">Imperial · °F, inches, mph</option></select></label><label>Language<select id="simple-settings-language"><option value="en">English</option><option value="ar">العربية</option><option value="fr">Français</option><option value="es">Español</option><option value="de">Deutsch</option><option value="pt">Português</option><option value="tr">Türkçe</option><option value="ur">اردو</option><option value="hi">हिन्दी</option><option value="zh">中文</option></select></label><label>Farmer workspace<select id="simple-farmer-mode"><option value="simple">Simple farmer · guided</option><option value="advanced">Complex farmer · full controls</option></select></label><button class="button danger" type="button" data-action="reset-workspace">Reset entire workspace</button></div></dialog>
     <nav class="simple-steps" aria-label="Farm analysis steps"><button type="button" data-simple-step="1"><i>1</i><span>Location</span></button><button type="button" data-simple-step="2"><i>2</i><span>Soil &amp; water</span></button><button type="button" data-simple-step="3"><i>3</i><span>Crops</span></button><button type="button" data-simple-step="4"><i>4</i><span>Report</span></button></nav>
-    <section class="simple-stage" data-simple-stage="1"><article class="panel simple-card"><span class="eyebrow">STEP 1 / LOCATION</span><h2>Where is your farm?</h2><p>Start with a place. AgriPulse uses it to set your country, weather context, and local report currency.</p><div class="simple-location-readout" id="simple-location-readout">No farm selected yet.</div><div class="simple-location-context" id="simple-location-context"><span>◎ Country: waiting</span><span>¤ Currency: waiting</span><span>☁ Weather: waiting</span></div><div class="button-row"><button class="button" type="button" data-action="simple-geolocation">Use my location</button><button class="button secondary" type="button" data-action="simple-map-focus">Choose on map</button></div><div class="simple-or"><span>or search for a place</span></div><form id="simple-place-search" class="simple-place-search"><label class="sr-only" for="simple-place-query">Search for a place</label><input id="simple-place-query" name="query" minlength="2" required placeholder="Country, city, village, or farm area"><button class="button secondary" type="submit">Search</button></form><div id="simple-place-results" class="simple-place-results" aria-live="polite"></div><div class="simple-step-actions"><span></span><button class="button" type="button" data-action="simple-next" data-next-step="2">Next <span aria-hidden="true">→</span></button></div></article></section>
-    <section class="simple-stage" data-simple-stage="2" hidden><article class="panel simple-card"><span class="eyebrow">STEP 2 / SOIL &amp; WATER</span><h2>Tell us only what you know.</h2><p>These quick choices help AgriPulse explain the crop and water signals. “I don’t know” is always okay.</p><form id="simple-farm-form" class="simple-farm-form"><label>Water source<select name="waterSource"><option value="unknown">I don’t know yet</option><option value="rainfed">Rain-fed only</option><option value="irrigated">Irrigation available</option></select></label><label>Your priority<select name="objective"><option value="water">Use water wisely</option><option value="soil">Protect soil health</option><option value="risk">Prepare for changing weather</option></select></label><label>Soil pH <small>Optional</small><input name="soilPH" inputmode="decimal" min="0" max="14" placeholder="I don’t know"></label><label>Soil texture<select name="soilTexture"><option value="unknown">I don’t know</option><option value="light">Light</option><option value="medium">Medium</option><option value="heavy">Heavy</option><option value="organic">Organic</option></select></label><label class="span-two">Drainage<select name="drainage"><option value="unknown">I don’t know</option><option value="well">Well drained</option><option value="excessive">Very fast drainage</option></select></label><div class="simple-step-actions span-two"><button class="button secondary" type="button" data-action="simple-back" data-back-step="1"><span aria-hidden="true">←</span> Back</button><button class="button" type="submit">Save &amp; continue <span aria-hidden="true">→</span></button></div></form></article></section>
+    <section class="simple-stage" data-simple-stage="1"><article class="panel simple-card"><span class="eyebrow">STEP 1 / LOCATION</span><h2>Where is your farm?</h2><p>Choose your point so AgriPulse can request recent NASA POWER regional records.</p><div class="simple-location-readout" id="simple-location-readout">No farm selected yet.</div><div class="simple-location-context" id="simple-location-context"><span>◎ Region: waiting</span><span>¤ Currency: local input</span><span>☁ NASA POWER: waiting</span></div><div class="button-row"><button class="button" type="button" data-action="simple-geolocation">Use my location</button><button class="button secondary" type="button" data-action="simple-map-focus">Choose on map</button></div><div class="simple-or"><span>or enter coordinates</span></div><form id="simple-place-search" class="simple-place-search"><label class="sr-only" for="simple-place-query">Latitude, longitude</label><input id="simple-place-query" name="query" minlength="3" required placeholder="Latitude, longitude — e.g. 24.7136, 46.6753"><button class="button secondary" type="submit">Use coordinates</button></form><div id="simple-place-results" class="simple-place-results" aria-live="polite"></div><div class="simple-step-actions"><span></span><button class="button" type="button" data-action="simple-next" data-next-step="2">Next <span aria-hidden="true">→</span></button></div></article></section>
+    <section class="simple-stage" data-simple-stage="2" hidden><article class="panel simple-card"><span class="eyebrow">STEP 2 / SOIL, WATER &amp; LOCAL COSTS</span><h2>Tell us only what you know.</h2><p>These quick choices help AgriPulse explain the crop and water signals. Leave optional local values empty rather than using a generic estimate.</p><form id="simple-farm-form" class="simple-farm-form"><label>Water source<select name="waterSource"><option value="unknown">I don’t know yet</option><option value="rainfed">Rain-fed only</option><option value="irrigated">Irrigation available</option></select></label><label>Your priority<select name="objective"><option value="water">Use water wisely</option><option value="soil">Protect soil health</option><option value="risk">Prepare for changing weather</option></select></label><label>Soil pH <small>Optional</small><input name="soilPH" inputmode="decimal" min="0" max="14" placeholder="I don’t know"></label><label>Soil texture<select name="soilTexture"><option value="unknown">I don’t know</option><option value="light">Light</option><option value="medium">Medium</option><option value="heavy">Heavy</option><option value="organic">Organic</option></select></label><label class="span-two">Drainage<select name="drainage"><option value="unknown">I don’t know</option><option value="well">Well drained</option><option value="excessive">Very fast drainage</option></select></label><div class="simple-local-economics span-two"><span class="eyebrow">OPTIONAL · YOUR LOCAL VALUES</span><p>No market price is invented. Enter values in the report currency to calculate profit.</p><label>Expected yield (t/ha)<input name="localYield" type="number" min="0" step="0.1" placeholder="Leave empty"></label><label>Selling price per tonne<input name="localPrice" type="number" min="0" step="0.01" placeholder="Leave empty"></label><label>Cost per hectare<input name="localCost" type="number" min="0" step="0.01" placeholder="Leave empty"></label></div><div class="simple-step-actions span-two"><button class="button secondary" type="button" data-action="simple-back" data-back-step="1"><span aria-hidden="true">←</span> Back</button><button class="button" type="submit">Save &amp; continue <span aria-hidden="true">→</span></button></div></form></article></section>
     <section class="simple-stage" data-simple-stage="3" hidden><article class="panel simple-card simple-crops-card"><span class="eyebrow">STEP 3 / CROPS</span><h2>Which crops are you considering?</h2><p>Choose one or more crops. AgriPulse will compare their available soil conditions and include your primary crop in the report.</p><div class="simple-crop-tools"><label><span>⌕</span><input id="simple-crop-search" type="search" placeholder="Search crops"></label><div role="group" aria-label="Crop category"><button class="active" type="button" data-crop-filter="all">All</button><button type="button" data-crop-filter="grain">Grains</button><button type="button" data-crop-filter="vegetable">Vegetables</button><button type="button" data-crop-filter="other">Other</button></div></div><form id="simple-crops-form" class="simple-crop-checklist">${Object.entries(simpleCropEvidence).map(([id, crop]) => { const sticker = simpleCropStickers[id]; return '<label data-crop-card data-crop-name="' + crop.name.toLowerCase() + '" data-crop-category="' + sticker.category + '"><input type="checkbox" name="crops" value="' + id + '"><span class="simple-crop-sticker" aria-hidden="true">' + sticker.icon + '</span><span class="simple-crop-copy"><b>' + crop.name + '</b><small>' + sticker.category + '</small></span><i aria-hidden="true">✓</i></label>'; }).join('')}<div class="simple-step-actions"><button class="button secondary" type="button" data-action="simple-back" data-back-step="2"><span aria-hidden="true">←</span> Back</button><button class="button" type="submit">Generate my report <span aria-hidden="true">→</span></button></div></form></article></section>
     <section class="simple-stage" data-simple-stage="4" hidden><header class="simple-results-heading"><div><span class="eyebrow">STEP 4 / YOUR REPORT</span><h2>Your farm, clearly explained.</h2><p id="simple-results-summary">Your location, crop choices, water context, and planning estimate appear here.</p></div><div class="button-row"><button class="button" type="button" data-action="simple-save">Export report</button><button class="button secondary" type="button" data-simple-step="1">Start again</button></div></header><div id="simple-report-hero"></div><div class="simple-results-grid" id="simple-results"></div><aside class="simple-results-note"><b>How to read your report</b><p>Weather and crop-condition signals are separated from planning estimates. Local currency follows the country you selected; confirm prices with your local buyer before acting.</p></aside></section>
     <dialog class="simple-export-dialog" id="simple-export-dialog"><header><div><span class="eyebrow">REPORT EXPORT</span><h2>Download your farm report</h2></div><button class="simple-tool-icon" type="button" data-action="close-simple-export" aria-label="Close">×</button></header><p>Choose the language and file type. Every format uses the same field data and planning assumptions.</p><form id="simple-export-form"><label>Report language<select name="language"><option value="en">English</option><option value="ar">العربية</option><option value="fr">Français</option><option value="es">Español</option><option value="de">Deutsch</option><option value="pt">Português</option><option value="tr">Türkçe</option><option value="ur">اردو</option><option value="hi">हिन्दी</option><option value="zh">中文</option></select></label><fieldset><legend>File type</legend><label class="simple-format-option"><input type="radio" name="format" value="html" checked><span><b>HTML</b><small>Designed report for browsers and printing</small></span></label><label class="simple-format-option"><input type="radio" name="format" value="jpg"><span><b>JPG image</b><small>Shareable report snapshot</small></span></label><label class="simple-format-option"><input type="radio" name="format" value="json"><span><b>JSON data</b><small>Structured field and evidence record</small></span></label><label class="simple-format-option"><input type="radio" name="format" value="csv"><span><b>CSV table</b><small>Forecast and planning data for spreadsheets</small></span></label></fieldset><div class="simple-export-preview"><span>Ready to export</span><b id="simple-export-filename">AgriPulse-report.html</b></div><button class="button full" type="submit">Generate and download</button></form></dialog>
@@ -633,12 +647,12 @@ function renderAgriSystemLiveSignals() {
   const rainTotal = forecast.reduce((sum,day) => sum + (number(day.rain) ? day.rain : 0),0);
   const etTotal = forecast.reduce((sum,day) => sum + (number(day.et0) ? day.et0 : 0),0);
   text('#system-live-weather', weather ? temp(weather.current?.temperature) + ' · ' + t(formatWeatherCode(weather.current?.weatherCode)) : t(hasLocation() ? 'Connecting…' : 'Choose a field'));
-  text('#system-live-water', weather ? rain(rainTotal) + ' ' + t('rain') + ' · ET₀ ' + rain(etTotal) : t('Waiting for forecast'));
+  text('#system-live-water', weather ? rain(rainTotal) + ' ' + t('recent rain') : t('Waiting for NASA POWER'));
   const localSoil = state.samples.filter(sample => sample.field === fieldKey()).length;
   text('#system-live-soil', localSoil ? localSoil + ' ' + t('local record(s)') : hasLocation() ? t('Automatic land context') : t('No local details'));
   const connected = [hasLocation(),Boolean(weather),localSoil > 0,Boolean(state.economics)].filter(Boolean).length;
   text('#system-live-readiness', connected + ' / 4 ' + t('connected'));
-  text('#passport-weather', weather ? temp(weather.current?.temperature) + ' · ' + rain(rainTotal) + ' ' + t('rain in 7 days') : t(hasLocation() ? 'Connecting live forecast…' : 'Choose a field to connect the forecast.'));
+  text('#passport-weather', weather ? temp(weather.current?.temperature) + ' · ' + rain(rainTotal) + ' ' + t('rain in recent 7 days') : t(hasLocation() ? 'Connecting NASA POWER…' : 'Choose a field to load recent regional records.'));
   text('#passport-local', localSoil ? localSoil + ' ' + t('local soil record(s) connected.') : t('No local soil records connected yet.'));
   text('#passport-readiness', connected + ' ' + t('of 4 decision signals connected.'));
   $$('[data-evidence-card]').forEach((card,index) => card.classList.toggle('connected',[Boolean(weather),hasLocation(),localSoil>0,connected>=3][index]));
@@ -757,7 +771,7 @@ function renderSimpleFlow() {
     : '<b>' + escapeHTML(t('Choose your farm location')) + '</b><span>' + escapeHTML(t('GPS is optional. You can search or choose a point on the map.')) + '</span>';
   const context = $('#simple-location-context');
   if (context) context.innerHTML = hasLocation()
-    ? '<span>◎ ' + escapeHTML(state.location.country || t('Selected region')) + '</span><span>¤ ' + escapeHTML(simpleCurrency()) + '</span><span>☁ ' + escapeHTML(t(state.weather ? 'Forecast connected' : 'Loads after selection')) + '</span>'
+    ? '<span>◎ ' + escapeHTML(state.location.country || t('Selected region')) + '</span><span>¤ ' + escapeHTML(simpleCurrency()) + '</span><span>☁ ' + escapeHTML(t(state.weather ? 'NASA POWER connected' : 'Loads after selection')) + '</span>'
     : '<span>◎ ' + escapeHTML(t('Country')) + ': ' + escapeHTML(t('waiting')) + '</span><span>¤ ' + escapeHTML(t('Currency')) + ': ' + escapeHTML(t('waiting')) + '</span><span>☁ ' + escapeHTML(t('Weather')) + ': ' + escapeHTML(t('waiting')) + '</span>';
   const currencySelect = $('#simple-currency');
   if (currencySelect) currencySelect.value = simpleCurrency();
@@ -766,54 +780,32 @@ function renderSimpleFlow() {
   if (form) Object.entries(state.simpleFarm).forEach(([key, value]) => { if (form.elements[key]) form.elements[key].value = value; });
   $$('input[name="crops"]', $('#simple-crops-form')).forEach(input => { input.checked = (state.simpleFarm.crops || []).includes(input.value); });
   const autoNote = $('#simple-auto-note');
-  if (autoNote && hasLocation()) {
-    const profile = simpleLandProfile(), names = profile.recommendedCrops.map(id => simpleCropEvidence[id]?.name).filter(Boolean).map(t);
-    autoNote.innerHTML = '<span>✦</span><div><b>' + escapeHTML(t('Automatic land-aware starting point')) + '</b><p>' + escapeHTML(t('Based on the selected location and available weather, AgriPulse preselected') + ' ' + names.join(', ') + '. ' + t('These are planning assumptions; change any choice if you know your field better.')) + '</p></div>';
-  }
+  if (autoNote && hasLocation()) autoNote.innerHTML = '<span>✦</span><div><b>' + escapeHTML(t('Verified context, local choices')) + '</b><p>' + escapeHTML(t('NASA POWER recent regional records are connected. Soil, water access, crops, prices, and costs stay blank until you provide them; AgriPulse does not guess field conditions.')) + '</p></div>';
 }
 
 function simpleLandProfile() {
-  const forecast = state.weather?.daily?.slice(0, 7) || [];
-  const rainTotal = forecast.reduce((sum, day) => sum + (number(day.rain) ? day.rain : 0), 0);
+  const recent = state.weather?.daily?.slice(0, 7) || [];
+  const rainTotal = recent.reduce((sum, day) => sum + (number(day.rain) ? day.rain : 0), 0);
   const currentTemp = state.weather?.current?.temperature;
-  const aridCountries = ['Saudi Arabia','United Arab Emirates','Qatar','Kuwait','Bahrain','Oman','Egypt','Jordan','Morocco','Algeria','Tunisia'];
-  const aridRegion = aridCountries.includes(state.location.country) || (Math.abs(state.location.lat) >= 18 && Math.abs(state.location.lat) <= 35 && rainTotal < 12);
-  const hot = number(currentTemp) ? currentTemp >= 30 : aridRegion;
-  const cold = number(currentTemp) ? currentTemp <= 17 : Math.abs(state.location.lat) > 45;
-  const wet = forecast.length ? rainTotal >= 25 : false;
-  const dry = forecast.length ? rainTotal < 8 : aridRegion;
-  const texture = aridRegion ? 'light' : wet ? 'heavy' : 'medium';
-  const pH = aridRegion ? '7.5' : wet ? '6.5' : '7.0';
-  const waterSource = dry ? 'irrigated' : 'rainfed';
-  const drainage = wet ? 'well' : aridRegion ? 'excessive' : 'well';
+  const hot = number(currentTemp) ? currentTemp >= 30 : false;
+  const cold = number(currentTemp) ? currentTemp <= 17 : false;
+  const wet = recent.length ? rainTotal >= 25 : false;
+  const dry = recent.length ? rainTotal < 8 : false;
   const objective = dry || hot ? 'water' : wet ? 'soil' : 'risk';
-  const scores = Object.keys(simpleCropEvidence).map(id => {
-    const profile = simpleCropEvidence[id]; let score = 0;
-    score += simpleFactorStatus(Number(pH), profile.ph) === 'SUITABLE' ? 3 : simpleFactorStatus(Number(pH), profile.ph) === 'MARGINAL' ? 1 : -3;
-    score += simpleFactorStatus(texture, profile.texture, 'category') === 'SUITABLE' ? 2 : simpleFactorStatus(texture, profile.texture, 'category') === 'MARGINAL' ? 1 : -2;
-    if (hot) score += ({ cotton:4,sunflower:3,chickpea:2,barley:1,alfalfa:1,potato:-3,rice:-1 }[id] || 0);
-    if (cold) score += ({ wheat:3,barley:3,potato:2,cotton:-3,rice:-2 }[id] || 0);
-    if (dry) score += ({ barley:3,chickpea:3,sunflower:2,cotton:1,rice:-5,tomato:-1 }[id] || 0);
-    if (wet) score += ({ rice:5,maize:2,barley:-1,chickpea:-1 }[id] || 0);
-    if (waterSource === 'irrigated') score += ({ tomato:2,alfalfa:2,maize:1 }[id] || 0);
-    return [id, score];
-  }).sort((a,b) => b[1] - a[1]);
-  return { rainTotal, currentTemp, aridRegion, hot, cold, wet, dry, texture, pH, waterSource, drainage, objective, recommendedCrops: scores.slice(0,3).map(([id]) => id) };
+  return { rainTotal, currentTemp, hot, cold, wet, dry, objective };
 }
 function ensureSimpleAssumptions() {
   if (!hasLocation()) return;
   const profile = simpleLandProfile();
-  const automatic = { ...(state.simpleFarm._autoAssumptions || {}) };
-  for (const key of ['waterSource','soilTexture','drainage','soilPH','objective']) {
-    const missing = state.simpleFarm[key] === '' || state.simpleFarm[key] === 'unknown' || state.simpleFarm[key] == null;
-    if (missing || automatic[key]) { state.simpleFarm[key] = profile[key]; automatic[key] = true; }
-  }
-  if (!(state.simpleFarm.crops || []).length || state.simpleFarm._autoCrops) {
-    state.simpleFarm.crops = profile.recommendedCrops;
-    state.simpleFarm.crop = profile.recommendedCrops[0];
-    state.simpleFarm._autoCrops = true;
-  }
-  state.simpleFarm._autoAssumptions = automatic;
+  const previousAutomatic = state.simpleFarm._autoAssumptions || {};
+  if (previousAutomatic.waterSource) state.simpleFarm.waterSource = 'unknown';
+  if (previousAutomatic.soilTexture) state.simpleFarm.soilTexture = 'unknown';
+  if (previousAutomatic.drainage) state.simpleFarm.drainage = 'unknown';
+  if (previousAutomatic.soilPH) state.simpleFarm.soilPH = '';
+  if (state.simpleFarm._autoCrops) { state.simpleFarm.crops = []; state.simpleFarm.crop = 'recommend'; }
+  if (!state.simpleFarm.objective || state.simpleFarm.objective === 'unknown') state.simpleFarm.objective = profile.objective;
+  delete state.simpleFarm._autoAssumptions;
+  delete state.simpleFarm._autoCrops;
   write('fieldshift.simpleFarm', state.simpleFarm);
 }
 
@@ -877,19 +869,6 @@ function simpleCard(title, type, body, detail, action = 'Learn more') {
   return '<article class="panel simple-result-card"><div class="simple-result-top"><span class="simple-result-type ' + type + '">' + escapeHTML(t(type.toUpperCase())) + '</span><span class="simple-result-icon">' + ({ forecast: '☁', calculated: '◒', unavailable: '○', screening: '✦' }[type] || '·') + '</span></div><h3>' + escapeHTML(t(title)) + '</h3><p>' + escapeHTML(t(body)) + '</p><div class="simple-result-more" id="' + id + '" hidden><b>' + escapeHTML(t('What this means')) + '</b><p>' + escapeHTML(t(detail)) + '</p><small>' + escapeHTML(t('Use this signal with local observations and professional agricultural advice.')) + '</small></div><button class="simple-learn-more" type="button" data-action="simple-report-more" aria-expanded="false" aria-controls="' + id + '">' + escapeHTML(t(action)) + ' <span>＋</span></button></article>';
 }
 
-const simplePlanningBenchmarks = {
-  wheat: { yield: 3.2, priceUsd: 270, costUsd: 470 },
-  barley: { yield: 2.8, priceUsd: 230, costUsd: 380 },
-  chickpea: { yield: 1.6, priceUsd: 710, costUsd: 510 },
-  alfalfa: { yield: 8.4, priceUsd: 155, costUsd: 720 },
-  maize: { yield: 5.8, priceUsd: 210, costUsd: 690 },
-  rice: { yield: 4.2, priceUsd: 340, costUsd: 820 },
-  tomato: { yield: 45, priceUsd: 420, costUsd: 8900 },
-  potato: { yield: 22, priceUsd: 250, costUsd: 3100 },
-  cotton: { yield: 1.8, priceUsd: 1650, costUsd: 1250 },
-  sunflower: { yield: 1.6, priceUsd: 480, costUsd: 540 },
-};
-const simpleFallbackRates = { USD:1,SAR:3.75,AED:3.6725,QAR:3.64,KWD:.307,BHD:.376,OMR:.385,JOD:.709,EGP:50,EUR:.92,GBP:.79,INR:84,PKR:279,BDT:120,CNY:7.25,JPY:153,TRY:34,CAD:1.39,AUD:1.53,BRL:5.45,MXN:20.3,ARS:1000,CLP:970,COP:4400,KES:129,ZAR:18.3,NGN:1550,MAD:10,DZD:134,TND:3.1,IDR:15800,MYR:4.4,THB:34.5,PHP:58,RUB:98 };
 function simpleCurrency() { return state.simpleFarm.currency || countryCurrencies[state.location.country] || 'USD'; }
 function simpleMoney(value, currency) {
   return new Intl.NumberFormat(localeForLanguage(), { style: 'currency', currency, maximumFractionDigits: 0 }).format(value);
@@ -902,23 +881,12 @@ function renderSimpleCurrencyStatus() {
     status.textContent = t('Automatically chosen from the selected country. You can change it.');
     return;
   }
-  status.textContent = fx.live
-    ? t('Live exchange rate connected') + ' · 1 USD = ' + new Intl.NumberFormat(localeForLanguage(), { maximumFractionDigits: 4 }).format(fx.rate) + ' ' + fx.currency
-    : t('Live rate unavailable; clearly labeled reference rate is being used.');
+  status.textContent = t('Enter prices and costs directly in') + ' ' + fx.currency + '. ' + t('No exchange rate is assumed.');
 }
 async function updateSimpleCurrency() {
   const currency = simpleCurrency();
   state.economicsInputs.currency = currency;
-  let rate = simpleFallbackRates[currency] || 1, source = currency === 'USD' ? 'USD base rate' : 'offline reference rate', live = currency === 'USD', retrievedAt = currency === 'USD' ? new Date().toISOString() : null;
-  if (currency !== 'USD') try {
-    const response = await fetch('https://open.er-api.com/v6/latest/USD', { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(5000) });
-    const data = await response.json();
-    if (response.ok && data?.result === 'success' && Number(data?.rates?.[currency]) > 0) {
-      rate = Number(data.rates[currency]); source = 'open.er-api.com · USD reference'; live = true;
-      retrievedAt = data.time_last_update_utc || new Date().toISOString();
-    }
-  } catch { /* The transparent reference rate keeps the simple report usable offline. */ }
-  state.simpleFx = { currency, rate, source, live, retrievedAt };
+  state.simpleFx = { currency, rate: 1, source: 'Farmer-entered local values', live: false, retrievedAt: null };
   renderSimpleCurrencyStatus();
   return state.simpleFx;
 }
@@ -977,59 +945,58 @@ function renderSimpleResults() {
   const current = weather?.current;
   const firstDay = weather?.daily?.[0];
   const forecastBody = weather
-    ? 'Current forecast: ' + temp(current?.temperature) + ', wind ' + wind(current?.wind) + '. Seven-day forecast data is available for this selected location.'
-    : 'Forecast data could not be retrieved yet. You can retry after selecting your location.';
-  const waterBody = number(firstDay?.et0)
-    ? t('Reference ET₀') + ': ' + rain(firstDay.et0) + '. ' + t('Use it as weather context, not irrigation instruction.')
-    : t('Add crop stage, irrigation method, and available water to estimate demand.');
+    ? 'Recent NASA POWER record: ' + temp(current?.temperature) + ', wind ' + wind(current?.wind) + '. Seven recent daily records are available for this selected location.'
+    : 'NASA POWER data could not be retrieved yet. You can retry after selecting your location.';
+  const waterBody = weather ? t('Recent seven-day rainfall') + ': ' + rain(weather.daily.reduce((sum,day)=>sum+(number(day.rain)?day.rain:0),0)) + '. ' + t('This is historical regional context, not an irrigation instruction.') : t('Add crop stage, irrigation method, and available water to estimate demand.');
   const hot = number(current?.temperature) && current.temperature >= 35;
   const windy = number(current?.wind) && current.wind >= 30;
-  const riskBody = weather ? (hot || windy ? t('Short-term weather watch') + ': ' + [hot ? t('high temperature') : '', windy ? t('strong wind') : ''].filter(Boolean).join(' · ') + '. ' + t('Confirm crop thresholds locally.') : t('No short-term heat or wind alert is active. Keep checking local conditions.')) : t('Weather risks are unavailable until the forecast loads.');
-  const benchmark = simplePlanningBenchmarks[selectedCrop];
-  const fx = state.simpleFx || { currency: simpleCurrency(), rate: simpleFallbackRates[simpleCurrency()] || 1, source: 'planning reference conversion' };
+  const riskBody = weather ? (hot || windy ? t('Recent-condition watch') + ': ' + [hot ? t('high temperature') : '', windy ? t('strong wind') : ''].filter(Boolean).join(' · ') + '. ' + t('Confirm current conditions and crop thresholds locally.') : t('No heat or wind signal appears in the recent regional record. Check current local conditions.')) : t('Weather context is unavailable until NASA POWER loads.');
+  const localYield=Number(state.simpleFarm.localYield),localPrice=Number(state.simpleFarm.localPrice),localCost=Number(state.simpleFarm.localCost);
+  const benchmark = state.simpleFarm.localYield !== '' && state.simpleFarm.localPrice !== '' && state.simpleFarm.localCost !== '' && [localYield,localPrice,localCost].every(Number.isFinite) ? { yield:localYield,priceUsd:localPrice,costUsd:localCost } : null;
+  const fx = state.simpleFx || { currency: simpleCurrency(), rate: 1, source: 'Farmer-entered local values', live: false };
   const sales = benchmark ? benchmark.yield * benchmark.priceUsd * fx.rate : null;
   const cost = benchmark ? benchmark.costUsd * fx.rate : null;
   const margin = benchmark ? sales - cost : null;
   const profitBody = benchmark ? t('Planning margin') + ': ' + simpleMoney(margin, fx.currency) + ' ' + t('per hectare') + '. ' + t('Estimated sales') + ': ' + simpleMoney(sales, fx.currency) + '. ' + t('Planning costs') + ': ' + simpleMoney(cost, fx.currency) + '.' : t('Choose at least one crop to create the planning estimate.');
   const cropNames = selectedCrops.map(id => simpleCropEvidence[id]?.name || crops.find(crop => crop.id === id)?.name || id).filter(Boolean);
-  const weatherCode = Number(current?.weatherCode);
-  const scene = weatherCode >= 51 ? 'storm' : weatherCode > 0 ? 'clouds' : 'clear';
-  const weatherGlyph = weatherCode === 0 ? '☀' : weatherCode >= 51 ? '☂' : '☁';
-  const forecastItems = weather?.daily?.slice(0, 4).map((day, index) => '<div><span>' + escapeHTML(index === 0 ? t('Today') : dateShort(day.date)) + '</span><b>' + escapeHTML(temp(day.high)) + '</b><small>' + escapeHTML(rain(day.rain)) + '</small></div>').join('') || '<p class="empty">' + escapeHTML(t('Forecast unavailable.')) + '</p>';
+  const weatherCode = number(current?.weatherCode) ? current.weatherCode : null;
+  const scene = weatherCode === null ? 'clouds' : weatherCode >= 51 ? 'storm' : weatherCode > 0 ? 'clouds' : 'clear';
+  const weatherGlyph = weatherCode === null ? '◎' : weatherCode === 0 ? '☀' : weatherCode >= 51 ? '☂' : '☁';
+  const forecastItems = weather?.daily?.slice(-4).map(day => '<div><span>' + escapeHTML(dateShort(day.date)) + '</span><b>' + escapeHTML(temp(day.high)) + '</b><small>' + escapeHTML(rain(day.rain)) + '</small></div>').join('') || '<p class="empty">' + escapeHTML(t('Recent NASA record unavailable.')) + '</p>';
   const decisionTips = [
-    state.simpleFarm._autoAssumptions?.soilPH ? t('Confirm the automatic soil estimate with a local soil test.') : t('Keep your soil sample date and method with this report.'),
-    weather && number(firstDay?.rain) < 2 ? t('Review irrigation access because little rain appears in the short forecast.') : t('Check rainfall again before planting or irrigation.'),
+    state.simpleFarm.soilPH ? t('Keep your soil sample date and method with this report.') : t('Add a dated local soil test before comparing crop fit.'),
+    weather && number(firstDay?.rain) < 2 ? t('Recent rainfall was limited; verify current conditions and irrigation access locally.') : t('Check a current local forecast before planting or irrigation.'),
     benchmark ? t('Confirm selling price and input costs with a local buyer before acting.') : t('Choose a crop to unlock a planning margin.'),
   ];
   const readinessSignals = [
-    [t('Location'), true], [t('Live weather'), Boolean(weather)], [t('Crop choice'), cropNames.length > 0],
+    [t('Location'), true], [t('NASA POWER context'), Boolean(weather)], [t('Crop choice'), cropNames.length > 0],
     [t('Local soil input'), Boolean(state.simpleFarm.soilPH || (state.simpleFarm.soilTexture && state.simpleFarm.soilTexture !== 'unknown'))],
-    [t('Live currency'), Boolean(fx.live)],
+    [t('Local economics'), Boolean(benchmark)],
   ];
   const readinessCount = readinessSignals.filter(([, connected]) => connected).length;
   const weekRain = weather?.daily?.slice(0, 7).reduce((sum, day) => sum + (number(day.rain) ? day.rain : 0), 0);
   const weekEt0 = weather?.daily?.slice(0, 7).reduce((sum, day) => sum + (number(day.et0) ? day.et0 : 0), 0);
   const waterGap = number(weekRain) && number(weekEt0) ? weekRain - weekEt0 : null;
   const soilKnown = [state.simpleFarm.soilPH, state.simpleFarm.soilTexture, state.simpleFarm.drainage].filter(value => value && value !== 'unknown').length;
-  const automaticSoil = state.simpleFarm._autoAssumptions && ['soilPH','soilTexture','drainage'].some(key => state.simpleFarm._autoAssumptions[key]);
   const reportUpdated = weather?.retrievedAt ? new Date(weather.retrievedAt).toLocaleString(localeForLanguage()) : t('Not available');
-  reportHero.innerHTML = '<article class="simple-weather-report simple-weather-' + scene + '"><div class="simple-weather-shade"></div><div class="simple-weather-main"><span class="eyebrow">' + escapeHTML(t('LIVE FIELD WEATHER')) + '</span><h2>' + escapeHTML(state.location.name) + '</h2><p>' + escapeHTML(cropNames.length ? t('Selected crops') + ': ' + cropNames.map(t).join(', ') : t('No crop selected')) + '</p><div class="simple-weather-current"><span aria-hidden="true">' + weatherGlyph + '</span><strong>' + escapeHTML(weather ? temp(current?.temperature) : '—') + '</strong><div><b>' + escapeHTML(weather ? t(formatWeatherCode(weatherCode)) : t('Forecast unavailable.')) + '</b><small>' + escapeHTML(weather ? t('Wind') + ' ' + wind(current?.wind) + ' · ' + t('Humidity') + ' ' + (current?.humidity ?? '—') + '%' : t('Select or refresh your location to retry the live forecast')) + '</small></div></div></div><div class="simple-weather-forecast"><span class="eyebrow">' + escapeHTML(t('FOUR DAY OUTLOOK')) + '</span>' + forecastItems + '</div></article>' +
-    '<div class="simple-report-facts"><article><span>' + escapeHTML(t('Location')) + '</span><b>' + escapeHTML(state.location.name) + '</b><small>' + escapeHTML(state.location.country || t('Selected region')) + '</small></article><article><span>' + escapeHTML(t('Crops')) + '</span><b>' + escapeHTML(cropNames.map(t).join(', ') || t('Not selected')) + '</b><small>' + escapeHTML(state.simpleFarm._autoCrops ? t('Automatically selected starting profiles') : t('Primary crop and alternatives')) + '</small></article><article><span>' + escapeHTML(t('Field details')) + '</span><b>' + escapeHTML(t(state.simpleFarm.waterSource === 'irrigated' ? 'Irrigation available' : 'Rain-fed only')) + '</b><small>' + escapeHTML(t('Soil texture') + ': ' + t(state.simpleFarm.soilTexture) + (automaticSoil ? ' · ' + t('automatic estimate') : '')) + '</small></article><article><span>' + escapeHTML(t('Profit estimate')) + '</span><b>' + escapeHTML(benchmark ? simpleMoney(margin, fx.currency) : '—') + '</b><small>' + escapeHTML(t('Planning margin per hectare')) + '</small></article></div><section class="simple-report-readiness"><div><span class="eyebrow">' + escapeHTML(t('DECISION READINESS')) + '</span><b>' + readinessCount + ' / ' + readinessSignals.length + ' ' + escapeHTML(t('signals connected')) + '</b></div><div>' + readinessSignals.map(([label, connected]) => '<span class="' + (connected ? 'connected' : '') + '"><i></i>' + escapeHTML(label) + '</span>').join('') + '</div></section><section class="simple-report-depth"><article><span class="eyebrow">' + escapeHTML(t('WATER BALANCE')) + '</span><h3>' + escapeHTML(number(waterGap) ? (waterGap >= 0 ? t('Rain exceeds reference demand') : t('Reference demand exceeds rain')) : t('Water balance unavailable')) + '</h3><dl><div><dt>' + escapeHTML(t('7-day rain')) + '</dt><dd>' + escapeHTML(number(weekRain) ? rain(weekRain) : '—') + '</dd></div><div><dt>' + escapeHTML(t('7-day reference ET₀')) + '</dt><dd>' + escapeHTML(number(weekEt0) ? rain(weekEt0) : '—') + '</dd></div><div><dt>' + escapeHTML(t('Difference')) + '</dt><dd>' + escapeHTML(number(waterGap) ? rain(Math.abs(waterGap)) : '—') + '</dd></div></dl></article><article><span class="eyebrow">' + escapeHTML(t('SOIL CONTEXT')) + '</span><h3>' + escapeHTML(automaticSoil ? t('Automatic land-based planning estimate') : soilKnown + ' / 3 ' + t('details provided')) + '</h3><dl><div><dt>' + escapeHTML(t('Soil pH')) + '</dt><dd>' + escapeHTML(state.simpleFarm.soilPH) + '</dd></div><div><dt>' + escapeHTML(t('Texture')) + '</dt><dd>' + escapeHTML(t(state.simpleFarm.soilTexture)) + '</dd></div><div><dt>' + escapeHTML(t('Drainage')) + '</dt><dd>' + escapeHTML(t(state.simpleFarm.drainage)) + '</dd></div></dl></article><article><span class="eyebrow">' + escapeHTML(t('REPORT TRACE')) + '</span><h3>' + escapeHTML(readinessCount + ' / ' + readinessSignals.length + ' ' + t('signals connected')) + '</h3><dl><div><dt>' + escapeHTML(t('Weather updated')) + '</dt><dd>' + escapeHTML(reportUpdated) + '</dd></div><div><dt>' + escapeHTML(t('Exchange rate')) + '</dt><dd>' + escapeHTML(fx.live ? t('Live') : t('Reference')) + '</dd></div><div><dt>' + escapeHTML(t('Coordinates')) + '</dt><dd>' + escapeHTML(state.location.lat.toFixed(3) + ', ' + state.location.lon.toFixed(3)) + '</dd></div></dl></article></section><article class="simple-decision-brief"><div><span class="eyebrow">' + escapeHTML(t('NEXT BEST ACTIONS')) + '</span><h3>' + escapeHTML(t('Your decision brief')) + '</h3><p>' + escapeHTML(t('Use these as checks, not automatic instructions. Local knowledge remains essential.')) + '</p></div><ol>' + decisionTips.map(tip => '<li>' + escapeHTML(tip) + '</li>').join('') + '</ol></article>';
+  reportHero.innerHTML = '<article class="simple-weather-report simple-weather-' + scene + '"><div class="simple-weather-shade"></div><div class="simple-weather-main"><span class="eyebrow">' + escapeHTML(t('RECENT NASA POWER CONTEXT')) + '</span><h2>' + escapeHTML(state.location.name) + '</h2><p>' + escapeHTML(cropNames.length ? t('Selected crops') + ': ' + cropNames.map(t).join(', ') : t('No crop selected')) + '</p><div class="simple-weather-current"><span aria-hidden="true">' + weatherGlyph + '</span><strong>' + escapeHTML(weather ? temp(current?.temperature) : '—') + '</strong><div><b>' + escapeHTML(t('Historical regional record')) + '</b><small>' + escapeHTML(weather ? t('Wind') + ' ' + wind(current?.wind) + ' · ' + t('Humidity') + ' ' + (current?.humidity ?? '—') + '%' : t('Select or refresh your location to retry NASA POWER')) + '</small></div></div></div><div class="simple-weather-forecast"><span class="eyebrow">' + escapeHTML(t('RECENT FOUR DAYS')) + '</span>' + forecastItems + '</div></article>' +
+    '<div class="simple-report-facts"><article><span>' + escapeHTML(t('Location')) + '</span><b>' + escapeHTML(state.location.name) + '</b><small>' + escapeHTML(state.location.country || t('Selected region')) + '</small></article><article><span>' + escapeHTML(t('Crops')) + '</span><b>' + escapeHTML(cropNames.map(t).join(', ') || t('Not selected')) + '</b><small>' + escapeHTML(t('Farmer-selected crop profiles')) + '</small></article><article><span>' + escapeHTML(t('Field details')) + '</span><b>' + escapeHTML(t(state.simpleFarm.waterSource === 'irrigated' ? 'Irrigation available' : state.simpleFarm.waterSource === 'rainfed' ? 'Rain-fed only' : 'Water access not provided')) + '</b><small>' + escapeHTML(t('Soil texture') + ': ' + t(state.simpleFarm.soilTexture === 'unknown' ? 'Not provided' : state.simpleFarm.soilTexture)) + '</small></article><article><span>' + escapeHTML(t('Profit estimate')) + '</span><b>' + escapeHTML(benchmark ? simpleMoney(margin, fx.currency) : '—') + '</b><small>' + escapeHTML(benchmark?t('Farmer-entered local values'):t('Local values required')) + '</small></article></div><section class="simple-report-readiness"><div><span class="eyebrow">' + escapeHTML(t('DECISION READINESS')) + '</span><b>' + readinessCount + ' / ' + readinessSignals.length + ' ' + escapeHTML(t('signals connected')) + '</b></div><div>' + readinessSignals.map(([label, connected]) => '<span class="' + (connected ? 'connected' : '') + '"><i></i>' + escapeHTML(label) + '</span>').join('') + '</div></section><section class="simple-report-depth"><article><span class="eyebrow">' + escapeHTML(t('RECENT WATER CONTEXT')) + '</span><h3>' + escapeHTML(t('NASA POWER regional record')) + '</h3><dl><div><dt>' + escapeHTML(t('Recent 7-day rain')) + '</dt><dd>' + escapeHTML(number(weekRain) ? rain(weekRain) : '—') + '</dd></div><div><dt>' + escapeHTML(t('Reference ET₀')) + '</dt><dd>—</dd></div><div><dt>' + escapeHTML(t('Classification')) + '</dt><dd>' + escapeHTML(t('Historical, not forecast')) + '</dd></div></dl></article><article><span class="eyebrow">' + escapeHTML(t('SOIL CONTEXT')) + '</span><h3>' + escapeHTML(soilKnown + ' / 3 ' + t('details provided')) + '</h3><dl><div><dt>' + escapeHTML(t('Soil pH')) + '</dt><dd>' + escapeHTML(state.simpleFarm.soilPH || t('Not provided')) + '</dd></div><div><dt>' + escapeHTML(t('Texture')) + '</dt><dd>' + escapeHTML(t(state.simpleFarm.soilTexture === 'unknown' ? 'Not provided' : state.simpleFarm.soilTexture)) + '</dd></div><div><dt>' + escapeHTML(t('Drainage')) + '</dt><dd>' + escapeHTML(t(state.simpleFarm.drainage === 'unknown' ? 'Not provided' : state.simpleFarm.drainage)) + '</dd></div></dl></article><article><span class="eyebrow">' + escapeHTML(t('REPORT TRACE')) + '</span><h3>' + escapeHTML(readinessCount + ' / ' + readinessSignals.length + ' ' + t('signals connected')) + '</h3><dl><div><dt>' + escapeHTML(t('NASA POWER retrieved')) + '</dt><dd>' + escapeHTML(reportUpdated) + '</dd></div><div><dt>' + escapeHTML(t('Currency basis')) + '</dt><dd>' + escapeHTML(t('Farmer-entered local values')) + '</dd></div><div><dt>' + escapeHTML(t('Coordinates')) + '</dt><dd>' + escapeHTML(state.location.lat.toFixed(3) + ', ' + state.location.lon.toFixed(3)) + '</dd></div></dl></article></section><article class="simple-decision-brief"><div><span class="eyebrow">' + escapeHTML(t('NEXT BEST ACTIONS')) + '</span><h3>' + escapeHTML(t('Your decision brief')) + '</h3><p>' + escapeHTML(t('Use these as checks, not automatic instructions. Local knowledge remains essential.')) + '</p></div><ol>' + decisionTips.map(tip => '<li>' + escapeHTML(tip) + '</li>').join('') + '</ol></article>';
   summary.textContent = weather ? 'Your automatic report is ready for ' + state.location.name + '. Currency: ' + fx.currency + '.' : 'Your location is saved. Weather retrieval is unavailable right now, so missing information is shown clearly.';
   host.innerHTML = [
     simpleCard(assessments.length ? 'Crop conditions' : 'Crop profiles', 'screening', cropBody, assessments.length ? t('Profile screening only; confirm with local evidence.') : t('Choose a crop for factor-by-factor conditions.')),
-    simpleCard('Water needs', number(firstDay?.et0) ? 'forecast' : 'unavailable', waterBody, number(firstDay?.et0) ? t('Open-Meteo reference evapotranspiration; not an irrigation instruction.') : t('Crop stage and water details are missing.')),
+    simpleCard('Water context', weather ? 'screening' : 'unavailable', waterBody, t('NASA POWER recent regional rainfall; not a future forecast or irrigation instruction.')),
     simpleCard('Planting window', 'unavailable', t('A local planting window needs seasonal crop and climate evidence.'), t('Review historical climate in Complex farmer mode.')),
-    simpleCard('Profit planning estimate', benchmark ? 'calculated' : 'unavailable', profitBody, benchmark ? t('Planning reference, not a local market quote.') : t('Choose a crop to create a planning estimate.')),
-    simpleCard('Farm risks', weather ? 'forecast' : 'unavailable', riskBody, weather ? t('Open-Meteo weather model forecast.') : t('Data unavailable.'))
+    simpleCard('Profit planning estimate', benchmark ? 'calculated' : 'unavailable', profitBody, benchmark ? t('Calculated only from farmer-entered local values.') : t('Enter local yield, price, and cost to calculate profit.')),
+    simpleCard('Farm risks', weather ? 'screening' : 'unavailable', riskBody, weather ? t('NASA POWER recent regional context; verify current local conditions.') : t('Data unavailable.'))
   ].join('');
 }
 
 function simpleReportData() {
   const cropIds = ((state.simpleFarm.crops || []).length ? state.simpleFarm.crops : [state.simpleFarm.crop]).filter(id => id && id !== 'recommend');
   const cropNames = cropIds.map(id => simpleCropEvidence[id]?.name || crops.find(crop => crop.id === id)?.name || id).filter(Boolean);
-  const benchmark = simplePlanningBenchmarks[cropIds[0]];
-  const fx = state.simpleFx || { currency: simpleCurrency(), rate: simpleFallbackRates[simpleCurrency()] || 1, source: 'planning reference conversion' };
+  const localYield=Number(state.simpleFarm.localYield),localPrice=Number(state.simpleFarm.localPrice),localCost=Number(state.simpleFarm.localCost);
+  const benchmark = state.simpleFarm.localYield !== '' && state.simpleFarm.localPrice !== '' && state.simpleFarm.localCost !== '' && [localYield,localPrice,localCost].every(Number.isFinite) ? { yield:localYield,priceUsd:localPrice,costUsd:localCost } : null;
+  const fx = state.simpleFx || { currency: simpleCurrency(), rate: 1, source: 'Farmer-entered local values', live: false };
   const margin = benchmark ? (benchmark.yield * benchmark.priceUsd - benchmark.costUsd) * fx.rate : null;
   return { cropNames, benchmark, fx, margin };
 }
@@ -1048,9 +1015,9 @@ function buildSimpleReportPayload(language = currentLanguage()) {
     schemaVersion: 2, language, direction: ['ar','ur'].includes(language) ? 'rtl' : 'ltr', generatedAt: new Date().toISOString(),
     location: { name: state.location.name, country: state.location.country, region: state.location.region, latitude: state.location.lat, longitude: state.location.lon, method: state.location.method },
     farm: { crops: cropNames.map(tr), waterSource: tr(state.simpleFarm.waterSource === 'irrigated' ? 'Irrigation available' : state.simpleFarm.waterSource === 'rainfed' ? 'Rain-fed only' : 'Water source unknown'), priority: tr(state.simpleFarm.objective || 'water'), soilPH: state.simpleFarm.soilPH || null, soilTexture: tr(state.simpleFarm.soilTexture || 'unknown'), drainage: tr(state.simpleFarm.drainage || 'unknown') },
-    weather: { available: Boolean(weather), source: weather?.source || 'Open-Meteo forecast API', retrievedAt: weather?.retrievedAt || null, current: current ? { temperatureC: current.temperature, condition: tr(formatWeatherCode(current.weatherCode)), humidityPercent: current.humidity, windKmh: current.wind, surfaceSoilMoisture: current.soilMoisture } : null, forecast: forecast.map(day => ({ date: day.date, highC: day.high, lowC: day.low, rainMm: day.rain, rainProbabilityPercent: day.rainProbability, referenceEt0Mm: day.et0, windMaxKmh: day.windMax })), sevenDay: { rainMm: weekRain, referenceEt0Mm: weekEt0, balanceMm: weekRain - weekEt0 } },
+    weather: { available: Boolean(weather), source: weather?.source || 'NASA POWER Daily API', classification: weather?.classification || 'Recent historical regional context', retrievedAt: weather?.retrievedAt || null, current: current ? { temperatureC: current.temperature, condition: tr('Historical regional record'), humidityPercent: current.humidity, windMs: current.wind, surfaceSoilMoisture: null } : null, forecast: forecast.map(day => ({ date: day.date, highC: day.high, lowC: day.low, rainMm: day.rain, rainProbabilityPercent: null, referenceEt0Mm: null, windMaxMs: day.windMax })), sevenDay: { rainMm: weekRain, referenceEt0Mm: null, balanceMm: null } },
     cropAssessment: cropAssessments,
-    economics: { available: Boolean(benchmark), currency: fx.currency, exchangeRatePerUsd: fx.rate, exchangeRateLive: Boolean(fx.live), exchangeRateSource: fx.source, benchmarkYieldTonnesPerHa: benchmark?.yield ?? null, estimatedSalesPerHa: sales, planningCostsPerHa: costs, planningMarginPerHa: margin },
+    economics: { available: Boolean(benchmark), currency: fx.currency, source: 'Farmer-entered local values', expectedYieldTonnesPerHa: benchmark?.yield ?? null, estimatedSalesPerHa: sales, planningCostsPerHa: costs, planningMarginPerHa: margin },
     evidence: { connectedSignals: [Boolean(state.location), Boolean(weather), cropNames.length > 0, Boolean(state.simpleFarm.soilPH || state.simpleFarm.soilTexture !== 'unknown'), Boolean(fx.live)].filter(Boolean).length, totalSignals: 5, limitations: [tr('Weather is modeled for the selected point, not measured on the farm.'), tr('Crop suitability is a profile screening, not a planting prescription.'), tr('Profit values are planning references until local prices and costs are entered.')] },
     nextActions: [!state.simpleFarm.soilPH ? tr('Measure soil pH to strengthen the crop comparison.') : tr('Keep your soil sample date and method with this report.'), weather && forecast[0]?.rain < 2 ? tr('Review irrigation access because little rain appears in the short forecast.') : tr('Check rainfall again before planting or irrigation.'), benchmark ? tr('Confirm selling price and input costs with a local buyer before acting.') : tr('Choose a crop to unlock a planning margin.')]
   };
@@ -1108,15 +1075,15 @@ function generateLandTip(animate = false) {
     return;
   }
   ensureSimpleAssumptions(); renderSimpleFlow();
-  const profile = simpleLandProfile(), cropNames = profile.recommendedCrops.map(id => simpleCropEvidence[id]?.name).filter(Boolean).map(t);
+  const profile = simpleLandProfile(), cropNames = (state.simpleFarm.crops || []).map(id => simpleCropEvidence[id]?.name).filter(Boolean).map(t);
   const temperature = number(profile.currentTemp) ? temp(profile.currentTemp) : t('not available');
   const climateSignal = profile.hot ? t('Hot conditions increase water demand and heat stress.') : profile.cold ? t('Cool conditions favor crops that tolerate a shorter, cooler season.') : profile.wet ? t('Wet conditions increase drainage and disease-management importance.') : t('Conditions are moderate, so soil evidence and crop timing become the main checks.');
-  const waterSignal = profile.dry ? t('The short forecast is dry, so confirm irrigation capacity before selecting a water-demanding crop.') : profile.wet ? t('Rainfall is relatively high; protect drainage and avoid unnecessary irrigation.') : t('Keep watching forecast rain and reference ET₀ before irrigating.');
+  const waterSignal = profile.dry ? t('Recent NASA POWER rainfall was limited; confirm current conditions and irrigation capacity locally.') : profile.wet ? t('Recent regional rainfall was relatively high; inspect drainage and current field conditions locally.') : t('Use the recent NASA record as context, then check a current official local forecast before irrigating.');
   const action = profile.hot && profile.dry ? t('Prioritize heat-tolerant crops, morning fieldwork, mulch, and efficient irrigation checks.') : profile.wet ? t('Check drainage, leaf disease risk, and field access before planting.') : profile.cold ? t('Confirm the local planting window and avoid crops that require sustained heat.') : t('Confirm soil pH and local planting dates before making the final crop choice.');
   if (animate) host.classList.add('is-generating');
   setTimeout(() => {
     host.dataset.topic = 'generated';
-    host.innerHTML = '<span class="eyebrow">' + escapeHTML(t('GENERATED FOR YOUR LAND')) + '</span><h3>' + escapeHTML(state.location.name) + '</h3><div class="generated-tip-signal"><span>☀ <b>' + escapeHTML(temperature) + '</b></span><span>☂ <b>' + escapeHTML(profile.rainTotal.toFixed(1) + ' mm / 7d') + '</b></span><span>◉ <b>' + escapeHTML(t(profile.texture)) + '</b></span></div><p><b>' + escapeHTML(t('Climate signal')) + ':</b> ' + escapeHTML(climateSignal) + '</p><p><b>' + escapeHTML(t('Water signal')) + ':</b> ' + escapeHTML(waterSignal) + '</p><div class="generated-tip-crops"><small>' + escapeHTML(t('Best starting crop profiles')) + '</small><b>' + escapeHTML(cropNames.join(' · ')) + '</b></div><p><b>' + escapeHTML(t('Next check')) + ':</b> ' + escapeHTML(action) + '</p><small>' + escapeHTML(t('Planning guidance only. Confirm varieties, planting dates, soil tests, water, pests, and markets locally.')) + '</small>';
+    host.innerHTML = '<span class="eyebrow">' + escapeHTML(t('GENERATED FOR YOUR LAND')) + '</span><h3>' + escapeHTML(state.location.name) + '</h3><div class="generated-tip-signal"><span>☀ <b>' + escapeHTML(temperature) + '</b></span><span>☂ <b>' + escapeHTML(profile.rainTotal.toFixed(1) + ' mm / 7d') + '</b></span><span>◉ <b>' + escapeHTML(t('NASA POWER')) + '</b></span></div><p><b>' + escapeHTML(t('Climate signal')) + ':</b> ' + escapeHTML(climateSignal) + '</p><p><b>' + escapeHTML(t('Water signal')) + ':</b> ' + escapeHTML(waterSignal) + '</p><div class="generated-tip-crops"><small>' + escapeHTML(t('Crops selected by you')) + '</small><b>' + escapeHTML(cropNames.join(' · ') || t('None selected')) + '</b></div><p><b>' + escapeHTML(t('Next check')) + ':</b> ' + escapeHTML(action) + '</p><small>' + escapeHTML(t('Planning guidance only. Confirm varieties, planting dates, soil tests, water, pests, and markets locally.')) + '</small>';
     host.classList.remove('is-generating');
     $$('[data-agri-tip]').forEach(button => button.classList.remove('active'));
   }, animate ? 420 : 0);
@@ -1132,7 +1099,7 @@ function showSimpleAgriTip(topic) {
   const tips = {
     weather: [t('Weather on your land'), weather ? t('Current conditions') + ': ' + temp(weather.current?.temperature) + ', ' + t(formatWeatherCode(weather.current?.weatherCode)) + '. ' + t('Wind') + ' ' + wind(weather.current?.wind) + '.' : t('Choose a location to load live weather context.')],
     soil: [t('What the soil details mean'), state.simpleFarm.soilPH ? t('Your entered soil pH is') + ' ' + state.simpleFarm.soilPH + '. ' + t('Compare it with the selected crop profile and keep the sample method.') : t('Soil pH is unknown. A local soil test would make the crop comparison stronger.')],
-    water: [t('Your short water signal'), firstDay ? t('Forecast rain') + ': ' + rain(firstDay.rain) + '. ' + t('Reference ET₀') + ': ' + rain(firstDay.et0) + '. ' + t('These are model signals, not irrigation instructions.') : t('Choose a location to compare forecast rain and reference water demand.')],
+    water: [t('Your recent water signal'), firstDay ? t('NASA POWER daily rainfall') + ': ' + rain(firstDay.rain) + '. ' + t('This is historical regional context, not an irrigation instruction or forecast.') : t('Choose a location to load recent NASA POWER rainfall context.')],
     crop: [t('Your crop choices'), cropNames.length ? cropNames.map(t).join(', ') + '. ' + t('Check local planting dates, seed availability, pests, and buyer requirements before choosing.') : t('Choose at least one crop to see its field profile.')],
     profit: [t('Your planning margin'), benchmark ? simpleMoney(margin, fx.currency) + ' ' + t('per hectare') + '. ' + t('This uses planning benchmarks; replace them with local prices and costs.') : t('Choose a crop to create a planning estimate.')],
   };
@@ -1492,46 +1459,10 @@ async function convertCurrency(event) {
     next = event.target.value,
     previous = state.economicsInputs.currency || "USD";
   if (next === previous) return;
-  const populated = currencyFields
-    .map((name) => Number(form.elements[name].value))
-    .filter(Number.isFinite);
-  if (!populated.length) {
-    state.economicsInputs = { ...state.economicsInputs, currency: next };
-    renderMarketContext();
-    return;
-  }
-  try {
-    text("#market-currency-note", "Fetching the latest exchange rate…");
-    const response = await fetch(
-      "https://api.frankfurter.app/v1/latest?base=" +
-        encodeURIComponent(previous) +
-        "&symbols=" +
-        encodeURIComponent(next),
-      { headers: { Accept: "application/json" } },
-    );
-    const data = await response.json(),
-      factor = Number(data?.rates?.[next]);
-    if (!response.ok || !Number.isFinite(factor) || factor <= 0)
-      throw new Error("No live rate is available for this currency pair.");
-    for (const name of currencyFields) {
-      const input = form.elements[name],
-        value = Number(input.value);
-      if (Number.isFinite(value) && input.value !== "")
-        input.value = String(Math.round(value * factor * 100) / 100);
-    }
-    state.economicsInputs = { ...state.economicsInputs, currency: next };
-    renderEconomics();
-    renderMarketContext();
-    text(
-      "#market-currency-note",
-      "Live exchange rate · " + previous + " → " + next + " · " + data.date,
-    );
-    toast("Converted using the latest available exchange rate.");
-  } catch (error) {
-    form.elements.currency.value = previous;
-    renderMarketContext();
-    toast(error.message || "Live currency conversion is unavailable.");
-  }
+  state.economicsInputs = { ...state.economicsInputs, currency: next };
+  renderMarketContext();
+  text("#market-currency-note", "Currency changed to " + next + ". Existing numeric values were not converted; update them with your dated local quote.");
+  toast("Currency label changed. No exchange rate was assumed.");
 }
 function applyPreferences() {
   const theme = resolvedTheme();
@@ -1639,58 +1570,14 @@ function renderFieldHealth() {
     text("#health-profit-score", "—");
     text(
       "#field-health-summary",
-      "Choose a real field to connect live weather and add your own local evidence.",
+      "Choose a real field to connect NASA context and add your own local evidence.",
     );
     return;
   }
-  const weather = state.weather?.current,
-    soilRecords = state.samples.filter((sample) => sample.field === fieldKey());
-  const climate = weather
-    ? Math.max(
-        30,
-        Math.min(
-          100,
-          100 -
-            Math.max(0, Math.abs((weather.temperature ?? 22) - 23) - 8) * 4 -
-            (weather.weatherCode >= 80 ? 12 : 0),
-        ),
-      )
-    : 55;
-  const water = weather
-    ? Math.max(
-        25,
-        Math.min(
-          100,
-          48 +
-            (weather.soilMoisture ?? 0.2) * 135 +
-            Math.min(18, (total(state.weather.daily, "rain") ?? 0) / 3),
-        ),
-      )
-    : 55;
-  const soil = soilRecords.length
-    ? Math.max(
-        35,
-        Math.min(
-          100,
-          72 +
-            (soilRecords.some((sample) => number(sample.carbon)) ? 8 : 0) +
-            (soilRecords.some((sample) => number(sample.ph)) ? 6 : 0),
-        ),
-      )
-    : 55;
-  const margin = state.economics?.perHa?.margin,
-    profit = number(margin)
-      ? Math.max(
-          20,
-          Math.min(100, 55 + Math.max(-35, Math.min(35, margin / 20))),
-        )
-      : 55;
-  const scores = {
-    weather: Math.round(climate),
-    water: Math.round(water),
-    soil: Math.round(soil),
-    profit: Math.round(profit),
-  };
+  const weather = state.weather?.current, soilRecords = state.samples.filter((sample) => sample.field === fieldKey());
+  const rainComplete = state.weather?.daily?.length >= 7 && state.weather.daily.every(day => number(day.rain));
+  const economicsVerified = Boolean(state.economics && state.economicsInputs.priceSource !== 'none' && state.economicsInputs.priceSource !== 'estimate' && state.economicsInputs.priceDate);
+  const scores = { weather: weather ? 100 : 0, water: rainComplete ? 100 : 0, soil: soilRecords.length ? 100 : 0, profit: economicsVerified ? 100 : 0 };
   const overall = Math.round(
     Object.values(scores).reduce((sum, value) => sum + value, 0) / 4,
   );
@@ -1704,11 +1591,11 @@ function renderFieldHealth() {
   text(
     "#field-health-summary",
     t(
-      overall >= 75
-        ? "Your field signals are working together. Keep checking local evidence before acting."
-        : overall >= 55
-          ? "Your field is steady, with opportunities to improve the weakest signal."
-          : "Your field needs a closer look. Start with the weakest signal before the next decision.",
+      overall === 100
+        ? "All four evidence groups are connected. Review their dates and limitations before acting."
+        : overall >= 50
+          ? "Some evidence is connected; complete the missing local records before relying on the plan."
+          : "Evidence is incomplete. Add NASA context, soil records, rainfall, and dated local economics.",
     ),
   );
 }
@@ -1729,23 +1616,23 @@ function renderDecisionBriefing() {
   if (!weather)
     alerts.push({
       kind: "info",
-      title: "Weather needs a refresh",
-      copy: "Forecast signals are unavailable until the provider returns data.",
+      title: "NASA context needs a refresh",
+      copy: "Recent regional records are unavailable until NASA POWER returns data.",
       link: "#/weather",
     });
   else {
     if (number(week) && week < 10)
       alerts.push({
         kind: "water",
-        title: "Low rain outlook",
-        copy: "The next 7-day forecast is below 10 mm. Compare it with crop water demand.",
+        title: "Low recent rainfall",
+        copy: "The recent 7-day NASA POWER record is below 10 mm. Verify current conditions locally before acting.",
         link: "#/water",
       });
     if (number(weather.temperature) && weather.temperature >= 32)
       alerts.push({
         kind: "heat",
-        title: "Heat window",
-        copy: "High temperature is present in the current model. Review sensitive crop stages.",
+        title: "Recent heat signal",
+        copy: "High temperature appears in the recent NASA POWER record. Check current local conditions and sensitive crop stages.",
         link: "#/weather",
       });
   }
@@ -1766,7 +1653,7 @@ function renderDecisionBriefing() {
   if (alerts.some((alert) => alert.kind === "water"))
     move = {
       title: "Review the water window",
-      copy: "Rainfall is limited in the connected forecast. Compare rain with reference demand before scheduling irrigation.",
+      copy: "Rainfall was limited in the recent regional record. Check current local conditions before scheduling irrigation.",
       link: "#/water",
       action: "Open water intelligence",
     };
@@ -1935,23 +1822,23 @@ async function searchSimpleLocation(event) {
   if (query.length < 2) return;
   state.searchController?.abort();
   state.searchController = new AbortController();
-  host.innerHTML = '<p class="search-results-status">Searching for places…</p>';
+  host.innerHTML = '<p class="search-results-status">Checking coordinates…</p>';
   try {
     const places = await searchPlaces(query, { signal: state.searchController.signal });
-    if (!places.length) { host.innerHTML = '<p class="search-results-status">No places found. Try a nearby town or village.</p>'; return; }
+    if (!places.length) { host.innerHTML = '<p class="search-results-status">Enter a valid latitude and longitude.</p>'; return; }
     host.replaceChildren(...places.map(place => {
       const button = document.createElement('button');
       button.type = 'button'; button.className = 'simple-place-option';
       button.innerHTML = '<b>' + escapeHTML(place.name) + '</b><small>' + place.lat.toFixed(4) + ', ' + place.lon.toFixed(4) + '</small>';
       button.addEventListener('click', () => {
-        selectLocation({ ...place, method: 'Place search' });
+        selectLocation({ ...place, method: 'Coordinates' });
         host.replaceChildren();
         toast('Selected ' + place.name + '. Press Next when you are ready.');
       });
       return button;
     }));
   } catch (error) {
-    if (error.name !== 'AbortError') host.innerHTML = '<p class="search-results-status">Place search is unavailable. You can use the map instead.</p>';
+    if (error.name !== 'AbortError') host.innerHTML = '<p class="search-results-status">' + escapeHTML(error.message) + '</p>';
   }
 }
 async function searchLocation(event) {
@@ -1961,7 +1848,7 @@ async function searchLocation(event) {
   const query = event.target.elements.query.value.trim();
   if (query.length < 2) return;
   $("#search-results").innerHTML =
-    '<p class="search-results-status">Searching for places…</p>';
+    '<p class="search-results-status">Checking coordinates…</p>';
   try {
     const results = await searchPlaces(query, {
       signal: state.searchController.signal,
@@ -1984,7 +1871,7 @@ async function searchLocation(event) {
         place.lon.toFixed(4) +
         "</small>";
       button.addEventListener("click", () => {
-        selectLocation({ ...place, method: "Place search" });
+        selectLocation({ ...place, method: "Coordinates" });
         $("#location-dialog").close();
         toast("Selected " + place.name);
       });
@@ -2126,7 +2013,7 @@ function renderFieldDataControls(status=state.weather?'ready':'idle',error=''){
   $$('[data-context-refresh]').forEach(button=>{button.hidden=!selected;button.disabled=status==='loading';});
   $$('.field-data-controls').forEach(bar=>{bar.dataset.status=selected?status:'unselected';});
   const place=selected?state.location.lat.toFixed(4)+', '+state.location.lon.toFixed(4):'';
-  text('[data-context-status]',!selected?'Choose a place, use your location, or draw a boundary. Weather, Water and Soil will update together.':status==='loading'?'Loading the latest forecast and water signals for '+place+'…':status==='error'?error+' Try Refresh data, or choose another field.':state.weather?'Connected · '+place+' · '+state.weather.source+' · retrieved '+new Date(state.weather.retrievedAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'Selected point: '+place+'. Refresh data to connect weather and water signals.');
+  text('[data-context-status]',!selected?'Choose a place, use your location, or draw a boundary. NASA context and local evidence will update together.':status==='loading'?'Loading recent NASA POWER records for '+place+'…':status==='error'?error+' Try Refresh data, or choose another field.':state.weather?'Connected · '+place+' · '+state.weather.source+' · retrieved '+new Date(state.weather.retrievedAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'Selected point: '+place+'. Refresh data to connect NASA POWER.');
 }
 async function loadWeather(force=false) {
   if (!hasLocation()) {
@@ -2140,7 +2027,7 @@ async function loadWeather(force=false) {
   resetWeather("loading");
   try {
     const weather = await fetchWeather(state.location, {
-      signal: AbortSignal.any([state.weatherController.signal, AbortSignal.timeout(8000)]),
+      signal: AbortSignal.any([state.weatherController.signal, AbortSignal.timeout(30000)]),
       force,
     });
     if (request !== state.requestId) return;
@@ -2194,38 +2081,38 @@ function resetWeather(status) {
   text(
     '[data-stat="conditions"]',
     status === "loading"
-      ? "Fetching conditions…"
+      ? "Fetching NASA POWER…"
       : status === "unselected"
-        ? "Choose a field to load live conditions"
+        ? "Choose a field to load recent regional records"
         : "Unavailable",
   );
   $("#home-forecast").innerHTML =
     '<p class="empty">' +
     (status === "loading"
-      ? "Fetching the latest forecast…"
+      ? "Fetching recent NASA POWER records…"
       : status === "unselected"
-        ? "Choose a field to load the live forecast."
+        ? "Choose a field to load NASA POWER context."
         : "The data provider is unavailable.") +
     "</p>";
   $("#full-forecast").innerHTML =
     '<p class="empty">' +
     (status === "loading"
-      ? "Loading seven-day outlook…"
+      ? "Loading recent seven-day record…"
       : status === "unselected"
-        ? "Choose a field to load the forecast."
-        : "Forecast unavailable.") +
+        ? "Choose a field to load recent NASA records."
+        : "NASA POWER record unavailable.") +
     "</p>";
   $("#hourly-chart").innerHTML =
     '<p class="empty">' +
     (status === "loading"
-      ? "Loading hourly data…"
-      : status==='unselected'?'Choose a field above to load hourly temperature.':"Hourly data unavailable.") +
+      ? "Checking data availability…"
+      : status==='unselected'?'Choose a field above to load NASA daily temperature.':"NASA POWER does not provide hourly values in this view.") +
     "</p>";
   $("#water-chart").innerHTML =
     '<p class="empty">' +
     (status === "loading"
-      ? "Loading water signals…"
-      : status==='unselected'?'Choose a field above to load rainfall and reference water demand.':"Water signals unavailable.") +
+      ? "Loading recent rainfall…"
+      : status==='unselected'?'Choose a field above to load NASA rainfall context.':"Rainfall context unavailable.") +
     "</p>";
   renderReports();
   renderFieldHealth();
@@ -2252,7 +2139,7 @@ function renderWeather() {
   );
   text(
     '[data-stat="weatherTime"]',
-    "Valid " +
+    "Most recent record " +
       (c.time?.replace("T", " ") ?? "time unavailable") +
       " · " +
       w.timezone,
@@ -2269,25 +2156,24 @@ function renderWeather() {
   text(
     '[data-stat="provenance"]',
     (w.cached ? "Cached retrieval · " : "") +
-      "Open-Meteo · valid " +
+      "NASA POWER daily regional grid · record " +
       (c.time ?? "time unavailable") +
       " (" +
       w.timezone +
       ") · retrieved " +
       new Date(w.retrievedAt).toLocaleString() +
-      ". Current conditions and shallow moisture are model outputs.",
+      ". Historical context only; not a field measurement or future forecast.",
   );
-  text("[data-weather-status]", w.cached ? "CACHED" : "MODEL");
-  text("#connection-label", "LATEST DATA CONNECTED");
+  text("[data-weather-status]", w.cached ? "CACHED" : "NASA POWER");
+  text("#connection-label", "NASA DATA CONNECTED");
   const glyph = (day) => (number(day.rain) && day.rain > 1 ? "☂" : "◌");
-  $(".weather-glyph").textContent =
-    c.weatherCode === 0 ? "☀" : c.weatherCode >= 51 ? "☂" : "☁";
+  $(".weather-glyph").textContent = "◎";
   $("#home-forecast").innerHTML = w.daily
     .slice(0, 4)
     .map(
       (d, i) =>
         '<div class="forecast-item"><span class="forecast-date">' +
-        (i === 0 ? "Today" : dateShort(d.date)) +
+        dateShort(d.date) +
         "</span><span>" +
         glyph(d) +
         '</span><span class="forecast-temp">' +
@@ -2301,7 +2187,7 @@ function renderWeather() {
     .map(
       (d, i) =>
         '<div class="day-card"><span class="day">' +
-        (i === 0 ? "Today" : dateShort(d.date)) +
+        dateShort(d.date) +
         '</span><span class="wx">' +
         glyph(d) +
         "</span><strong>" +
@@ -3093,13 +2979,12 @@ function assistantFieldContext() {
       : null,
     weather: weather
       ? {
-          source: "Open-Meteo weather model",
-          valid_time: weather.time,
+          source: "NASA POWER Daily API",
+          record_time: weather.time,
           temperature_c: weather.temperature,
-          feels_like_c: weather.feelsLike,
           humidity_percent: weather.humidity,
-          wind_kmh: weather.wind,
-          soil_moisture_0_to_1cm_model: weather.soilMoisture,
+          wind_m_s: weather.wind,
+          classification: "Recent historical regional context; not a forecast",
         }
       : null,
     soil_records: samples.map((sample) => ({
@@ -3263,20 +3148,20 @@ function evidenceRows() {
     [
       "Air temperature",
       c ? temp(c.temperature) : "Unavailable",
-      "Current model analysis",
-      "Open-Meteo",
+      "Recent regional record",
+      "NASA POWER",
     ],
     [
-      "7-day rainfall",
+      "Recent 7-day rainfall",
       w ? rain(total(w.daily, "rain")) : "Unavailable",
-      "Forecast",
-      "Open-Meteo",
+      "Historical regional context",
+      "NASA POWER",
     ],
     [
       "Surface moisture",
       c ? moisture(c.soilMoisture) : "Unavailable",
-      "Modeled 0–1 cm layer",
-      "Open-Meteo",
+      "Not inferred",
+      "SMAP integration not connected",
     ],
     [
       "Local gross margin / ha",

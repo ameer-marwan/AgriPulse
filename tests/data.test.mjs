@@ -58,58 +58,57 @@ test('rotation scenarios respond to priority, family and pH constraints', () => 
 test('weather null values stay unavailable while genuine zero is preserved', async () => {
   const original = globalThis.fetch;
   globalThis.fetch = async () => ({ ok: true, json: async () => ({
-    current: { temperature_2m: null, apparent_temperature: 0, relative_humidity_2m: null, wind_speed_10m: 0, weather_code: 0, time: '2026-10-29T10:15' },
-    daily: { time: ['2026-10-29'], temperature_2m_max: [null], temperature_2m_min: [0], precipitation_sum: [null] },
-    hourly: { time: ['2026-10-29T10:00'], temperature_2m: [null], precipitation: [0], soil_moisture_0_to_1cm: [null] },
-    elevation: null, timezone: 'UTC'
+    properties: { parameter: {
+      T2M: { '20261029': 0 }, T2M_MAX: { '20261029': -999 }, T2M_MIN: { '20261029': 0 },
+      RH2M: { '20261029': -999 }, WS10M: { '20261029': 0 }, WS10M_MAX: { '20261029': 0 },
+      PRECTOTCORR: { '20261029': 0 }, ALLSKY_SFC_SW_DWN: { '20261029': -999 }
+    } }
   }) });
   try {
     const value = await fetchWeather({ lat: 1, lon: 2 });
-    assert.equal(value.current.temperature, null);
-    assert.equal(value.current.feelsLike, 0);
+    assert.equal(value.current.temperature, 0);
+    assert.equal(value.current.feelsLike, null);
     assert.equal(value.current.soilMoisture, null);
-    assert.equal(value.daily[0].rain, null);
+    assert.equal(value.daily[0].rain, 0);
     assert.equal(value.daily[0].low, 0);
     assert.equal(value.elevation, null);
-    assert.equal(value.hourly[0].rain, 0);
+    assert.deepEqual(value.hourly, []);
   } finally { globalThis.fetch = original; }
 });
 
 test('malformed and failed weather responses reject instead of generating sample data', async () => {
   const original = globalThis.fetch;
-  globalThis.fetch = async () => ({ ok: true, json: async () => ({ current: {} }) });
-  try { await assert.rejects(fetchWeather({ lat: 3, lon: 4 }), /incomplete/); }
+  globalThis.fetch = async () => ({ ok: true, json: async () => ({ properties: { parameter: {} } }) });
+  try { await assert.rejects(fetchWeather({ lat: 3, lon: 4 }), /no usable recent daily data/); }
   finally { globalThis.fetch = original; }
   await assert.rejects(fetchWeather({ lat: '', lon: 0 }), /valid latitude/);
 });
 
-test('weather preserves source array alignment across invalid times and requests explicit units', async () => {
+test('weather keeps the latest seven NASA POWER records and converts wind to km/h', async () => {
   const original = globalThis.fetch;
   let requestUrl;
   globalThis.fetch = async url => {
     requestUrl = new URL(url);
-    return { ok: true, json: async () => ({
-      current: { time: '2026-10-30T12:15' },
-      daily: { time: [null, '2026-10-30'], temperature_2m_max: [90, 23], temperature_2m_min: [80, 8], wind_speed_10m_max: [99, 35], precipitation_sum: [100, 0] },
-      hourly: { time: [null, '2026-10-30T12:00'], temperature_2m: [99, 21], wind_speed_10m: [99, 0], relative_humidity_2m: [100, null], weather_code: [99, 0] }
-    }) };
+    const dates = Array.from({ length: 9 }, (_, index) => `202610${String(index + 1).padStart(2,'0')}`);
+    const record = mapper => Object.fromEntries(dates.map((date,index) => [date, mapper(index)]));
+    return { ok: true, json: async () => ({ properties: { parameter: {
+      T2M: record(i => 20 + i), T2M_MAX: record(i => 25 + i), T2M_MIN: record(i => 10 + i),
+      RH2M: record(() => 50), WS10M: record(() => 2), WS10M_MAX: record(() => 5),
+      PRECTOTCORR: record(i => i === 8 ? 0 : 1), ALLSKY_SFC_SW_DWN: record(() => 6)
+    } } }) };
   };
   try {
     const value = await fetchWeather({ lat: 4, lon: 5 });
-    assert.equal(value.daily.length, 1);
-    assert.equal(value.daily[0].high, 23);
-    assert.equal(value.daily[0].low, 8);
-    assert.equal(value.daily[0].windMax, 35);
-    assert.equal(value.daily[0].rain, 0);
-    assert.equal(value.hourly.length, 1);
-    assert.equal(value.hourly[0].temperature, 21);
-    assert.equal(value.hourly[0].wind, 0);
-    assert.equal(value.hourly[0].humidity, null);
-    assert.equal(value.hourly[0].weatherCode, 0);
-    assert.equal(requestUrl.searchParams.get('wind_speed_unit'), 'kmh');
-    assert.equal(requestUrl.searchParams.get('temperature_unit'), 'celsius');
-    assert.equal(requestUrl.searchParams.get('precipitation_unit'), 'mm');
-    assert.match(requestUrl.searchParams.get('daily'), /wind_speed_10m_max/);
+    assert.equal(value.daily.length, 7);
+    assert.equal(value.daily[0].date, '2026-10-03');
+    assert.equal(value.daily.at(-1).high, 33);
+    assert.equal(value.daily.at(-1).windMax, 18);
+    assert.equal(value.daily.at(-1).rain, 0);
+    assert.equal(value.current.wind, 7.2);
+    assert.equal(value.hourly.length, 0);
+    assert.match(requestUrl.hostname, /power\.larc\.nasa\.gov/);
+    assert.match(requestUrl.searchParams.get('parameters'), /PRECTOTCORR/);
+    assert.match(value.units.wind, /km\/h/);
   } finally { globalThis.fetch = original; }
 });
 
@@ -118,17 +117,16 @@ test('already cancelled requests never fetch even if cached', async () => {
   await assert.rejects(fetchWeather({ lat: 1, lon: 2 }, { signal: controller.signal }), { name: 'AbortError' });
 });
 
-test('search returns a selectable resolved location and excludes missing coordinates', async () => {
-  const original = globalThis.fetch;
-  globalThis.fetch = async () => ({ ok: true, json: async () => ({ results: [
-    { id: 1, name: 'Place', country: 'Country', latitude: 0, longitude: 0 },
-    { id: 2, name: 'Unknown', latitude: null, longitude: null }
-  ] }) });
+test('coordinate entry resolves locally without an outside geocoding provider', async () => {
+  let fetched = false;
+  const original = globalThis.fetch; globalThis.fetch = async () => { fetched = true; throw new Error('unexpected fetch'); };
   try {
-    const value = await searchPlaces('Place');
+    const value = await searchPlaces('24.7136, 46.6753');
     assert.equal(value.length, 1);
-    assert.equal(value[0].lat, 0);
-    assert.equal(value[0].name, 'Place, Country');
+    assert.equal(value[0].lat, 24.7136);
+    assert.match(value[0].name, /Coordinates/);
+    assert.equal(fetched, false);
+    await assert.rejects(searchPlaces('Riyadh'), /Enter coordinates/);
   } finally { globalThis.fetch = original; }
 });
 

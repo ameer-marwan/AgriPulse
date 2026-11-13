@@ -42,57 +42,36 @@ function arrayValue(record, property, index) {
 
 export async function fetchWeather(point, { signal, force = false } = {}) {
   const { lat, lon } = coordinates(point);
-  const key = `weather:${lat},${lon}`;
+  const key = `nasa-power-recent:${lat},${lon}`;
   const saved = cache.get(key);
   if (signal?.aborted) throw new DOMException('Request cancelled', 'AbortError');
-  if (!force && saved && Date.now() - saved.at < 15 * 60 * 1000) return { ...saved.value, cached: true };
-  const query = new URLSearchParams({
-    latitude: lat, longitude: lon,
-    current: 'temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code,is_day',
-    hourly: 'temperature_2m,precipitation,soil_moisture_0_to_1cm,wind_speed_10m,relative_humidity_2m,weather_code',
-    daily: 'temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,et0_fao_evapotranspiration,wind_speed_10m_max',
-    timezone: 'auto', forecast_days: '7', temperature_unit: 'celsius', wind_speed_unit: 'kmh', precipitation_unit: 'mm'
-  });
-  const data = await request(`https://api.open-meteo.com/v1/forecast?${query}`, { signal });
-  if (!data || typeof data !== 'object' || data.error || !data.current ||
-      !Array.isArray(data.daily?.time) || !Array.isArray(data.hourly?.time)) {
-    throw new Error('The weather provider returned an incomplete response.');
-  }
-  const current = data.current;
-  const times = data.hourly.time;
-  const hour = typeof current.time === 'string' ? current.time.slice(0, 13) : '';
-  const hourIndex = times.findIndex(time => typeof time === 'string' && time.slice(0, 13) === hour);
+  if (!force && saved && Date.now() - saved.at < 6 * 60 * 60 * 1000) return { ...saved.value, cached: true };
+  const end = new Date(); end.setUTCDate(end.getUTCDate() - 5);
+  const start = new Date(end); start.setUTCDate(start.getUTCDate() - 30);
+  const compact = date => date.toISOString().slice(0,10).replaceAll('-','');
+  const query = new URLSearchParams({ parameters: 'T2M,T2M_MAX,T2M_MIN,RH2M,WS10M,WS10M_MAX,PRECTOTCORR,ALLSKY_SFC_SW_DWN', community: 'AG',
+    longitude: lon, latitude: lat, start: compact(start), end: compact(end), format: 'JSON' });
+  const data = await request(`https://power.larc.nasa.gov/api/temporal/daily/point?${query}`, { signal, timeout: 30000 });
+  const p = data?.properties?.parameter;
+  if (!p || typeof p.T2M !== 'object') throw new Error('NASA POWER returned no usable recent daily data for this location.');
+  const dates = Object.keys(p.T2M).filter(date => /^\d{8}$/.test(date) && number(p.T2M[date]) !== null).sort().slice(-7);
+  if (!dates.length) throw new Error('NASA POWER has no recent complete daily records for this location yet.');
+  const read = (name,date) => number(p[name]?.[date]);
+  const daily = dates.map(date => ({ date: `${date.slice(0,4)}-${date.slice(4,6)}-${date.slice(6,8)}`,
+    high: read('T2M_MAX',date), low: read('T2M_MIN',date), rain: read('PRECTOTCORR',date), rainProbability: null,
+    et0: null, windMax: read('WS10M_MAX',date) === null ? null : read('WS10M_MAX',date) * 3.6, mean: read('T2M',date), humidity: read('RH2M',date), solar: read('ALLSKY_SFC_SW_DWN',date) }));
+  const recent = daily.at(-1);
   const value = {
-    location: { lat, lon }, gridLocation: { lat: number(data.latitude), lon: number(data.longitude) },
+    location: { lat, lon }, gridLocation: { lat, lon },
     current: {
-      temperature: number(current.temperature_2m), feelsLike: number(current.apparent_temperature),
-      humidity: number(current.relative_humidity_2m), wind: number(current.wind_speed_10m),
-      weatherCode: number(current.weather_code),
-      isDay: current.is_day === 1 ? true : current.is_day === 0 ? false : null,
-      soilMoisture: hourIndex >= 0 ? arrayValue(data.hourly, 'soil_moisture_0_to_1cm', hourIndex) : null,
-      time: typeof current.time === 'string' ? current.time : null
+      temperature: recent.mean, feelsLike: null, humidity: recent.humidity, wind: read('WS10M',dates.at(-1)) === null ? null : read('WS10M',dates.at(-1)) * 3.6, weatherCode: null,
+      isDay: null, soilMoisture: null, time: recent.date + 'T12:00'
     },
-    daily: data.daily.time.map((date, i) => ({
-      date, high: arrayValue(data.daily, 'temperature_2m_max', i),
-      low: arrayValue(data.daily, 'temperature_2m_min', i),
-      rain: arrayValue(data.daily, 'precipitation_sum', i),
-      rainProbability: arrayValue(data.daily, 'precipitation_probability_max', i),
-      et0: arrayValue(data.daily, 'et0_fao_evapotranspiration', i),
-      windMax: arrayValue(data.daily, 'wind_speed_10m_max', i)
-    })).filter(day => typeof day.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(day.date)),
-    hourly: times.map((time, i) => ({
-      time, temperature: arrayValue(data.hourly, 'temperature_2m', i),
-      rain: arrayValue(data.hourly, 'precipitation', i),
-      wind: arrayValue(data.hourly, 'wind_speed_10m', i),
-      humidity: arrayValue(data.hourly, 'relative_humidity_2m', i),
-      weatherCode: arrayValue(data.hourly, 'weather_code', i)
-    })).filter(hour => typeof hour.time === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(hour.time)),
-    timezone: typeof data.timezone === 'string' ? data.timezone : 'UTC',
-    elevation: number(data.elevation), retrievedAt: new Date().toISOString(),
-    source: 'Open-Meteo forecast API', sourceUrl: 'https://open-meteo.com/en/docs',
-    classification: 'Weather model analysis and forecast', cached: false,
-    units: { temperature: '°C', wind: 'km/h', rain: 'mm', humidity: '%', soilMoisture: 'm³/m³', et0: 'mm' },
-    limitations: 'Reference-grid weather, not a field measurement. Soil moisture describes only the modeled 0–1 cm layer.'
+    daily, hourly: [], timezone: 'UTC', elevation: null, retrievedAt: new Date().toISOString(),
+    source: 'NASA POWER Daily API', sourceUrl: 'https://power.larc.nasa.gov/docs/services/api/temporal/daily/',
+    classification: 'Recent regional agroclimatology — historical, not a forecast', cached: false,
+    units: { temperature: '°C', wind: 'km/h (converted from NASA POWER m/s)', rain: 'mm/day', humidity: '%', soilMoisture: null, et0: null },
+    limitations: 'Recent NASA POWER regional-grid records, not a field measurement or future forecast. Soil moisture and reference ET₀ are not inferred when they are unavailable from this request.'
   };
   cache.set(key, { at: Date.now(), value });
   return value;
@@ -100,14 +79,12 @@ export async function fetchWeather(point, { signal, force = false } = {}) {
 
 export async function searchPlaces(query, { signal } = {}) {
   const text = String(query || '').trim();
-  if (text.length < 2) return [];
-  const data = await request(`https://geocoding-api.open-meteo.com/v1/search?${new URLSearchParams({ name: text, count: '7', language: 'en', format: 'json' })}`, { signal });
-  if (data.error) throw new Error('Location search could not complete.');
-  return (Array.isArray(data.results) ? data.results : []).filter(place => number(place.latitude) !== null && number(place.longitude) !== null).map(place => ({
-    id: place.id, name: [place.name, place.admin1, place.country].filter(Boolean).join(', '),
-    lat: place.latitude, lon: place.longitude, country: place.country || '', region: place.admin1 || '',
-    timezone: place.timezone || null
-  }));
+  if (signal?.aborted) throw new DOMException('Request cancelled', 'AbortError');
+  const match = text.match(/^\s*(-?\d+(?:\.\d+)?)\s*[, ]\s*(-?\d+(?:\.\d+)?)\s*$/);
+  if (!match) throw new Error('Enter coordinates as latitude, longitude, or choose a point on the map.');
+  const lat = Number(match[1]), lon = Number(match[2]);
+  coordinates({ lat, lon });
+  return [{ id: `coordinates:${lat},${lon}`, name: `Coordinates ${lat.toFixed(4)}, ${lon.toFixed(4)}`, lat, lon, country: '', region: '', timezone: 'UTC' }];
 }
 
 export async function fetchNasa(point, { signal } = {}) {
@@ -142,7 +119,7 @@ export async function fetchNasa(point, { signal } = {}) {
   return value;
 }
 
-const fao = 'https://www.fao.org/land-water/databases-and-software/crop-information/en/';
+const fao = 'https://gaez.fao.org/';
 export const crops = [
   { id: 'wheat', name: 'Wheat', family: 'Poaceae', type: 'grain', season: 'Cool season', waterDemand: 'Moderate', droughtTolerance: 'Moderate', phMin: 5.5, phMax: 7.5, notes: 'Winter and spring cultivars have different temperature and vernalization needs.' },
   { id: 'maize', name: 'Maize', family: 'Poaceae', type: 'grain', season: 'Warm season', waterDemand: 'High', droughtTolerance: 'Low', phMin: 5.5, phMax: 7.5, notes: 'Water stress around flowering is particularly important. Irrigation access alone does not establish suitability.' },
@@ -166,7 +143,7 @@ export function recommendRotations({ priority = 'soil', currentCrop = 'wheat', i
     { id: 'water', name: 'Water conservation', favored: ['sorghum', 'chickpea', 'cowpea', 'barley'], reason: 'Favors broadly drought-tolerant or lower-water-demand options, subject to planting season and local soil storage.' },
     { id: 'risk', name: 'Crop diversification', favored: ['sunflower', 'cowpea', 'soybean', 'barley'], reason: 'Changes crop family and seasonal management exposure rather than assuming all crops have the same risk.' }
   ];
-  const limit = 'A scenario, not a planting prescription: local cultivar, planting window, market, pest history, soil profile and irrigation capacity need confirmation. A seven-day forecast cannot validate a multi-season rotation.';
+  const limit = 'A scenario, not a planting prescription: local cultivar, planting window, market, pest history, soil profile and irrigation capacity need confirmation. Recent regional climate records cannot validate a multi-season rotation.';
   return concepts.sort((a, b) => (a.id === priority ? -1 : b.id === priority ? 1 : 0)).map(concept => {
     const eligible = crops.filter(crop => crop.type !== 'cover' && (!current || crop.family !== current.family) &&
       (phValue === null || (phValue >= crop.phMin && phValue <= crop.phMax)));
