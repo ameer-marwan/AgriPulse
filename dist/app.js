@@ -415,7 +415,7 @@ function init() {
     <section class="simple-stage" data-simple-stage="2" hidden><article class="panel simple-card"><span class="eyebrow">STEP 2 / SOIL, WATER &amp; LOCAL COSTS</span><h2>Tell us only what you know.</h2><p>These quick choices help AgriPulse explain the crop and water signals. Leave optional local values empty rather than using a generic estimate.</p><form id="simple-farm-form" class="simple-farm-form"><label>Water source<select name="waterSource"><option value="unknown">I don’t know yet</option><option value="rainfed">Rain-fed only</option><option value="irrigated">Irrigation available</option></select></label><label>Your priority<select name="objective"><option value="water">Use water wisely</option><option value="soil">Protect soil health</option><option value="risk">Prepare for changing weather</option></select></label><label>Soil pH <small>Optional</small><input name="soilPH" inputmode="decimal" min="0" max="14" placeholder="I don’t know"></label><label>Soil texture<select name="soilTexture"><option value="unknown">I don’t know</option><option value="light">Light</option><option value="medium">Medium</option><option value="heavy">Heavy</option><option value="organic">Organic</option></select></label><label class="span-two">Drainage<select name="drainage"><option value="unknown">I don’t know</option><option value="well">Well drained</option><option value="excessive">Very fast drainage</option></select></label><div class="simple-local-economics span-two"><span class="eyebrow">OPTIONAL · YOUR LOCAL VALUES</span><p>No market price is invented. Enter values in the report currency to calculate profit.</p><label>Expected yield (t/ha)<input name="localYield" type="number" min="0" step="0.1" placeholder="Leave empty"></label><label>Selling price per tonne<input name="localPrice" type="number" min="0" step="0.01" placeholder="Leave empty"></label><label>Cost per hectare<input name="localCost" type="number" min="0" step="0.01" placeholder="Leave empty"></label></div><div class="simple-step-actions span-two"><button class="button secondary" type="button" data-action="simple-back" data-back-step="1"><span aria-hidden="true">←</span> Back</button><button class="button" type="submit">Save &amp; continue <span aria-hidden="true">→</span></button></div></form></article></section>
     <section class="simple-stage" data-simple-stage="3" hidden><article class="panel simple-card simple-crops-card"><span class="eyebrow">STEP 3 / CROPS</span><h2>Which crops are you considering?</h2><p>Choose one or more crops. AgriPulse will compare their available soil conditions and include your primary crop in the report.</p><div class="simple-crop-tools"><label><span>⌕</span><input id="simple-crop-search" type="search" placeholder="Search crops"></label><div role="group" aria-label="Crop category"><button class="active" type="button" data-crop-filter="all">All</button><button type="button" data-crop-filter="grain">Grains</button><button type="button" data-crop-filter="vegetable">Vegetables</button><button type="button" data-crop-filter="other">Other</button></div></div><form id="simple-crops-form" class="simple-crop-checklist">${Object.entries(simpleCropEvidence).map(([id, crop]) => { const sticker = simpleCropStickers[id]; return '<label data-crop-card data-crop-name="' + crop.name.toLowerCase() + '" data-crop-category="' + sticker.category + '"><input type="checkbox" name="crops" value="' + id + '"><span class="simple-crop-sticker" aria-hidden="true">' + sticker.icon + '</span><span class="simple-crop-copy"><b>' + crop.name + '</b><small>' + sticker.category + '</small></span><i aria-hidden="true">✓</i></label>'; }).join('')}<div class="simple-step-actions"><button class="button secondary" type="button" data-action="simple-back" data-back-step="2"><span aria-hidden="true">←</span> Back</button><button class="button" type="submit">Generate my report <span aria-hidden="true">→</span></button></div></form></article></section>
     <section class="simple-stage" data-simple-stage="4" hidden><header class="simple-results-heading"><div><span class="eyebrow">STEP 4 / YOUR REPORT</span><h2>Your farm, clearly explained.</h2><p id="simple-results-summary">Your location, crop choices, water context, and planning estimate appear here.</p></div><div class="button-row"><button class="button" type="button" data-action="simple-save">Export report</button><button class="button secondary" type="button" data-simple-step="1">Start again</button></div></header><div id="simple-report-hero"></div><div class="simple-results-grid" id="simple-results"></div><aside class="simple-results-note"><b>How to read your report</b><p>Weather and crop-condition signals are separated from planning estimates. Local currency follows the country you selected; confirm prices with your local buyer before acting.</p></aside></section>
-    <dialog class="simple-export-dialog" id="simple-export-dialog"><header><div><span class="eyebrow">REPORT EXPORT</span><h2>Download your farm report</h2></div><button class="simple-tool-icon" type="button" data-action="close-simple-export" aria-label="Close">×</button></header><p>Choose the language and file type. Every format uses the same field data and planning assumptions.</p><form id="simple-export-form"><label>Report language<select name="language"><option value="en">English</option><option value="ar">العربية</option><option value="fr">Français</option><option value="es">Español</option><option value="de">Deutsch</option><option value="pt">Português</option><option value="tr">Türkçe</option><option value="ur">اردو</option><option value="hi">हिन्दी</option><option value="zh">中文</option></select></label><fieldset><legend>File type</legend><label class="simple-format-option"><input type="radio" name="format" value="html" checked><span><b>HTML</b><small>Designed report for browsers and printing</small></span></label><label class="simple-format-option"><input type="radio" name="format" value="jpg"><span><b>JPG image</b><small>Shareable report snapshot</small></span></label><label class="simple-format-option"><input type="radio" name="format" value="json"><span><b>JSON data</b><small>Structured field and evidence record</small></span></label><label class="simple-format-option"><input type="radio" name="format" value="csv"><span><b>CSV table</b><small>Forecast and planning data for spreadsheets</small></span></label></fieldset><div class="simple-export-preview"><span>Ready to export</span><b id="simple-export-filename">AgriPulse-report.html</b></div><button class="button full" type="submit">Generate and download</button></form></dialog>
+    <dialog class="simple-export-dialog" id="simple-export-dialog"><header><div><span class="eyebrow">REPORT EXPORT</span><h2>Download your farm report</h2></div><button class="simple-tool-icon" type="button" data-action="close-simple-export" aria-label="Close">×</button></header><p>Choose the language and file type. Every format uses the same field data and planning assumptions.</p><form id="simple-export-form"><label>Report language<select name="language"><option value="en">English</option><option value="ar">العربية</option><option value="fr">Français</option><option value="es">Español</option><option value="de">Deutsch</option><option value="pt">Português</option><option value="tr">Türkçe</option><option value="ur">اردو</option><option value="hi">हिन्दी</option><option value="zh">中文</option></select></label><fieldset><legend>File type</legend><label class="simple-format-option"><input type="radio" name="format" value="html" checked><span><b>HTML</b><small>Designed report for browsers and printing</small></span></label><label class="simple-format-option"><input type="radio" name="format" value="jpg"><span><b>JPG image</b><small>Shareable report snapshot</small></span></label><label class="simple-format-option"><input type="radio" name="format" value="json"><span><b>JSON data</b><small>Structured field and evidence record</small></span></label><label class="simple-format-option"><input type="radio" name="format" value="csv"><span><b>CSV table</b><small>Weather and planning data for spreadsheets</small></span></label></fieldset><div class="simple-export-preview"><span>Ready to export</span><b id="simple-export-filename">AgriPulse-report.html</b></div><button class="button full" type="submit">Generate and download</button></form></dialog>
     <aside class="simple-community"><div><span class="eyebrow">AGRIPULSE COMMUNITY</span><b>Help us build better field decisions.</b></div><div><button type="button" data-action="simple-feedback">Share feedback</button><button type="button" data-action="simple-about">Learn about us</button></div></aside>
     <dialog class="simple-info-dialog" id="simple-feedback-dialog"><header><div><span class="eyebrow">YOUR FEEDBACK</span><h2>Help AgriPulse grow</h2></div><button class="simple-tool-icon" type="button" data-action="close-simple-dialog" aria-label="Close">×</button></header><p>Tell us what would make the guided farmer experience clearer or more useful.</p><form id="simple-feedback-form"><label>Rating<select name="rating"><option value="5">5 · Excellent</option><option value="4">4 · Good</option><option value="3">3 · Okay</option><option value="2">2 · Needs work</option><option value="1">1 · Poor</option></select></label><label>Comment<textarea name="comment" minlength="5" maxlength="600" required placeholder="Write your feedback"></textarea></label><button class="button" type="submit">Save feedback</button></form></dialog>
     <dialog class="simple-info-dialog" id="simple-about-dialog"><header><div><span class="eyebrow">ABOUT AGRIPULSE</span><h2>Built by students. Grounded in purpose.</h2></div><button class="simple-tool-icon" type="button" data-action="close-simple-dialog" aria-label="Close">×</button></header><div class="simple-about-profile"><img src="assets/dunia-alajial-logo.jpg" alt="Dunia Alajial International School logo"><div><b>Dunia Alajial International School</b><p>AgriPulse connects the NASA and partner resources supplied for the challenge with farmer-entered local knowledge.</p></div></div><div class="button-row"><a class="button secondary" href="https://power.larc.nasa.gov/" target="_blank" rel="noopener">NASA POWER ↗</a><a class="button secondary" href="https://gaez.fao.org/" target="_blank" rel="noopener">FAO GAEZ ↗</a></div></dialog>
@@ -785,7 +785,7 @@ function setSimpleStep(step) {
   text('#simple-save-status', t(safeStep === 4 ? 'Report ready' : 'Progress saved'));
 }
 
-function renderSimpleFlow() {
+function renderSimpleFlow({ preserveDrafts = false } = {}) {
   const readout = $('#simple-location-readout');
   if (!readout) return;
   const emptyState = $('#simple-empty-state');
@@ -795,16 +795,18 @@ function renderSimpleFlow() {
     : '<b>' + escapeHTML(t('Choose your farm location')) + '</b><span>' + escapeHTML(t('GPS is optional. You can search or choose a point on the map.')) + '</span>';
   const context = $('#simple-location-context');
   if (context) context.innerHTML = hasLocation()
-    ? '<span>◎ ' + escapeHTML(state.location.country || t('Selected region')) + '</span><span>¤ ' + escapeHTML(simpleCurrency()) + '</span><span>☁ ' + escapeHTML(t(state.weather ? 'NASA POWER connected' : 'Loads after selection')) + '</span>'
+    ? '<span>◎ ' + escapeHTML(state.location.country || t('Selected region')) + '</span><span>¤ ' + escapeHTML(simpleCurrency()) + '</span><span>☁ ' + escapeHTML(state.weather?.source || t('Loads after selection')) + '</span>'
     : '<span>◎ ' + escapeHTML(t('Country')) + ': ' + escapeHTML(t('waiting')) + '</span><span>¤ ' + escapeHTML(t('Currency')) + ': ' + escapeHTML(t('waiting')) + '</span><span>☁ ' + escapeHTML(t('Weather')) + ': ' + escapeHTML(t('waiting')) + '</span>';
   const currencySelect = $('#simple-currency');
   if (currencySelect) currencySelect.value = simpleCurrency();
   renderSimpleCurrencyStatus();
   const form = $('#simple-farm-form');
-  if (form) Object.entries(state.simpleFarm).forEach(([key, value]) => { if (form.elements[key]) form.elements[key].value = value; });
-  $$('input[name="crops"]', $('#simple-crops-form')).forEach(input => { input.checked = (state.simpleFarm.crops || []).includes(input.value); });
+  if (!preserveDrafts) {
+    if (form) Object.entries(state.simpleFarm).forEach(([key, value]) => { if (form.elements[key]) form.elements[key].value = value; });
+    $$('input[name="crops"]', $('#simple-crops-form')).forEach(input => { input.checked = (state.simpleFarm.crops || []).includes(input.value); });
+  }
   const autoNote = $('#simple-auto-note');
-  if (autoNote && hasLocation()) autoNote.innerHTML = '<span>✦</span><div><b>' + escapeHTML(t('Verified context, local choices')) + '</b><p>' + escapeHTML(t('NASA POWER recent regional records are connected. Soil, water access, crops, prices, and costs stay blank until you provide them; AgriPulse does not guess field conditions.')) + '</p></div>';
+  if (autoNote && hasLocation()) autoNote.innerHTML = '<span>✦</span><div><b>' + escapeHTML(t('Verified context, local choices')) + '</b><p>' + escapeHTML(t('The report identifies the weather source. Soil, water access, crops, prices, and costs stay blank until you provide them.')) + '</p></div>';
 }
 
 function simpleLandProfile() {
@@ -953,144 +955,396 @@ function renderSimpleResults() {
   const summary = $('#simple-results-summary');
   if (!host || !summary || !reportHero) return;
   if (!hasLocation()) {
-    summary.textContent = 'Choose your farm location first. No estimates have been generated.';
+    summary.textContent = t('Choose your farm location first. No estimates have been generated.');
     reportHero.innerHTML = '';
     host.innerHTML = simpleCard('Start with your location', 'unavailable', 'AgriPulse needs a selected place before it can retrieve regional weather context.', 'Required: selected location', 'Choose location');
     return;
   }
-  const weather = state.weather;
-  const selectedCrops = (state.simpleFarm.crops || []).length ? state.simpleFarm.crops : [state.simpleFarm.crop].filter(id => id && id !== 'recommend').concat(state.simpleFarm.crop === 'recommend' ? [simpleAutoPlan().cropId] : []);
-  const selectedCrop = selectedCrops[0] || 'recommend';
-  const priority = state.simpleFarm.objective || 'water';
-  const irrigated = state.simpleFarm.waterSource === 'irrigated';
-  const rotations = recommendRotations({ priority, currentCrop: selectedCrop === 'recommend' ? 'wheat' : selectedCrop, irrigated, weather });
-  const ids = [...new Set(rotations.flatMap(plan => plan.sequence).filter(id => crops.find(crop => crop.id === id)?.type !== 'cover'))].slice(0, 3);
-  const candidates = ids.map(id => crops.find(crop => crop.id === id)?.name).filter(Boolean);
-  const assessments = selectedCrops.map(assessSimpleCropEvidence).filter(Boolean);
-  const assessment = assessments[0];
-  const cropBody = assessments.length
-    ? assessments.map(item => t(item.profile.name) + ': ' + t(item.overall) + (item.limiting.length ? ' (' + t('watch') + ': ' + item.limiting.map(t).join(', ') + ')' : '')).join('. ') + '.'
-    : candidates.length ? candidates.map(t).join(', ') + '. ' + t('These are crop profiles for comparison, not automatic recommendations.') : t('Choose a crop to evaluate the available profile factors.');
-  const current = weather?.current;
-  const autoPlan = simpleAutoPlan();
-  const firstDay = weather?.daily?.[0];
-  const waterDays = weather?.daily?.slice(0, 7) || [];
-  const waterRain = waterDays.length && waterDays.every(day => number(day.rain)) ? waterDays.reduce((sum, day) => sum + day.rain, 0) : null;
-  const waterBody = weather && number(waterRain) ? t('Seven-day rainfall') + ': ' + rain(waterRain) + '. ' + t(weather.source.includes('Open-Meteo') ? 'Modeled forecast; verify with a local rain gauge.' : 'Historical regional context; verify current conditions locally.') : t('Rainfall estimate unavailable because daily precipitation values were not returned.');
-  const hot = number(current?.temperature) && current.temperature >= 35;
-  const windy = number(current?.wind) && current.wind >= 30;
-  const riskBody = weather ? (hot || windy ? t('Condition watch') + ': ' + [hot ? t('high temperature') : '', windy ? t('strong wind') : ''].filter(Boolean).join(' · ') + '. ' + t('Confirm conditions and crop thresholds locally.') : t('No heat or wind threshold is crossed in the available model. Check current local conditions.')) : t('Weather context is unavailable until a provider responds.');
-  const localYield=Number(state.simpleFarm.localYield),localPrice=Number(state.simpleFarm.localPrice),localCost=Number(state.simpleFarm.localCost);
-  const benchmark = state.simpleFarm.localYield !== '' && state.simpleFarm.localPrice !== '' && state.simpleFarm.localCost !== '' && [localYield,localPrice,localCost].every(Number.isFinite) ? { yield:localYield,priceUsd:localPrice,costUsd:localCost } : null;
-  const fx = state.simpleFx || { currency: simpleCurrency(), rate: 1, source: 'Farmer-entered local values', live: false };
-  const sales = benchmark ? benchmark.yield * benchmark.priceUsd * fx.rate : null;
-  const cost = benchmark ? benchmark.costUsd * fx.rate : null;
-  const margin = benchmark ? sales - cost : null;
-  const profitBody = benchmark ? t('Planning margin') + ': ' + simpleMoney(margin, fx.currency) + ' ' + t('per hectare') + '. ' + t('Estimated sales') + ': ' + simpleMoney(sales, fx.currency) + '. ' + t('Planning costs') + ': ' + simpleMoney(cost, fx.currency) + '.' : t('Choose at least one crop to create the planning estimate.');
-  const cropNames = selectedCrops.map(id => simpleCropEvidence[id]?.name || crops.find(crop => crop.id === id)?.name || id).filter(Boolean);
-  const weatherCode = number(current?.weatherCode) ? current.weatherCode : null;
-  const recentRain = weather?.daily?.slice(-3).reduce((sum, day) => sum + (number(day.rain) ? day.rain : 0), 0) || 0;
-  const scene = weatherCode === null ? (recentRain >= 8 ? 'storm' : 'clouds') : weatherCode >= 51 ? 'storm' : weatherCode > 0 ? 'clouds' : 'clear';
-  const weatherGlyph = weatherCode === null ? '◎' : weatherCode === 0 ? '☀' : weatherCode >= 51 ? '☂' : '☁';
-  const forecastItems = weather?.daily?.slice(-4).map(day => '<div><span>' + escapeHTML(dateShort(day.date)) + '</span><b>' + escapeHTML(temp(day.high)) + '</b><small>' + escapeHTML(rain(day.rain)) + '</small></div>').join('') || '<p class="empty">' + escapeHTML(t('Recent NASA record unavailable.')) + '</p>';
-  const decisionTips = [
-    state.simpleFarm.soilPH ? t('Keep your soil sample date and method with this report.') : t('Add a dated local soil test before comparing crop fit.'),
-    weather && number(firstDay?.rain) < 2 ? t('Recent rainfall was limited; verify current conditions and irrigation access locally.') : t('Check a current local forecast before planting or irrigation.'),
-    benchmark ? t('Confirm selling price and input costs with a local buyer before acting.') : t('Choose a crop to unlock a planning margin.'),
-  ];
-  const readinessSignals = [
-    [t('Location'), true], [t('Weather context'), Boolean(weather)], [t('Crop choice'), cropNames.length > 0],
-    [t('Local soil input'), Boolean(state.simpleFarm.soilPH || (state.simpleFarm.soilTexture && state.simpleFarm.soilTexture !== 'unknown'))],
-    [t('Local economics'), Boolean(benchmark)],
-  ];
-  const readinessCount = readinessSignals.filter(([, connected]) => connected).length;
-  const weekRain = number(waterRain) ? waterRain : null;
-  const weekEt0 = weather?.daily?.slice(0, 7).every(day => number(day.et0)) ? weather.daily.slice(0, 7).reduce((sum, day) => sum + day.et0, 0) : null;
-  const waterGap = number(weekRain) && number(weekEt0) ? weekRain - weekEt0 : null;
-  const soilKnown = [state.simpleFarm.soilPH, state.simpleFarm.soilTexture, state.simpleFarm.drainage].filter(value => value && value !== 'unknown').length;
-  const reportUpdated = weather?.retrievedAt ? new Date(weather.retrievedAt).toLocaleString(localeForLanguage()) : t('Not available');
-  reportHero.innerHTML = '<article class="simple-weather-report simple-weather-' + scene + '"><div class="simple-weather-shade"></div><div class="simple-weather-main"><span class="eyebrow">' + escapeHTML(t('RECENT NASA POWER CONTEXT')) + '</span><h2>' + escapeHTML(state.location.name) + '</h2><p>' + escapeHTML(cropNames.length ? t('Selected crops') + ': ' + cropNames.map(t).join(', ') : t('No crop selected')) + '</p><div class="simple-weather-current"><span aria-hidden="true">' + weatherGlyph + '</span><strong>' + escapeHTML(weather ? temp(current?.temperature) : '—') + '</strong><div><b>' + escapeHTML(t('Historical regional record')) + '</b><small>' + escapeHTML(weather ? t('Wind') + ' ' + wind(current?.wind) + ' · ' + t('Humidity') + ' ' + (current?.humidity ?? '—') + '%' : t('Select or refresh your location to retry NASA POWER')) + '</small></div></div></div><div class="simple-weather-forecast"><span class="eyebrow">' + escapeHTML(t('RECENT FOUR DAYS')) + '</span>' + forecastItems + '</div></article>' +
-    '<div class="simple-report-facts"><article><span>' + escapeHTML(t('Location')) + '</span><b>' + escapeHTML(state.location.name) + '</b><small>' + escapeHTML(state.location.country || t('Selected region')) + '</small></article><article><span>' + escapeHTML(t('Crops')) + '</span><b>' + escapeHTML(cropNames.map(t).join(', ') || t('Not selected')) + '</b><small>' + escapeHTML(t('Farmer-selected crop profiles')) + '</small></article><article><span>' + escapeHTML(t('Field details')) + '</span><b>' + escapeHTML(t(state.simpleFarm.waterSource === 'irrigated' ? 'Irrigation available' : state.simpleFarm.waterSource === 'rainfed' ? 'Rain-fed only' : 'Water access not provided')) + '</b><small>' + escapeHTML(t('Soil texture') + ': ' + t(state.simpleFarm.soilTexture === 'unknown' ? 'Not provided' : state.simpleFarm.soilTexture)) + '</small></article><article><span>' + escapeHTML(t('Profit estimate')) + '</span><b>' + escapeHTML(benchmark ? simpleMoney(margin, fx.currency) : '—') + '</b><small>' + escapeHTML(benchmark?t('Farmer-entered local values'):t('Local values required')) + '</small></article></div><section class="simple-report-readiness"><div><span class="eyebrow">' + escapeHTML(t('DECISION READINESS')) + '</span><b>' + readinessCount + ' / ' + readinessSignals.length + ' ' + escapeHTML(t('signals connected')) + '</b></div><div>' + readinessSignals.map(([label, connected]) => '<span class="' + (connected ? 'connected' : '') + '"><i></i>' + escapeHTML(label) + '</span>').join('') + '</div></section><section class="simple-report-depth"><article><span class="eyebrow">' + escapeHTML(t('RECENT WATER CONTEXT')) + '</span><h3>' + escapeHTML(t('NASA POWER regional record')) + '</h3><dl><div><dt>' + escapeHTML(t('Recent 7-day rain')) + '</dt><dd>' + escapeHTML(number(weekRain) ? rain(weekRain) : '—') + '</dd></div><div><dt>' + escapeHTML(t('Reference ET₀')) + '</dt><dd>—</dd></div><div><dt>' + escapeHTML(t('Classification')) + '</dt><dd>' + escapeHTML(t('Historical, not forecast')) + '</dd></div></dl></article><article><span class="eyebrow">' + escapeHTML(t('SOIL CONTEXT')) + '</span><h3>' + escapeHTML(soilKnown + ' / 3 ' + t('details provided')) + '</h3><dl><div><dt>' + escapeHTML(t('Soil pH')) + '</dt><dd>' + escapeHTML(state.simpleFarm.soilPH || t('Not provided')) + '</dd></div><div><dt>' + escapeHTML(t('Texture')) + '</dt><dd>' + escapeHTML(t(state.simpleFarm.soilTexture === 'unknown' ? 'Not provided' : state.simpleFarm.soilTexture)) + '</dd></div><div><dt>' + escapeHTML(t('Drainage')) + '</dt><dd>' + escapeHTML(t(state.simpleFarm.drainage === 'unknown' ? 'Not provided' : state.simpleFarm.drainage)) + '</dd></div></dl></article><article><span class="eyebrow">' + escapeHTML(t('REPORT TRACE')) + '</span><h3>' + escapeHTML(readinessCount + ' / ' + readinessSignals.length + ' ' + t('signals connected')) + '</h3><dl><div><dt>' + escapeHTML(t('NASA POWER retrieved')) + '</dt><dd>' + escapeHTML(reportUpdated) + '</dd></div><div><dt>' + escapeHTML(t('Currency basis')) + '</dt><dd>' + escapeHTML(t('Farmer-entered local values')) + '</dd></div><div><dt>' + escapeHTML(t('Coordinates')) + '</dt><dd>' + escapeHTML(state.location.lat.toFixed(3) + ', ' + state.location.lon.toFixed(3)) + '</dd></div></dl></article></section><article class="simple-decision-brief"><div><span class="eyebrow">' + escapeHTML(t('NEXT BEST ACTIONS')) + '</span><h3>' + escapeHTML(t('Your decision brief')) + '</h3><p>' + escapeHTML(t('Use these as checks, not automatic instructions. Local knowledge remains essential.')) + '</p></div><ol>' + decisionTips.map(tip => '<li>' + escapeHTML(tip) + '</li>').join('') + '</ol></article>';
-  if (weather) {
-    const live = weather.source.includes('Open-Meteo');
-    const hero = reportHero.querySelector('.simple-weather-report');
-    hero?.querySelector('.eyebrow')?.replaceChildren(document.createTextNode(t(live ? 'CURRENT MODEL FORECAST' : 'RECENT NASA POWER HISTORY')));
-    hero?.querySelector('.simple-weather-current b')?.replaceChildren(document.createTextNode(t(live ? 'Current modeled conditions' : 'Historical regional record')));
-    hero?.querySelector('.simple-weather-forecast .eyebrow')?.replaceChildren(document.createTextNode(t(live ? 'FOUR-DAY FORECAST' : 'RECENT FOUR DAYS')));
-    const depth = reportHero.querySelectorAll('.simple-report-depth article');
-    depth[0]?.querySelector('h3')?.replaceChildren(document.createTextNode(weather.source));
-    const waterValues = depth[0]?.querySelectorAll('dd');
-    if (waterValues?.[1]) waterValues[1].textContent = number(weekEt0) ? rain(weekEt0) : t('Estimate unavailable');
-    if (waterValues?.[2]) waterValues[2].textContent = t(live ? 'Model forecast' : 'Historical regional record');
-    depth[0]?.insertAdjacentHTML('beforeend', '<small class="estimate-note">' + escapeHTML(t(live ? 'These weather and water values are model estimates for a regional grid, not field measurements. Check local conditions before acting.' : 'These are past regional records, not a current forecast. Check a local forecast before acting.')) + '</small>');
-    depth[2]?.querySelector('dt')?.replaceChildren(document.createTextNode(t(live ? 'Weather model retrieved' : 'NASA POWER retrieved')));
-  }
-  summary.textContent = weather ? t('Report ready for') + ' ' + state.location.name + ' · ' + t('Currency') + ': ' + fx.currency + '.' : t('Weather retrieval is unavailable; select another location or retry.');
+
+  const { location, farm, weather, cropAssessment, economics, evidence, nextActions } = buildSimpleReportPayload();
+  const e = escapeHTML;
+  const locale = localeForLanguage();
+  const period = reportPeriod(weather, locale);
+  const live = weather.kind === 'forecast';
+  const historical = weather.kind === 'historical';
+  const current = weather.current;
+  const weatherCode = current?.weatherCode;
+  const scene = weatherCode >= 51 ? 'storm' : weatherCode === 0 ? 'clear' : 'clouds';
+  const glyph = weatherCode >= 51 ? '☂' : weatherCode === 0 ? '☀' : number(weatherCode) ? '☁' : '◎';
+  const days = live ? weather.daily.slice(0, 4) : weather.daily.slice(-4);
+  const weatherDays = days.map(day => '<div><span>' + e(dateShort(day.date)) + '</span><b>' + e(temp(day.highC)) +
+    '</b><small>' + e(rain(day.rainMm)) + '</small></div>').join('');
+  const margin = economics.available ? simpleMoney(economics.planningMarginPerHa, economics.currency) : '—';
+  const source = weather.source || t('Not available');
+  const retrieved = weather.retrievedAt ? new Date(weather.retrievedAt).toLocaleString(locale) : t('Not available');
+  const soilKnown = [farm.soilPH, state.simpleFarm.soilTexture, state.simpleFarm.drainage].filter(value => value && value !== 'unknown').length;
+  const fact = (label, value, detail) => '<article><span>' + e(t(label)) + '</span><b>' + e(value) + '</b><small>' + e(detail) + '</small></article>';
+  const detail = (label, value) => '<div><dt>' + e(t(label)) + '</dt><dd>' + e(value) + '</dd></div>';
+  const shown = value => value ?? t('Not available');
+  const rainText = number(weather.sevenDay.rainMm) ? rain(weather.sevenDay.rainMm) : t('Not available');
+  const et0Text = number(weather.sevenDay.referenceEt0Mm) ? rain(weather.sevenDay.referenceEt0Mm) : t('Not available');
+  reportHero.innerHTML = `<article class="simple-weather-report simple-weather-${scene}">
+    <div class="simple-weather-shade"></div>
+    <div class="simple-weather-main">
+      <span class="eyebrow">${e(t(live ? 'CURRENT MODEL FORECAST' : historical ? 'RECENT NASA POWER HISTORY' : 'WEATHER UNAVAILABLE'))}</span>
+      <h2>${e(location.name)}</h2>
+      <p>${e(farm.crops.join(', ') || t('No crop selected'))}</p>
+      <div class="simple-weather-current"><span aria-hidden="true">${glyph}</span><strong>${e(temp(current?.temperatureC))}</strong>
+        <div><b>${e(live ? t('Current modeled conditions') : weather.classification)}</b>
+          <small>${e(source)}${period ? ' · ' + e(period) : ''}</small>
+          <small>${current ? e(t('Wind') + ' ' + wind(current.windKmh) + ' · ' + t('Humidity') + ' ' + reportMeasure(current.humidityPercent, '%')) : ''}</small></div>
+      </div>
+    </div>
+    <div class="simple-weather-forecast">
+      <span class="eyebrow">${e(t(live ? 'FORECAST DAYS' : historical ? 'RECENT RECORDS' : 'WEATHER'))}</span>
+      ${weatherDays || '<p class="empty">' + e(t('Weather context is unavailable until a provider responds.')) + '</p>'}
+    </div>
+  </article>
+  <div class="simple-report-facts">
+    ${fact('Location', location.name, location.country || t('Selected region'))}
+    ${fact('Crops', farm.crops.join(', ') || t('Not selected'), t('Farmer-selected crop profiles'))}
+    ${fact('Field details', farm.waterSource, farm.priority)}
+    ${fact('Profit estimate', margin, economics.available ? t('Farmer-entered local values') : t('Local values required'))}
+  </div>
+  <section class="simple-report-readiness">
+    <div><span class="eyebrow">${e(t('DECISION READINESS'))}</span><b>${e(evidence.connectedSignals + ' / ' + evidence.totalSignals + ' ' + t('signals connected'))}</b></div>
+    <div>${evidence.signals.map(({ label, connected }) => '<span class="' + (connected ? 'connected' : '') + '"><i></i>' + e(label) + '</span>').join('')}</div>
+  </section>
+  <section class="simple-report-depth">
+    <article><span class="eyebrow">${e(t('Water context'))}</span><h3>${e(source)}</h3><dl>
+      ${detail('7-day rain', rainText)}${detail('7-day reference ET₀', et0Text)}${detail('Classification', weather.classification)}
+    </dl><small class="estimate-note">${e(evidence.limitations[0])}</small></article>
+    <article><span class="eyebrow">${e(t('SOIL CONTEXT'))}</span><h3>${e(soilKnown + ' / 3 ' + t('details provided'))}</h3><dl>
+      ${detail('Soil pH', shown(farm.soilPH))}${detail('Texture', farm.soilTexture)}${detail('Drainage', farm.drainage)}
+    </dl></article>
+    <article><span class="eyebrow">${e(t('REPORT TRACE'))}</span><h3>${e(t('Weather evidence'))}</h3><dl>
+      ${detail('Data period', shown(period))}${detail('Retrieved at', retrieved)}
+      ${detail('Coordinates', location.latitude.toFixed(3) + ', ' + location.longitude.toFixed(3))}
+    </dl></article>
+  </section>
+  <article class="simple-decision-brief">
+    <div><span class="eyebrow">${e(t('NEXT BEST ACTIONS'))}</span><h3>${e(t('Your decision brief'))}</h3></div>
+    <ol>${nextActions.map(tip => '<li>' + e(tip) + '</li>').join('')}</ol>
+  </article>`;
+  summary.textContent = t('Report ready for') + ' ' + location.name + ' · ' + t('Currency') + ': ' + economics.currency + '.';
+  const cropBody = cropAssessment.length
+    ? cropAssessment.map(item => item.crop + ': ' + item.overall + '.').join(' ')
+    : t('Choose a crop to evaluate the available profile factors.');
+  const profitBody = economics.available
+    ? t('Planning margin') + ': ' + margin + ' ' + t('per hectare') + '. ' +
+      t('Estimated sales') + ': ' + simpleMoney(economics.estimatedSalesPerHa, economics.currency) + '. ' +
+      t('Planning costs') + ': ' + simpleMoney(economics.planningCostsPerHa, economics.currency) + '.'
+    : t('Enter local yield, price, and cost to calculate profit.');
+  const hot = number(current?.temperatureC) && current.temperatureC >= 35;
+  const windy = number(current?.windKmh) && current.windKmh >= 30;
+  const riskBody = number(current?.temperatureC) && number(current?.windKmh)
+    ? (hot || windy ? t('Condition watch') + ': ' + [hot ? t('high temperature') : '', windy ? t('strong wind') : ''].filter(Boolean).join(' · ')
+      : t('No heat or wind threshold is crossed in the available model. Check current local conditions.'))
+    : t('Temperature or wind data is unavailable.');
   host.innerHTML = [
-    simpleCard(assessments.length ? 'Crop conditions' : 'Crop profiles', 'screening', cropBody, assessments.length ? t('Profile screening only; confirm with local evidence.') : t('Choose a crop for factor-by-factor conditions.')),
-    simpleCard('Water context', weather ? 'screening' : 'unavailable', waterBody, weather ? weather.source + ' · ' + weather.classification + '. ' + t('Check your field before irrigating.') : t('No estimate is shown because the weather source is unavailable.')),
+    simpleCard('Crop profiles', 'screening', cropBody, t('Profile screening only; confirm with local evidence.')),
+    simpleCard('Water context', number(weather.sevenDay.rainMm) ? 'screening' : 'unavailable', t('7-day rain') + ': ' + rainText, evidence.limitations[1]),
     simpleCard('Planting window', 'unavailable', t('A local planting window needs seasonal crop and climate evidence.'), t('Review historical climate in Complex farmer mode.')),
-    simpleCard('Profit planning estimate', benchmark ? 'calculated' : 'unavailable', profitBody, benchmark ? t('Calculated only from farmer-entered local values.') : t('Enter local yield, price, and cost to calculate profit.')),
-    simpleCard('Farm risks', weather ? 'screening' : 'unavailable', riskBody, weather ? weather.source + ' · ' + t('Verify local conditions and crop thresholds.') : t('Data unavailable.'))
+    simpleCard('Profit planning estimate', economics.available ? 'calculated' : 'unavailable', profitBody, economics.source),
+    simpleCard('Farm risks', weather.available ? 'screening' : 'unavailable', riskBody, evidence.limitations[0]),
   ].join('');
 }
 
 function simpleReportData() {
-  const cropIds = ((state.simpleFarm.crops || []).length ? state.simpleFarm.crops : [state.simpleFarm.crop]).filter(id => id && id !== 'recommend');
-  const cropNames = cropIds.map(id => simpleCropEvidence[id]?.name || crops.find(crop => crop.id === id)?.name || id).filter(Boolean);
-  const localYield=Number(state.simpleFarm.localYield),localPrice=Number(state.simpleFarm.localPrice),localCost=Number(state.simpleFarm.localCost);
-  const benchmark = state.simpleFarm.localYield !== '' && state.simpleFarm.localPrice !== '' && state.simpleFarm.localCost !== '' && [localYield,localPrice,localCost].every(Number.isFinite) ? { yield:localYield,priceUsd:localPrice,costUsd:localCost } : null;
-  const fx = state.simpleFx || { currency: simpleCurrency(), rate: 1, source: 'Farmer-entered local values', live: false };
-  const margin = benchmark ? (benchmark.yield * benchmark.priceUsd - benchmark.costUsd) * fx.rate : null;
-  return { cropNames, benchmark, fx, margin };
+  const farm = state.simpleFarm;
+  const cropIds = (farm.crops?.length ? farm.crops : [farm.crop]).filter(id => id && id !== 'recommend');
+  const cropNames = cropIds.map(id => simpleCropEvidence[id]?.name || crops.find(crop => crop.id === id)?.name || id);
+  const values = [farm.localYield, farm.localPrice, farm.localCost];
+  const [yieldTonnes, price, cost] = values.map(Number);
+  const benchmark = values.every(value => value != null && String(value).trim() !== '') &&
+    [yieldTonnes, price, cost].every(value => number(value) && value >= 0)
+    ? { yield: yieldTonnes, price, cost } : null;
+  const fx = state.simpleFx || { currency: simpleCurrency() };
+  const margin = benchmark ? benchmark.yield * benchmark.price - benchmark.cost : null;
+  return { cropIds, cropNames, benchmark, fx, margin };
 }
 
 const reportLocales = { en:'en-US',fr:'fr-FR',ar:'ar-SA',es:'es-ES',de:'de-DE',pt:'pt-BR',tr:'tr-TR',ur:'ur-PK',hi:'hi-IN',zh:'zh-CN' };
-function buildSimpleReportPayload(language = currentLanguage()) {
-  const tr = value => tFor(language, value);
-  const { cropNames, benchmark, fx, margin } = simpleReportData();
-  const weather = state.weather, current = weather?.current, forecast = weather?.daily?.slice(0, 7) || [];
-  const sales = benchmark ? benchmark.yield * benchmark.priceUsd * fx.rate : null;
-  const costs = benchmark ? benchmark.costUsd * fx.rate : null;
-  const weekRain = forecast.reduce((sum, day) => sum + (number(day.rain) ? day.rain : 0), 0);
-  const weekEt0 = forecast.reduce((sum, day) => sum + (number(day.et0) ? day.et0 : 0), 0);
-  const cropAssessments = ((state.simpleFarm.crops || []).length ? state.simpleFarm.crops : [state.simpleFarm.crop]).filter(id => id && id !== 'recommend').map(assessSimpleCropEvidence).filter(Boolean).map(item => ({ crop: tr(item.profile.name), overall: tr(item.overall), limiting: item.limiting.map(tr), unknown: item.unknown.map(tr), factors: item.factors.map(([name,status]) => ({ name: tr(name), status: tr(status) })) }));
+
+function simpleReportWeather(weather, tr) {
+  const kind = !weather ? 'unavailable' : weather.source.includes('Open-Meteo') ? 'forecast' : 'historical';
+  const isForecast = kind === 'forecast';
+  const daily = (weather?.daily || []).slice(0, 7).map(day => ({
+    date: day.date, highC: day.high, lowC: day.low, rainMm: day.rain,
+    rainProbabilityPercent: day.rainProbability, referenceEt0Mm: day.et0, windMaxKmh: day.windMax,
+  }));
+  const period = daily.length ? { start: daily[0].date, end: daily.at(-1).date } : null;
+  const fullWeek = daily.length === 7 && daily.every((day, index) => index === 0 ||
+    Date.parse(day.date) - Date.parse(daily[index - 1].date) === 86400000);
+  const rainMm = fullWeek ? total(daily, 'rainMm') : null;
+  const referenceEt0Mm = fullWeek ? total(daily, 'referenceEt0Mm') : null;
+  const current = weather?.current;
   return {
-    schemaVersion: 2, language, direction: ['ar','ur'].includes(language) ? 'rtl' : 'ltr', generatedAt: new Date().toISOString(),
-    location: { name: state.location.name, country: state.location.country, region: state.location.region, latitude: state.location.lat, longitude: state.location.lon, method: state.location.method },
-    farm: { crops: cropNames.map(tr), waterSource: tr(state.simpleFarm.waterSource === 'irrigated' ? 'Irrigation available' : state.simpleFarm.waterSource === 'rainfed' ? 'Rain-fed only' : 'Water source unknown'), priority: tr(state.simpleFarm.objective || 'water'), soilPH: state.simpleFarm.soilPH || null, soilTexture: tr(state.simpleFarm.soilTexture || 'unknown'), drainage: tr(state.simpleFarm.drainage || 'unknown') },
-    weather: { available: Boolean(weather), source: weather?.source || 'NASA POWER Daily API', classification: weather?.classification || 'Recent historical regional context', retrievedAt: weather?.retrievedAt || null, current: current ? { temperatureC: current.temperature, condition: tr('Historical regional record'), humidityPercent: current.humidity, windMs: current.wind, surfaceSoilMoisture: null } : null, forecast: forecast.map(day => ({ date: day.date, highC: day.high, lowC: day.low, rainMm: day.rain, rainProbabilityPercent: null, referenceEt0Mm: null, windMaxMs: day.windMax })), sevenDay: { rainMm: weekRain, referenceEt0Mm: null, balanceMm: null } },
-    cropAssessment: cropAssessments,
-    economics: { available: Boolean(benchmark), currency: fx.currency, source: 'Farmer-entered local values', expectedYieldTonnesPerHa: benchmark?.yield ?? null, estimatedSalesPerHa: sales, planningCostsPerHa: costs, planningMarginPerHa: margin },
-    evidence: { connectedSignals: [Boolean(state.location), Boolean(weather), cropNames.length > 0, Boolean(state.simpleFarm.soilPH || state.simpleFarm.soilTexture !== 'unknown'), Boolean(fx.live)].filter(Boolean).length, totalSignals: 5, limitations: [tr('Weather is modeled for the selected point, not measured on the farm.'), tr('Crop suitability is a profile screening, not a planting prescription.'), tr('Profit values are planning references until local prices and costs are entered.')] },
-    nextActions: [!state.simpleFarm.soilPH ? tr('Measure soil pH to strengthen the crop comparison.') : tr('Keep your soil sample date and method with this report.'), weather && forecast[0]?.rain < 2 ? tr('Review irrigation access because little rain appears in the short forecast.') : tr('Check rainfall again before planting or irrigation.'), benchmark ? tr('Confirm selling price and input costs with a local buyer before acting.') : tr('Choose a crop to unlock a planning margin.')]
+    available: Boolean(weather), kind, period, daily,
+    source: weather?.source ?? null,
+    sourceUrl: weather?.sourceUrl ?? null,
+    classification: tr(isForecast ? 'Model forecast' : weather ? 'Historical regional record' : 'Not available'),
+    retrievedAt: weather?.retrievedAt ?? null,
+    timezone: weather?.timezone ?? null,
+    current: current ? {
+      temperatureC: current.temperature, humidityPercent: current.humidity, windKmh: current.wind,
+      time: current.time ?? null, weatherCode: current.weatherCode, surfaceSoilMoisture: current.soilMoisture,
+    } : null,
+    sevenDay: {
+      rainMm, referenceEt0Mm,
+      balanceMm: number(rainMm) && number(referenceEt0Mm) ? rainMm - referenceEt0Mm : null,
+    },
   };
 }
-function reportMoney(value, currency, language) { return number(value) ? new Intl.NumberFormat(reportLocales[language] || 'en-US', { style:'currency', currency, maximumFractionDigits:0 }).format(value) : '—'; }
+
+function buildSimpleReportPayload(language = currentLanguage()) {
+  const tr = value => tFor(language, value);
+  const { cropIds, cropNames, benchmark, fx, margin } = simpleReportData();
+  const farm = state.simpleFarm;
+  const weather = simpleReportWeather(state.weather, tr);
+  const hasSoil = [farm.soilPH, farm.soilTexture, farm.drainage].some(value => value && value !== 'unknown');
+  const waterAction = weather.kind === 'forecast' && number(weather.sevenDay.rainMm)
+    ? 'Compare expected rainfall over the next seven days with local soil moisture and irrigation access.'
+    : weather.kind === 'historical' ? 'Use the historical record as context and check a current local forecast before irrigating.'
+    : 'Check local rainfall and soil moisture before planting or irrigating.';
+  const signals = [
+    ['Location', true], ['Weather context', weather.available], ['Crop choice', cropNames.length > 0],
+    ['Local soil input', hasSoil], ['Local economics', Boolean(benchmark)],
+  ];
+  return {
+    schemaVersion: 3,
+    language,
+    direction: ['ar', 'ur'].includes(language) ? 'rtl' : 'ltr',
+    generatedAt: new Date().toISOString(),
+    location: {
+      name: state.location.name, country: state.location.country, region: state.location.region,
+      latitude: state.location.lat, longitude: state.location.lon, method: state.location.method,
+    },
+    farm: {
+      crops: cropNames.map(tr),
+      waterSource: tr(farm.waterSource === 'irrigated' ? 'Irrigation available' : farm.waterSource === 'rainfed' ? 'Rain-fed only' : 'Water source unknown'),
+      priority: tr({ water: 'Use water wisely', soil: 'Protect soil health', risk: 'Prepare for changing weather' }[farm.objective] ?? 'Not provided'),
+      soilPH: farm.soilPH || null,
+      soilTexture: tr(farm.soilTexture === 'unknown' ? 'Not provided' : farm.soilTexture),
+      drainage: tr(farm.drainage === 'unknown' ? 'Not provided' : farm.drainage),
+    },
+    weather,
+    cropAssessment: cropIds.map(assessSimpleCropEvidence).filter(Boolean).map(item => ({
+      crop: tr(item.profile.name), overall: tr(item.overall), limiting: item.limiting.map(tr),
+      unknown: item.unknown.map(tr), factors: item.factors.map(([name, status]) => ({ name: tr(name), status: tr(status) })),
+    })),
+    economics: {
+      available: Boolean(benchmark), currency: fx.currency, source: tr('Farmer-entered local values'),
+      expectedYieldTonnesPerHa: benchmark?.yield ?? null, sellingPricePerTonne: benchmark?.price ?? null,
+      estimatedSalesPerHa: benchmark ? benchmark.yield * benchmark.price : null,
+      planningCostsPerHa: benchmark?.cost ?? null, planningMarginPerHa: margin,
+    },
+    evidence: {
+      signals: signals.map(([label, connected]) => ({ label: tr(label), connected })),
+      connectedSignals: signals.filter(([, connected]) => connected).length,
+      totalSignals: signals.length,
+      limitations: [
+        weather.kind === 'historical' ? 'These are past regional records, not a current forecast. Check a local forecast before acting.'
+          : weather.available ? 'Weather is modeled for the selected point, not measured on the farm.'
+          : 'Weather context is unavailable until a provider responds.',
+        'Seven-day totals require seven consecutive daily values.',
+        'Crop suitability is a profile screening, not a planting prescription.',
+      ].map(tr),
+    },
+    nextActions: [
+      farm.soilPH ? 'Keep your soil sample date and method with this report.' : 'Add a dated local soil test before comparing crop fit.',
+      waterAction,
+      benchmark ? 'Confirm selling price and input costs with a local buyer before acting.' : 'Enter local yield, price, and cost to calculate profit.',
+    ].map(tr),
+  };
+}
+
+function reportPeriod(weather, locale) {
+  if (!weather.period) return null;
+  const format = new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeZone: 'UTC' });
+  const { start, end } = weather.period;
+  return format.formatRange(new Date(start + 'T12:00:00Z'), new Date(end + 'T12:00:00Z'));
+}
+function reportMoney(value, currency, language) {
+  return number(value) ? new Intl.NumberFormat(reportLocales[language] || 'en-US', { style: 'currency', currency, maximumFractionDigits: 0 }).format(value) : '—';
+}
+function reportMeasure(value, unit, precision = 0) {
+  return number(value) ? value.toFixed(precision) + ' ' + unit : '—';
+}
+
 function buildSimpleReportHtml(payload) {
-  const tr = value => tFor(payload.language, value), e = escapeHTML, locale = reportLocales[payload.language] || 'en-US';
-  const rows = payload.weather.forecast.map((day, index) => '<tr><td>' + e(index ? new Date(day.date + 'T12:00:00').toLocaleDateString(locale,{weekday:'short',month:'short',day:'numeric'}) : tr('Today')) + '</td><td>' + e(number(day.highC) ? Math.round(day.highC) + '°C' : '—') + '</td><td>' + e(number(day.lowC) ? Math.round(day.lowC) + '°C' : '—') + '</td><td>' + e(number(day.rainMm) ? day.rainMm.toFixed(1) + ' mm' : '—') + '</td><td>' + e(number(day.referenceEt0Mm) ? day.referenceEt0Mm.toFixed(1) + ' mm' : '—') + '</td></tr>').join('');
-  const assessment = payload.cropAssessment.map(item => '<article class="card"><span>' + e(item.crop) + '</span><b>' + e(item.overall) + '</b><p>' + e(item.factors.map(factor => factor.name + ': ' + factor.status).join(' · ')) + '</p></article>').join('') || '<article class="card"><b>' + e(tr('No crop selected')) + '</b></article>';
-  return '<!doctype html><html lang="' + e(payload.language) + '" dir="' + payload.direction + '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>AgriPulse · ' + e(payload.location.name) + '</title><style>body{margin:0;background:#eef4eb;color:#173d34;font:15px Arial,sans-serif}.page{max-width:980px;margin:auto;padding:42px}.hero{padding:38px;border-radius:24px;color:white;background:linear-gradient(130deg,#092f25,#1d704d)}h1{font-size:44px;margin:8px 0}.eyebrow{font-size:10px;letter-spacing:2px;text-transform:uppercase}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:18px 0}.card{padding:20px;border:1px solid #cadac8;border-radius:14px;background:white}.card span{color:#657a6d;font-size:10px;text-transform:uppercase}.card b{display:block;margin:8px 0;font-size:19px}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0}.metric{padding:15px;border-radius:12px;background:#dcebd4}.metric small{display:block;color:#57705f}.metric strong{display:block;margin-top:7px;font-size:18px}table{width:100%;border-collapse:collapse;background:white}th,td{padding:12px;border-bottom:1px solid #dce6d9;text-align:start}.note{padding:18px;border-inline-start:4px solid #83b64c;background:#e6f1d8}.actions li{margin:10px 0}.footer{margin-top:28px;color:#657a6d;font-size:11px}@media print{body{background:white}.page{padding:12px}}@media(max-width:650px){.page{padding:18px}.grid,.metrics{grid-template-columns:1fr 1fr}h1{font-size:30px}}</style></head><body><main class="page"><section class="hero"><span class="eyebrow">AGRIPULSE · ' + e(tr('FARM DECISION REPORT')) + '</span><h1>' + e(payload.location.name) + '</h1><p>' + e(payload.location.country || tr('Selected region')) + ' · ' + e(new Date(payload.generatedAt).toLocaleString(locale)) + '</p></section><section class="metrics"><div class="metric"><small>' + e(tr('Weather')) + '</small><strong>' + e(payload.weather.current ? Math.round(payload.weather.current.temperatureC) + '°C' : '—') + '</strong></div><div class="metric"><small>' + e(tr('7-day rain')) + '</small><strong>' + e(payload.weather.sevenDay.rainMm.toFixed(1) + ' mm') + '</strong></div><div class="metric"><small>' + e(tr('Crops')) + '</small><strong>' + e(payload.farm.crops.join(', ') || tr('Not selected')) + '</strong></div><div class="metric"><small>' + e(tr('Planning margin')) + '</small><strong>' + e(reportMoney(payload.economics.planningMarginPerHa,payload.economics.currency,payload.language)) + '</strong></div></section><section class="grid"><article class="card"><span>' + e(tr('Field details')) + '</span><b>' + e(payload.farm.waterSource) + '</b><p>' + e(tr('Soil pH') + ': ' + (payload.farm.soilPH ?? tr('Unknown')) + ' · ' + tr('Texture') + ': ' + payload.farm.soilTexture + ' · ' + tr('Drainage') + ': ' + payload.farm.drainage) + '</p></article><article class="card"><span>' + e(tr('Economics')) + '</span><b>' + e(reportMoney(payload.economics.planningMarginPerHa,payload.economics.currency,payload.language)) + ' / ha</b><p>' + e(tr('Estimated sales') + ': ' + reportMoney(payload.economics.estimatedSalesPerHa,payload.economics.currency,payload.language) + ' · ' + tr('Planning costs') + ': ' + reportMoney(payload.economics.planningCostsPerHa,payload.economics.currency,payload.language)) + '</p></article>' + assessment + '</section><section class="card"><h2>' + e(tr('SEVEN DAY OUTLOOK')) + '</h2><table><thead><tr><th>' + e(tr('Day')) + '</th><th>' + e(tr('High')) + '</th><th>' + e(tr('Low')) + '</th><th>' + e(tr('Rain')) + '</th><th>ET₀</th></tr></thead><tbody>' + (rows || '<tr><td colspan="5">' + e(tr('Forecast unavailable.')) + '</td></tr>') + '</tbody></table></section><section class="card actions"><h2>' + e(tr('NEXT BEST ACTIONS')) + '</h2><ol>' + payload.nextActions.map(action => '<li>' + e(action) + '</li>').join('') + '</ol></section><section class="note"><b>' + e(tr('Evidence and limitations')) + '</b><ul>' + payload.evidence.limitations.map(note => '<li>' + e(note) + '</li>').join('') + '</ul></section><footer class="footer">AgriPulse · ' + e(tr('Generated from your selected land and inputs.')) + ' · ' + e(payload.weather.source) + '</footer></main></body></html>';
+  const { language, direction, location, farm, weather, economics, cropAssessment, evidence, nextActions } = payload;
+  const tr = value => tFor(language, value);
+  const e = escapeHTML;
+  const locale = reportLocales[language] || 'en-US';
+  const period = reportPeriod(weather, locale);
+  const retrieved = weather.retrievedAt ? new Date(weather.retrievedAt).toLocaleString(locale) : null;
+  const missing = tr('Not available');
+  const isolate = value => '<bdi>' + e(value) + '</bdi>';
+  const metric = (label, value) => '<div class="metric"><small>' + e(tr(label)) + '</small><strong>' + isolate(value === '—' ? missing : value) + '</strong></div>';
+  const detail = (label, value) => '<div><dt>' + e(tr(label)) + '</dt><dd>' + isolate(value ?? missing) + '</dd></div>';
+  const rows = weather.daily.map(day => [
+    day.date, reportMeasure(day.highC, '°C'), reportMeasure(day.lowC, '°C'),
+    reportMeasure(day.rainMm, 'mm', 1), reportMeasure(day.referenceEt0Mm, 'mm', 1), reportMeasure(day.windMaxKmh, 'km/h'),
+  ].map(value => '<td>' + isolate(value) + '</td>').join('')).map(row => '<tr>' + row + '</tr>').join('');
+  const headers = ['Date', 'High', 'Low', 'Rain', 'Reference ET₀', 'Wind'].map(label => '<th scope="col">' + e(tr(label)) + '</th>').join('');
+  const cropRows = cropAssessment.map(item => '<li><b>' + e(item.crop) + '</b> · ' + e(item.overall) +
+    (item.unknown.length ? '<small>' + e(tr('Evidence still needed')) + ' · ' + e(item.unknown.join(', ')) + '</small>' : '') + '</li>').join('');
+  const money = value => reportMoney(value, economics.currency, language);
+  const heading = tr(weather.kind === 'forecast' ? 'FORECAST DAYS' : weather.kind === 'historical' ? 'RECENT RECORDS' : 'Weather');
+  return `<!doctype html>
+<html lang="${e(language)}" dir="${direction}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>AgriPulse · ${e(location.name)}</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#eef4eb;color:#173d34;font:15px/1.5 Arial,sans-serif}
+main{max-width:980px;margin:auto;padding:32px}header{padding:26px 32px;border-radius:20px;background:#123f30;color:white}
+header small{color:#dbefc9;font-weight:bold}h1{font-size:clamp(28px,5vw,48px);line-height:1.15;margin:6px 0;overflow-wrap:anywhere}
+h2{font-size:19px;margin:0 0 8px}p{margin:0 0 8px}header p{margin:0}section{margin:14px 0}
+.metrics,.grid{display:grid;gap:10px}.metrics{grid-template-columns:repeat(4,minmax(0,1fr))}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.metric,.card,.actions{padding:14px 16px;border:1px solid #cadac8;border-radius:12px;background:white;overflow-wrap:anywhere}
+.metric strong,.crop-list small{display:block}.metric strong{font-size:18px}.metric small,.crop-list small,dt,footer{color:#506b5e}
+.actions{background:#e7f1e0;border-inline-start:4px solid #4c8e48}.actions ol,.crop-list,.limitations{margin:0;padding-inline-start:22px}
+li+li{margin-block-start:4px}dl{margin:0}dl>div{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid #e5ece3;padding:4px 0}dd{margin:0;text-align:end}
+.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse}th,td{padding:6px;text-align:start;border-bottom:1px solid #e5ece3}
+a{color:#245f3b}footer{font-size:12px}bdi{unicode-bidi:isolate}
+@media(max-width:600px){main{padding:14px}header{padding:18px}.metrics,.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:1fr}}
+@media print{body{background:white;font-size:11px}main{max-width:none;padding:0}header{background:white;color:#173d34;border:1px solid #cadac8;padding:12px}header small{color:#506b5e}h1{font-size:26px}h2{font-size:14px}.metric,.card,.actions{padding:8px 10px;break-inside:avoid}section{margin:8px 0}.metrics,.grid{gap:6px}th,td{padding:3px 5px}}
+</style></head><body><main>
+<header><small>AGRIPULSE · ${e(tr('FARM DECISION REPORT'))}</small><h1>${e(location.name)}</h1>
+<p>${e(location.country || tr('Selected region'))} · <bdi>${e(location.latitude.toFixed(4) + ', ' + location.longitude.toFixed(4))}</bdi> · ${e(new Date(payload.generatedAt).toLocaleDateString(locale))}</p></header>
+<section class="actions"><h2>${e(tr('Your decision brief'))}</h2><ol>${nextActions.map(action => '<li>' + e(action) + '</li>').join('')}</ol></section>
+<section class="metrics">
+${metric(weather.kind === 'historical' ? 'Latest recorded temperature' : 'Temperature', reportMeasure(weather.current?.temperatureC, '°C'))}
+${metric('7-day rain', reportMeasure(weather.sevenDay.rainMm, 'mm', 1))}
+${metric('7-day reference ET₀', reportMeasure(weather.sevenDay.referenceEt0Mm, 'mm', 1))}
+${metric('Planning margin per hectare', money(economics.planningMarginPerHa))}
+</section>
+<section class="grid">
+<article class="card"><h2>${e(tr('Weather evidence'))}</h2><dl>
+${detail('Weather source', weather.source)}${detail('Classification', weather.classification)}${detail('Data period', period)}
+${detail('Retrieved at', retrieved)}</dl>
+${weather.sourceUrl ? '<p><a href="' + e(weather.sourceUrl) + '">' + e(tr('Data source details')) + '</a></p>' : ''}
+</article>
+<article class="card"><h2>${e(tr('Field details'))}</h2><dl>
+${detail('Water source', farm.waterSource)}${detail('Your priority', farm.priority)}${detail('Soil pH', farm.soilPH)}
+${detail('Texture', farm.soilTexture)}${detail('Drainage', farm.drainage)}</dl></article>
+<article class="card"><h2>${e(tr('Crop profiles'))}</h2>
+${cropRows ? '<ul class="crop-list">' + cropRows + '</ul>' : '<p>' + e(tr('No crop selected')) + '</p>'}</article>
+<article class="card"><h2>${e(tr('Economics'))}</h2><p>${e(economics.available ? economics.source : tr('Local values required'))}</p><dl>
+${detail('Expected yield (t/ha)', economics.expectedYieldTonnesPerHa)}
+${detail('Selling price per tonne', money(economics.sellingPricePerTonne))}
+${detail('Estimated sales per hectare', money(economics.estimatedSalesPerHa))}
+${detail('Cost per hectare', money(economics.planningCostsPerHa))}</dl></article>
+</section>
+<section class="card"><h2>${e(heading)}</h2>
+${rows ? '<div class="table-wrap"><table><thead><tr>' + headers + '</tr></thead><tbody>' + rows + '</tbody></table></div>' : '<p>' + e(missing) + '</p>'}</section>
+<section class="card"><h2>${e(tr('Evidence and limitations'))}</h2><ul class="limitations">${evidence.limitations.map(note => '<li>' + e(note) + '</li>').join('')}</ul></section>
+<footer>AgriPulse · ${e(tr('Generated from your selected land and inputs.'))}</footer>
+</main></body></html>`;
 }
+
 function buildSimpleReportCsv(payload) {
-  const tr = value => tFor(payload.language, value), rows = [[tr('AgriPulse farm decision report')],[tr('Location'),payload.location.name],[tr('Country'),payload.location.country],[tr('Crops'),payload.farm.crops.join(' | ')],[tr('Currency'),payload.economics.currency],[tr('Planning margin per hectare'),payload.economics.planningMarginPerHa],[tr('7-day rain'),payload.weather.sevenDay.rainMm],[tr('7-day reference ET₀'),payload.weather.sevenDay.referenceEt0Mm],[],[tr('Day'),tr('High') + ' °C',tr('Low') + ' °C',tr('Rain') + ' mm','ET₀ mm',tr('Wind') + ' km/h'],...payload.weather.forecast.map(day => [day.date,day.highC,day.lowC,day.rainMm,day.referenceEt0Mm,day.windMaxKmh])];
-  return rows.map(row => row.map(value => '"' + String(value ?? '').replace(/"/g,'""') + '"').join(',')).join('\n');
+  const { location, farm, weather, economics, nextActions } = payload;
+  const tr = value => tFor(payload.language, value);
+  const rows = [
+    [tr('AgriPulse farm decision report')], [tr('Location'), location.name], [tr('Country'), location.country],
+    [tr('Latitude'), location.latitude], [tr('Longitude'), location.longitude], [tr('Crops'), farm.crops.join(' | ')],
+    [tr('Weather source'), weather.source], [tr('Classification'), weather.classification], [tr('Data source details'), weather.sourceUrl],
+    [tr('Data period'), weather.period?.start, weather.period?.end], [tr('Retrieved at'), weather.retrievedAt],
+    [tr('Currency'), economics.currency], [tr('Planning margin per hectare'), economics.planningMarginPerHa],
+    [tr('7-day rain'), weather.sevenDay.rainMm], [tr('7-day reference ET₀'), weather.sevenDay.referenceEt0Mm], [],
+    [tr('Your decision brief')], ...nextActions.map(action => [action]), [],
+    [tr('Date'), tr('High') + ' °C', tr('Low') + ' °C', tr('Rain') + ' mm', 'ET₀ mm', tr('Wind') + ' km/h'],
+    ...weather.daily.map(day => [day.date, day.highC, day.lowC, day.rainMm, day.referenceEt0Mm, day.windMaxKmh]),
+  ];
+  return rows.map(row => row.map(value => {
+    const text = String(value ?? '');
+    const safe = typeof value === 'string' && /^[\s\uFEFF]*[=+@-]/.test(value) ? "'" + text : text;
+    return '"' + safe.replace(/"/g, '""') + '"';
+  }).join(',')).join('\n');
 }
-function downloadBlob(name, blob) { const url = URL.createObjectURL(blob), a = document.createElement('a'); a.href = url; a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1500); }
+
+function downloadBlob(name, blob) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = name;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+}
+
 async function downloadSimpleReportJpg(payload, name) {
-  const tr = value => tFor(payload.language, value), rtl = payload.direction === 'rtl';
-  const canvas = document.createElement('canvas'); canvas.width = 1600; canvas.height = 2100; const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#eef4eb'; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle = '#0a3a2b'; ctx.fillRect(0,0,canvas.width,390); ctx.textAlign = rtl ? 'right' : 'left'; ctx.direction = rtl ? 'rtl' : 'ltr'; const x = rtl ? 1490 : 110;
-  const line = (value,y,size=34,color='#173d34',weight='400') => { ctx.fillStyle=color; ctx.font=weight+' '+size+'px Arial'; ctx.fillText(String(value),x,y); };
-  line('AGRIPULSE · '+tr('FARM DECISION REPORT'),105,24,'#bfe78b','600'); line(payload.location.name,205,72,'#ffffff','700'); line(payload.location.country+' · '+new Date(payload.generatedAt).toLocaleDateString(reportLocales[payload.language]||'en-US'),275,28,'#d7e9df');
-  const cards=[[tr('Weather'),payload.weather.current?Math.round(payload.weather.current.temperatureC)+'°C':'—'],[tr('7-day rain'),payload.weather.sevenDay.rainMm.toFixed(1)+' mm'],[tr('Crops'),payload.farm.crops.join(', ')||tr('Not selected')],[tr('Planning margin'),reportMoney(payload.economics.planningMarginPerHa,payload.economics.currency,payload.language)]];
-  cards.forEach(([label,value],i)=>{const cx=90+(i%2)*760,cy=450+Math.floor(i/2)*220;ctx.fillStyle='#ffffff';ctx.roundRect(cx,cy,700,170,22);ctx.fill();ctx.textAlign=rtl?'right':'left';const tx=rtl?cx+650:cx+50;ctx.fillStyle='#61786a';ctx.font='24px Arial';ctx.fillText(label,tx,cy+52);ctx.fillStyle='#173d34';ctx.font='700 38px Arial';ctx.fillText(String(value).slice(0,30),tx,cy+112)});
-  ctx.textAlign=rtl?'right':'left'; line(tr('Field evidence'),965,34,'#173d34','700'); const evidence=[tr('Water source')+': '+payload.farm.waterSource,tr('Soil pH')+': '+(payload.farm.soilPH??tr('Unknown')),tr('Texture')+': '+payload.farm.soilTexture,tr('Drainage')+': '+payload.farm.drainage,tr('Signals connected')+': '+payload.evidence.connectedSignals+' / '+payload.evidence.totalSignals]; evidence.forEach((value,i)=>line('• '+value,1030+i*62,27,'#3e5c4d'));
-  line(tr('Next best actions'),1400,34,'#173d34','700'); payload.nextActions.forEach((value,i)=>line((i+1)+'. '+String(value).slice(0,80),1470+i*72,25,'#3e5c4d'));
-  ctx.fillStyle='#dcebd4';ctx.fillRect(80,1785,1440,190);line(tr('Planning support only. Confirm local weather, soil, crop requirements, prices, and costs before acting.'),1860,24,'#375342','600');line('AgriPulse · '+tr('Generated from your selected land and inputs.'),1930,20,'#607668');
-  const blob = await new Promise(resolve => canvas.toBlob(resolve,'image/jpeg',.92)); if (!blob) throw new Error('Image export could not be generated.'); downloadBlob(name,blob);
+  const { language, direction, location, farm, weather, economics, evidence, nextActions } = payload;
+  const tr = value => tFor(language, value);
+  const locale = reportLocales[language] || 'en-US';
+  const rtl = direction === 'rtl';
+  const canvas = document.createElement('canvas');
+  canvas.width = 1600;
+  canvas.height = 2100;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#eef4eb';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#0a3a2b';
+  ctx.fillRect(0, 0, canvas.width, 385);
+  ctx.textAlign = rtl ? 'right' : 'left';
+  ctx.direction = direction;
+  const x = rtl ? 1490 : 110;
+  const line = (value, y, size = 34, color = '#173d34', weight = '400') => {
+    ctx.fillStyle = color;
+    ctx.font = weight + ' ' + size + 'px Arial';
+    ctx.fillText(String(value), x, y, 1380);
+  };
+  line('AGRIPULSE · ' + tr('FARM DECISION REPORT'), 82, 24, '#bfe78b', '600');
+  line(location.name, 168, 66, '#fff', '700');
+  line([location.country, new Date(payload.generatedAt).toLocaleDateString(locale)].filter(Boolean).join(' · '), 226, 26, '#d7e9df');
+  line([weather.source, weather.classification].filter(Boolean).join(' · '), 286, 29, '#fff', '600');
+  line(tr('Data period') + ' · ' + (reportPeriod(weather, locale) || tr('Not available')), 333, 25, '#d7e9df');
+
+  const cards = [
+    [tr(weather.kind === 'historical' ? 'Latest recorded temperature' : 'Temperature'), reportMeasure(weather.current?.temperatureC, '°C')],
+    [tr('7-day rain'), reportMeasure(weather.sevenDay.rainMm, 'mm', 1)],
+    [tr('Crops'), farm.crops.join(', ') || tr('Not selected')],
+    [tr('Planning margin per hectare'), reportMoney(economics.planningMarginPerHa, economics.currency, language)],
+  ];
+  cards.forEach(([label, value], i) => {
+    const column = rtl ? 1 - i % 2 : i % 2;
+    const cx = 90 + column * 730, cy = 435 + Math.floor(i / 2) * 190;
+    const tx = rtl ? cx + 650 : cx + 50;
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.roundRect(cx, cy, 690, 160, 22);
+    ctx.fill();
+    ctx.fillStyle = '#506b5e';
+    ctx.font = '24px Arial';
+    ctx.fillText(label, tx, cy + 52, 590);
+    ctx.fillStyle = '#173d34';
+    ctx.font = '700 38px Arial';
+    ctx.fillText(value === '—' ? tr('Not available') : value, tx, cy + 112, 590);
+  });
+
+  line(tr('Field evidence'), 881, 34, '#173d34', '700');
+  [
+    [tr('Coordinates'), location.latitude.toFixed(4) + ', ' + location.longitude.toFixed(4)],
+    [tr('Water source'), farm.waterSource], [tr('Soil pH'), farm.soilPH ?? tr('Unknown')],
+    [tr('Texture'), farm.soilTexture], [tr('Drainage'), farm.drainage],
+    [tr('7-day reference ET₀'), reportMeasure(weather.sevenDay.referenceEt0Mm, 'mm', 1)],
+  ].forEach(([label, value], i) => line('• ' + label + ' · ' + value, 943 + i * 52, 27, '#3e5c4d'));
+  line(tr('Your decision brief'), 1320, 34, '#173d34', '700');
+  nextActions.forEach((value, i) => line((i + 1) + '. ' + value, 1382 + i * 65, 29, '#3e5c4d'));
+
+  ctx.fillStyle = '#dcebd4';
+  ctx.fillRect(80, 1650, 1440, 365);
+  line(tr('Evidence and limitations'), 1718, 30, '#173d34', '700');
+  evidence.limitations.forEach((value, i) => line('• ' + value, 1780 + i * 51, 26, '#375342'));
+  if (weather.retrievedAt) {
+    line(tr('Retrieved at') + ' · ' + new Date(weather.retrievedAt).toLocaleString(locale), 1970, 24, '#375342');
+  }
+
+  const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.92));
+  if (!blob) throw new Error('Image export could not be generated.');
+  downloadBlob(name, blob);
 }
+
 function simpleReportFilename(format) { const slug = state.location.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,48)||'field'; return 'AgriPulse-report-'+slug+'-'+new Date().toISOString().slice(0,10)+'.'+format; }
 function updateSimpleExportFilename() { const form = $('#simple-export-form'); if (!form) return; text('#simple-export-filename', simpleReportFilename(form.elements.format.value)); }
 function downloadSimpleReport() {
@@ -1099,9 +1353,14 @@ function downloadSimpleReport() {
   form.elements.language.value = currentLanguage(); updateSimpleExportFilename(); dialog.showModal();
 }
 async function exportSimpleReport(event) {
-  event.preventDefault(); const form = event.currentTarget, language = form.elements.language.value, format = form.elements.format.value, payload = buildSimpleReportPayload(language), name = simpleReportFilename(format), button = form.querySelector('button[type="submit"]');
+  event.preventDefault();
+  const form = event.currentTarget;
+  const { language, format } = Object.fromEntries(new FormData(form));
+  const name = simpleReportFilename(format);
+  const button = form.querySelector('button[type="submit"]');
   button.disabled = true; button.textContent = t('Generating report…');
   try {
+    const payload = buildSimpleReportPayload(language);
     if (format === 'html') download(name, buildSimpleReportHtml(payload), 'text/html;charset=utf-8');
     else if (format === 'json') download(name, JSON.stringify(payload,null,2), 'application/json;charset=utf-8');
     else if (format === 'csv') download(name, '\ufeff' + buildSimpleReportCsv(payload), 'text/csv;charset=utf-8');
@@ -1408,6 +1667,9 @@ function bindEvents() {
       soilPH: form.elements.soilPH.value.trim(),
       soilTexture: form.elements.soilTexture.value,
       drainage: form.elements.drainage.value,
+      localYield: form.elements.localYield.value,
+      localPrice: form.elements.localPrice.value,
+      localCost: form.elements.localCost.value,
       currency: state.simpleFarm.currency || simpleCurrency(),
     };
     write('fieldshift.simpleFarm', state.simpleFarm);
@@ -2117,7 +2379,7 @@ async function loadWeather(force=false) {
     if (request !== state.requestId) return;
     state.weather = weather;
     ensureSimpleAssumptions();
-    renderSimpleFlow();
+    renderSimpleFlow({ preserveDrafts: true });
     renderWeather();
     renderRotations();
   } catch (error) {
@@ -2136,6 +2398,7 @@ async function loadWeather(force=false) {
       error.message + " No sample values have been substituted.",
     );
   }
+  if (!$('[data-simple-stage="4"]')?.hidden) renderSimpleResults();
   renderReports();
 }
 function resetWeather(status) {
