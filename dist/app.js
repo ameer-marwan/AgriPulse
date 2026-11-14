@@ -989,13 +989,12 @@ function renderSimpleResults() {
   const current = weather?.current;
   const autoPlan = simpleAutoPlan();
   const firstDay = weather?.daily?.[0];
-  const forecastBody = weather
-    ? 'Recent NASA POWER record: ' + temp(current?.temperature) + ', wind ' + wind(current?.wind) + '. Seven recent daily records are available for this selected location.'
-    : 'NASA POWER data could not be retrieved yet. You can retry after selecting your location.';
-  const waterBody = weather ? t('Recent seven-day rainfall') + ': ' + rain(weather.daily.reduce((sum,day)=>sum+(number(day.rain)?day.rain:0),0)) + '. ' + t('This is historical regional context, not an irrigation instruction.') : t('Add crop stage, irrigation method, and available water to estimate demand.');
+  const waterDays = weather?.daily?.slice(0, 7) || [];
+  const waterRain = waterDays.length && waterDays.every(day => number(day.rain)) ? waterDays.reduce((sum, day) => sum + day.rain, 0) : null;
+  const waterBody = weather && number(waterRain) ? t('Seven-day rainfall') + ': ' + rain(waterRain) + '. ' + t(weather.source.includes('Open-Meteo') ? 'Modeled forecast; verify with a local rain gauge.' : 'Historical regional context; verify current conditions locally.') : t('Rainfall estimate unavailable because daily precipitation values were not returned.');
   const hot = number(current?.temperature) && current.temperature >= 35;
   const windy = number(current?.wind) && current.wind >= 30;
-  const riskBody = weather ? (hot || windy ? t('Recent-condition watch') + ': ' + [hot ? t('high temperature') : '', windy ? t('strong wind') : ''].filter(Boolean).join(' · ') + '. ' + t('Confirm current conditions and crop thresholds locally.') : t('No heat or wind signal appears in the recent regional record. Check current local conditions.')) : t('Weather context is unavailable until NASA POWER loads.');
+  const riskBody = weather ? (hot || windy ? t('Condition watch') + ': ' + [hot ? t('high temperature') : '', windy ? t('strong wind') : ''].filter(Boolean).join(' · ') + '. ' + t('Confirm conditions and crop thresholds locally.') : t('No heat or wind threshold is crossed in the available model. Check current local conditions.')) : t('Weather context is unavailable until a provider responds.');
   const localYield=Number(state.simpleFarm.localYield),localPrice=Number(state.simpleFarm.localPrice),localCost=Number(state.simpleFarm.localCost);
   const benchmark = state.simpleFarm.localYield !== '' && state.simpleFarm.localPrice !== '' && state.simpleFarm.localCost !== '' && [localYield,localPrice,localCost].every(Number.isFinite) ? { yield:localYield,priceUsd:localPrice,costUsd:localCost } : null;
   const fx = state.simpleFx || { currency: simpleCurrency(), rate: 1, source: 'Farmer-entered local values', live: false };
@@ -1015,25 +1014,39 @@ function renderSimpleResults() {
     benchmark ? t('Confirm selling price and input costs with a local buyer before acting.') : t('Choose a crop to unlock a planning margin.'),
   ];
   const readinessSignals = [
-    [t('Location'), true], [t('NASA POWER context'), Boolean(weather)], [t('Crop choice'), cropNames.length > 0],
+    [t('Location'), true], [t('Weather context'), Boolean(weather)], [t('Crop choice'), cropNames.length > 0],
     [t('Local soil input'), Boolean(state.simpleFarm.soilPH || (state.simpleFarm.soilTexture && state.simpleFarm.soilTexture !== 'unknown'))],
     [t('Local economics'), Boolean(benchmark)],
   ];
   const readinessCount = readinessSignals.filter(([, connected]) => connected).length;
-  const weekRain = weather?.daily?.slice(0, 7).reduce((sum, day) => sum + (number(day.rain) ? day.rain : 0), 0);
-  const weekEt0 = weather?.daily?.slice(0, 7).reduce((sum, day) => sum + (number(day.et0) ? day.et0 : 0), 0);
+  const weekRain = number(waterRain) ? waterRain : null;
+  const weekEt0 = weather?.daily?.slice(0, 7).every(day => number(day.et0)) ? weather.daily.slice(0, 7).reduce((sum, day) => sum + day.et0, 0) : null;
   const waterGap = number(weekRain) && number(weekEt0) ? weekRain - weekEt0 : null;
   const soilKnown = [state.simpleFarm.soilPH, state.simpleFarm.soilTexture, state.simpleFarm.drainage].filter(value => value && value !== 'unknown').length;
   const reportUpdated = weather?.retrievedAt ? new Date(weather.retrievedAt).toLocaleString(localeForLanguage()) : t('Not available');
   reportHero.innerHTML = '<article class="simple-weather-report simple-weather-' + scene + '"><div class="simple-weather-shade"></div><div class="simple-weather-main"><span class="eyebrow">' + escapeHTML(t('RECENT NASA POWER CONTEXT')) + '</span><h2>' + escapeHTML(state.location.name) + '</h2><p>' + escapeHTML(cropNames.length ? t('Selected crops') + ': ' + cropNames.map(t).join(', ') : t('No crop selected')) + '</p><div class="simple-weather-current"><span aria-hidden="true">' + weatherGlyph + '</span><strong>' + escapeHTML(weather ? temp(current?.temperature) : '—') + '</strong><div><b>' + escapeHTML(t('Historical regional record')) + '</b><small>' + escapeHTML(weather ? t('Wind') + ' ' + wind(current?.wind) + ' · ' + t('Humidity') + ' ' + (current?.humidity ?? '—') + '%' : t('Select or refresh your location to retry NASA POWER')) + '</small></div></div></div><div class="simple-weather-forecast"><span class="eyebrow">' + escapeHTML(t('RECENT FOUR DAYS')) + '</span>' + forecastItems + '</div></article>' +
     '<div class="simple-report-facts"><article><span>' + escapeHTML(t('Location')) + '</span><b>' + escapeHTML(state.location.name) + '</b><small>' + escapeHTML(state.location.country || t('Selected region')) + '</small></article><article><span>' + escapeHTML(t('Crops')) + '</span><b>' + escapeHTML(cropNames.map(t).join(', ') || t('Not selected')) + '</b><small>' + escapeHTML(t('Farmer-selected crop profiles')) + '</small></article><article><span>' + escapeHTML(t('Field details')) + '</span><b>' + escapeHTML(t(state.simpleFarm.waterSource === 'irrigated' ? 'Irrigation available' : state.simpleFarm.waterSource === 'rainfed' ? 'Rain-fed only' : 'Water access not provided')) + '</b><small>' + escapeHTML(t('Soil texture') + ': ' + t(state.simpleFarm.soilTexture === 'unknown' ? 'Not provided' : state.simpleFarm.soilTexture)) + '</small></article><article><span>' + escapeHTML(t('Profit estimate')) + '</span><b>' + escapeHTML(benchmark ? simpleMoney(margin, fx.currency) : '—') + '</b><small>' + escapeHTML(benchmark?t('Farmer-entered local values'):t('Local values required')) + '</small></article></div><section class="simple-report-readiness"><div><span class="eyebrow">' + escapeHTML(t('DECISION READINESS')) + '</span><b>' + readinessCount + ' / ' + readinessSignals.length + ' ' + escapeHTML(t('signals connected')) + '</b></div><div>' + readinessSignals.map(([label, connected]) => '<span class="' + (connected ? 'connected' : '') + '"><i></i>' + escapeHTML(label) + '</span>').join('') + '</div></section><section class="simple-report-depth"><article><span class="eyebrow">' + escapeHTML(t('RECENT WATER CONTEXT')) + '</span><h3>' + escapeHTML(t('NASA POWER regional record')) + '</h3><dl><div><dt>' + escapeHTML(t('Recent 7-day rain')) + '</dt><dd>' + escapeHTML(number(weekRain) ? rain(weekRain) : '—') + '</dd></div><div><dt>' + escapeHTML(t('Reference ET₀')) + '</dt><dd>—</dd></div><div><dt>' + escapeHTML(t('Classification')) + '</dt><dd>' + escapeHTML(t('Historical, not forecast')) + '</dd></div></dl></article><article><span class="eyebrow">' + escapeHTML(t('SOIL CONTEXT')) + '</span><h3>' + escapeHTML(soilKnown + ' / 3 ' + t('details provided')) + '</h3><dl><div><dt>' + escapeHTML(t('Soil pH')) + '</dt><dd>' + escapeHTML(state.simpleFarm.soilPH || t('Not provided')) + '</dd></div><div><dt>' + escapeHTML(t('Texture')) + '</dt><dd>' + escapeHTML(t(state.simpleFarm.soilTexture === 'unknown' ? 'Not provided' : state.simpleFarm.soilTexture)) + '</dd></div><div><dt>' + escapeHTML(t('Drainage')) + '</dt><dd>' + escapeHTML(t(state.simpleFarm.drainage === 'unknown' ? 'Not provided' : state.simpleFarm.drainage)) + '</dd></div></dl></article><article><span class="eyebrow">' + escapeHTML(t('REPORT TRACE')) + '</span><h3>' + escapeHTML(readinessCount + ' / ' + readinessSignals.length + ' ' + t('signals connected')) + '</h3><dl><div><dt>' + escapeHTML(t('NASA POWER retrieved')) + '</dt><dd>' + escapeHTML(reportUpdated) + '</dd></div><div><dt>' + escapeHTML(t('Currency basis')) + '</dt><dd>' + escapeHTML(t('Farmer-entered local values')) + '</dd></div><div><dt>' + escapeHTML(t('Coordinates')) + '</dt><dd>' + escapeHTML(state.location.lat.toFixed(3) + ', ' + state.location.lon.toFixed(3)) + '</dd></div></dl></article></section><article class="simple-decision-brief"><div><span class="eyebrow">' + escapeHTML(t('NEXT BEST ACTIONS')) + '</span><h3>' + escapeHTML(t('Your decision brief')) + '</h3><p>' + escapeHTML(t('Use these as checks, not automatic instructions. Local knowledge remains essential.')) + '</p></div><ol>' + decisionTips.map(tip => '<li>' + escapeHTML(tip) + '</li>').join('') + '</ol></article>';
-  summary.textContent = weather ? 'Your automatic report is ready for ' + state.location.name + '. Currency: ' + fx.currency + '.' : 'Your location is saved. Weather retrieval is unavailable right now, so missing information is shown clearly.';
+  if (weather) {
+    const live = weather.source.includes('Open-Meteo');
+    const hero = reportHero.querySelector('.simple-weather-report');
+    hero?.querySelector('.eyebrow')?.replaceChildren(document.createTextNode(t(live ? 'CURRENT MODEL FORECAST' : 'RECENT NASA POWER HISTORY')));
+    hero?.querySelector('.simple-weather-current b')?.replaceChildren(document.createTextNode(t(live ? 'Current modeled conditions' : 'Historical regional record')));
+    hero?.querySelector('.simple-weather-forecast .eyebrow')?.replaceChildren(document.createTextNode(t(live ? 'FOUR-DAY FORECAST' : 'RECENT FOUR DAYS')));
+    const depth = reportHero.querySelectorAll('.simple-report-depth article');
+    depth[0]?.querySelector('h3')?.replaceChildren(document.createTextNode(weather.source));
+    const waterValues = depth[0]?.querySelectorAll('dd');
+    if (waterValues?.[1]) waterValues[1].textContent = number(weekEt0) ? rain(weekEt0) : t('Estimate unavailable');
+    if (waterValues?.[2]) waterValues[2].textContent = t(live ? 'Model forecast' : 'Historical regional record');
+    depth[0]?.insertAdjacentHTML('beforeend', '<small class="estimate-note">' + escapeHTML(t(live ? 'These weather and water values are model estimates for a regional grid, not field measurements. Check local conditions before acting.' : 'These are past regional records, not a current forecast. Check a local forecast before acting.')) + '</small>');
+    depth[2]?.querySelector('dt')?.replaceChildren(document.createTextNode(t(live ? 'Weather model retrieved' : 'NASA POWER retrieved')));
+  }
+  summary.textContent = weather ? t('Report ready for') + ' ' + state.location.name + ' · ' + t('Currency') + ': ' + fx.currency + '.' : t('Weather retrieval is unavailable; select another location or retry.');
   host.innerHTML = [
     simpleCard(assessments.length ? 'Crop conditions' : 'Crop profiles', 'screening', cropBody, assessments.length ? t('Profile screening only; confirm with local evidence.') : t('Choose a crop for factor-by-factor conditions.')),
-    simpleCard('Water context', weather ? 'screening' : 'unavailable', waterBody, t('NASA POWER recent regional rainfall; not a future forecast or irrigation instruction.')),
+    simpleCard('Water context', weather ? 'screening' : 'unavailable', waterBody, weather ? weather.source + ' · ' + weather.classification + '. ' + t('Check your field before irrigating.') : t('No estimate is shown because the weather source is unavailable.')),
     simpleCard('Planting window', 'unavailable', t('A local planting window needs seasonal crop and climate evidence.'), t('Review historical climate in Complex farmer mode.')),
     simpleCard('Profit planning estimate', benchmark ? 'calculated' : 'unavailable', profitBody, benchmark ? t('Calculated only from farmer-entered local values.') : t('Enter local yield, price, and cost to calculate profit.')),
-    simpleCard('Farm risks', weather ? 'screening' : 'unavailable', riskBody, weather ? t('NASA POWER recent regional context; verify current local conditions.') : t('Data unavailable.'))
+    simpleCard('Farm risks', weather ? 'screening' : 'unavailable', riskBody, weather ? weather.source + ' · ' + t('Verify local conditions and crop thresholds.') : t('Data unavailable.'))
   ].join('');
 }
 
@@ -1660,6 +1673,8 @@ function renderDecisionBriefing() {
     samples = state.samples.filter((sample) => sample.field === fieldKey()),
     source = state.economicsInputs.priceSource;
   const alerts = [];
+  const isForecast = state.weather?.source?.includes('Open-Meteo');
+  const weatherSource = state.weather?.source || 'weather provider';
   let move = {
     title: "Add local evidence",
     copy: "A soil sample and a dated local price make field decisions more reliable.",
@@ -1669,23 +1684,23 @@ function renderDecisionBriefing() {
   if (!weather)
     alerts.push({
       kind: "info",
-      title: "NASA context needs a refresh",
-      copy: "Recent regional records are unavailable until NASA POWER returns data.",
+      title: "Weather context needs a refresh",
+      copy: "Weather values are unavailable until a provider returns data for this field.",
       link: "#/weather",
     });
   else {
     if (number(week) && week < 10)
       alerts.push({
         kind: "water",
-        title: "Low recent rainfall",
-        copy: "The recent 7-day NASA POWER record is below 10 mm. Verify current conditions locally before acting.",
+        title: isForecast ? "Low forecast rainfall" : "Low recent rainfall",
+        copy: "Seven-day rainfall from " + weatherSource + " is below 10 mm. Verify conditions locally before acting.",
         link: "#/water",
       });
     if (number(weather.temperature) && weather.temperature >= 32)
       alerts.push({
         kind: "heat",
-        title: "Recent heat signal",
-        copy: "High temperature appears in the recent NASA POWER record. Check current local conditions and sensitive crop stages.",
+        title: isForecast ? "Forecast heat signal" : "Recent heat signal",
+        copy: "High temperature appears in " + weatherSource + ". Check local conditions and sensitive crop stages.",
         link: "#/weather",
       });
   }
@@ -1706,7 +1721,7 @@ function renderDecisionBriefing() {
   if (alerts.some((alert) => alert.kind === "water"))
     move = {
       title: "Review the water window",
-      copy: "Rainfall was limited in the recent regional record. Check current local conditions before scheduling irrigation.",
+      copy: "Rainfall is limited in the available regional data. Check local conditions before scheduling irrigation.",
       link: "#/water",
       action: "Open water intelligence",
     };
@@ -2219,11 +2234,11 @@ function renderWeather() {
   text('[data-stat="timezone"]', w.timezone);
   text(
     '[data-stat="elevation"]',
-    number(w.elevation) ? Math.round(w.elevation) + " m · grid" : "Unavailable",
+    number(w.elevation) ? Math.round(w.elevation) + " m · model grid" : "Elevation estimate unavailable",
   );
   text(
     '[data-stat="weatherTime"]',
-    "Most recent record " +
+    (w.source.includes('Open-Meteo') ? 'Current model time ' : 'Most recent historical record ') +
       (c.time?.replace("T", " ") ?? "time unavailable") +
       " · " +
       w.timezone,
@@ -2240,16 +2255,16 @@ function renderWeather() {
   text(
     '[data-stat="provenance"]',
     (w.cached ? "Cached retrieval · " : "") +
-      "NASA POWER daily regional grid · record " +
+      w.source + ' · ' + w.classification + ' · record ' +
       (c.time ?? "time unavailable") +
       " (" +
       w.timezone +
       ") · retrieved " +
       new Date(w.retrievedAt).toLocaleString() +
-      ". Historical context only; not a field measurement or future forecast.",
+      '. ' + w.limitations,
   );
-  text("[data-weather-status]", w.cached ? "CACHED" : "NASA POWER");
-  text("#connection-label", "NASA DATA CONNECTED");
+  text("[data-weather-status]", w.cached ? "CACHED · " + w.source : w.source);
+  text("#connection-label", w.source.includes('Open-Meteo') ? "LIVE MODEL CONNECTED" : "NASA HISTORY CONNECTED");
   const glyph = (day) => (number(day.rain) && day.rain > 1 ? "☂" : "◌");
   $(".weather-glyph").textContent = "◎";
   $("#home-forecast").innerHTML = w.daily
