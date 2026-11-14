@@ -85,10 +85,10 @@ export async function fetchLiveWeather(point, { signal, force = false } = {}) {
   const key = `open-meteo-live:${lat},${lon}`;
   const saved = cache.get(key);
   if (!force && saved && Date.now() - saved.at < 15 * 60 * 1000) return { ...saved.value, cached: true };
-  const query = new URLSearchParams({ latitude: lat, longitude: lon, current: 'temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,is_day', hourly: 'temperature_2m', daily: 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,et0_fao_evapotranspiration', forecast_days: '7', timezone: 'auto' });
+  const query = new URLSearchParams({ latitude: lat, longitude: lon, current: 'temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,is_day', hourly: 'temperature_2m', daily: 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,et0_fao_evapotranspiration', forecast_days: '7', timezone: 'auto' });
   const data = await request(`https://api.open-meteo.com/v1/forecast?${query}`, { signal, timeout: 20000 });
   if (!data?.current || !Array.isArray(data?.daily?.time)) throw new Error('Live forecast returned no usable conditions for this location.');
-  const daily = data.daily.time.map((date, i) => ({ date, high: arrayValue(data.daily, 'temperature_2m_max', i), low: arrayValue(data.daily, 'temperature_2m_min', i), rain: arrayValue(data.daily, 'precipitation_sum', i), rainProbability: arrayValue(data.daily, 'precipitation_probability_max', i), weatherCode: arrayValue(data.daily, 'weather_code', i), et0: arrayValue(data.daily, 'et0_fao_evapotranspiration', i), windMax: null, mean: null, humidity: null, solar: null }));
+  const daily = data.daily.time.map((date, i) => ({ date, high: arrayValue(data.daily, 'temperature_2m_max', i), low: arrayValue(data.daily, 'temperature_2m_min', i), rain: arrayValue(data.daily, 'precipitation_sum', i), rainProbability: arrayValue(data.daily, 'precipitation_probability_max', i), weatherCode: arrayValue(data.daily, 'weather_code', i), et0: arrayValue(data.daily, 'et0_fao_evapotranspiration', i), windMax: arrayValue(data.daily, 'wind_speed_10m_max', i), mean: null, humidity: null, solar: null }));
   const hourly = (data.hourly?.time || []).map((time, i) => ({ time, temperature: arrayValue(data.hourly, 'temperature_2m', i) }));
   const value = { location: { lat, lon }, gridLocation: { lat, lon }, current: { temperature: number(data.current.temperature_2m), feelsLike: number(data.current.apparent_temperature), humidity: number(data.current.relative_humidity_2m), wind: number(data.current.wind_speed_10m), weatherCode: number(data.current.weather_code), isDay: data.current.is_day === 1, time: data.current.time, soilMoisture: null }, daily, hourly, timezone: data.timezone || 'auto', elevation: number(data.elevation), retrievedAt: new Date().toISOString(), source: 'Open-Meteo live forecast', sourceUrl: 'https://open-meteo.com/en/docs', classification: 'Current modeled conditions and seven-day forecast — not a field measurement', cached: false, units: { temperature: '°C', wind: 'km/h', rain: 'mm/day', humidity: '%', soilMoisture: null, et0: 'mm/day (modeled FAO-56 reference)' }, limitations: 'Weather and reference evapotranspiration are model estimates for a grid point. Soil moisture needs a separate measurement and is not inferred from rain.' };
   cache.set(key, { at: Date.now(), value });
@@ -128,13 +128,13 @@ export function findNamedPlaces(query) {
   ].filter(([name]) => name.toLowerCase().includes(text)).slice(0,6).map(([name,lat,lon,country]) => ({ id:`place:${lat},${lon}`, name, lat, lon, country, region:'', timezone:'UTC' }));
 }
 
-export async function fetchNasa(point, { signal } = {}) {
+export async function fetchNasa(point, { signal, force = false } = {}) {
   const { lat, lon } = coordinates(point);
   const year = new Date().getUTCFullYear() - 1;
   const key = `nasa:${lat},${lon}:${year}`;
   const saved = cache.get(key);
   if (signal?.aborted) throw new DOMException('Request cancelled', 'AbortError');
-  if (saved) return { ...saved.value, cached: true };
+  if (!force && saved) return { ...saved.value, cached: true };
   const query = new URLSearchParams({ parameters: 'T2M,PRECTOTCORR,ALLSKY_SFC_SW_DWN', community: 'AG',
     longitude: lon, latitude: lat, start: `${year}0101`, end: `${year}1231`, format: 'JSON' });
   const data = await request(`https://power.larc.nasa.gov/api/temporal/daily/point?${query}`, { signal, timeout: 30000 });
