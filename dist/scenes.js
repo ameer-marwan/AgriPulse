@@ -2,16 +2,19 @@
 export function weatherScene(current) {
   const code = current?.weatherCode;
   if (typeof code !== 'number' || !Number.isFinite(code)) return 'unknown';
+  // Advanced keeps the provider field name while the Simple report uses a
+  // report-safe alias. Keep a single condition rule for both experiences.
+  const temperature = current.temperature ?? current.temperatureC;
   if ([95, 96, 99].includes(code)) return 'storm';
   if ([71, 73, 75, 77, 85, 86].includes(code)) return 'snow';
   if ([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return 'rain';
+  // A clear WMO code can still occur at a freezing location. Use the cold
+  // scene in that case so the visual never suggests warm sunny farmland.
+  // It illustrates freezing conditions; it does not claim precipitation.
+  if (Number.isFinite(Number(temperature)) && Number(temperature) <= 2) return 'snow';
   if ([45, 48].includes(code)) return 'fog';
   if (code === 3) return 'cloudy';
   if ([0, 1, 2].includes(code) && current.isDay === false) return 'night';
-  // The Simple report uses report-safe aliases while the Advanced workspace
-  // retains the provider shape. Accept both so one live condition always
-  // creates the same visual scene in both modes.
-  const temperature = current.temperature ?? current.temperatureC;
   if ([0, 1, 2].includes(code) && Number(temperature) >= 34) return 'hot';
   if (code === 0 || code === 1) return 'clear';
   if (code === 2) return 'partly';
