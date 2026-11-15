@@ -123,3 +123,6 @@ body.advanced-farmer[data-route=explore],body.advanced-farmer[data-route=reports
 #view-analytics:before{background-image:linear-gradient(var(--bg) 0 140px,transparent 420px),linear-gradient(90deg,var(--bg) 0%,transparent 42%,var(--bg) 100%),url('assets/field-landscape.jpg')!important}
 .simple-weather-clear,.simple-weather-clouds{background-image:url('assets/intro-farmland.jpg')!important}
 .simple-weather-storm{background-image:linear-gradient(#0a2639aa,#152534b8),url('assets/intro-farmland.jpg')!important}
+
+/* Explore uses photographic agricultural scenes; country labels describe the learning story, not the photo location. */
+.explore-world-hero{background-image:linear-gradient(90deg,#071c13f1 0%,#10291cd5 45%,#16291c5c 100%),url('assets/intro-farmland.jpg')!important}

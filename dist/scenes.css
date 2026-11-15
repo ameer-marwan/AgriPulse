@@ -57,19 +57,19 @@
 #view-weather[data-weather-scene=clear]{--scene-image:url('assets/intro-farmland.jpg')}
 #view-weather[data-weather-scene=clear] .weather-feature{background-image:linear-gradient(90deg,#10303bec,#183b48ba 40%,#155b7845 100%),var(--scene-image)}
 #view-weather[data-weather-scene=clear] .weather-feature:after{opacity:.95}
-#view-weather[data-weather-scene=partly]{--scene-image:url('assets/intro-farmland.jpg')}
+#view-weather[data-weather-scene=partly]{--scene-image:url('assets/weather-clouds.png')}
 #view-weather[data-weather-scene=partly] .weather-feature:after{opacity:.68;filter:blur(1px);top:22px;right:25%}
-#view-weather[data-weather-scene=cloudy]{--scene-image:url('assets/intro-farmland.jpg')}
+#view-weather[data-weather-scene=cloudy]{--scene-image:url('assets/weather-clouds.png')}
 #view-weather[data-weather-scene=cloudy] .weather-feature{background-position:center 57%}
-#view-weather[data-weather-scene=fog]{--scene-image:url('assets/intro-farmland.jpg')}
+#view-weather[data-weather-scene=fog]{--scene-image:url('assets/weather-clouds.png')}
 #view-weather[data-weather-scene=fog] .weather-feature:before{background:linear-gradient(0deg,#deebed27,transparent 80%),repeating-linear-gradient(178deg,transparent 0 40px,#d4e3e925 45px 54px,transparent 65px 100px);filter:blur(4px)}
-#view-weather[data-weather-scene=rain],#view-weather[data-weather-scene=storm]{--scene-image:url('assets/intro-farmland.jpg')}
+#view-weather[data-weather-scene=rain],#view-weather[data-weather-scene=storm]{--scene-image:url('assets/weather-rain.png')}
 #view-weather[data-weather-scene=rain] .weather-feature:before,#view-weather[data-weather-scene=storm] .weather-feature:before{inset:-30px;opacity:.6;background-image:repeating-linear-gradient(108deg,transparent 0 35px,#c5e6ed59 36px,#c5e6ed00 37px,transparent 38px 84px);background-size:145px 160px;animation:scene-rainfall 1.3s linear infinite}
 #view-weather[data-weather-scene=storm] .weather-feature{background-image:linear-gradient(90deg,#0d2030f0,#152736ce 42%,#1c29456e 100%),var(--scene-image)}
-#view-weather[data-weather-scene=snow]{--scene-image:url('assets/intro-farmland.jpg')}
+#view-weather[data-weather-scene=snow]{--scene-image:url('assets/weather-clouds.png')}
 #view-weather[data-weather-scene=snow] .weather-feature:before{opacity:.65;background-image:radial-gradient(circle,#edf7fa 1.5px,transparent 2px),radial-gradient(circle,#e4f0f5 1px,transparent 2px);background-size:83px 91px,117px 129px;background-position:0 0,38px 27px;animation:scene-snowfall 12s linear infinite}
-#view-weather[data-weather-scene=night]{--scene-image:none}
-#view-weather[data-weather-scene=night] .weather-feature{background-image:radial-gradient(ellipse at 78% 10%,#3d497d66,transparent 70%),linear-gradient(110deg,#0c2031,#172537 55%,#202c4c)}
+#view-weather[data-weather-scene=night]{--scene-image:url('assets/weather-night.png')}
+#view-weather[data-weather-scene=night] .weather-feature{background-image:linear-gradient(90deg,#07182ce6,#102743bd 55%,#10213d58),var(--scene-image)}
 #view-weather[data-weather-scene=night] .weather-feature:before{background-image:radial-gradient(circle,#e8edf58a 1px,transparent 1.5px),radial-gradient(circle,#d0dff066 1px,transparent 1.5px);background-size:147px 123px,221px 187px;background-position:15px 7px,69px 36px;opacity:.6}
 #view-weather[data-weather-scene=night] .weather-feature:after{opacity:.85;width:62px;height:62px;background:#ecf1e9;box-shadow:inset -16px -4px 0 #c1d0d3,0 0 50px #c4dcf026;right:22%;top:38px}
 #view-weather[data-weather-scene=unknown]{--scene-image:none}

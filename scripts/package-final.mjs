@@ -35,6 +35,14 @@ const introRasters = new Map([
 for (const [name,data] of introRasters) {
   css=css.replaceAll('assets/'+name+'.jpg',data);
 }
+const weatherVisuals = new Map([
+  ['weather-clouds', await dataUri('dist/assets/weather-clouds.png','image/png')],
+  ['weather-rain', await dataUri('dist/assets/weather-rain.png','image/png')],
+  ['weather-night', await dataUri('dist/assets/weather-night.png','image/png')]
+]);
+for (const [name,data] of weatherVisuals) {
+  css=css.replaceAll('assets/'+name+'.png',data);
+}
 html=html.replace(/<link rel="stylesheet" href="[^"]+"\s*\/?>/g,'')
   .replace('</head>',()=>'<style>'+css.replace(/<\/style/gi,'<\\/style')+'</style></head>');
 html=html.replaceAll('assets/logo-new.png',logo);
@@ -63,6 +71,9 @@ for (const [name,data] of inlinedArt) {
 }
 for (const [name,data] of introRasters) {
   html=html.replaceAll('assets/'+name+'.jpg',data);
+}
+for (const [name,data] of weatherVisuals) {
+  html=html.replaceAll('assets/'+name+'.png',data);
 }
 if(html.includes('assets/logo-new.png')||/assets\/[\w-]+\.(?:webp|jpg|png|svg)/i.test(html) &&
    !html.includes('assets/dunia-alajial-logo.jpg') && !html.includes('assets/logo-new.png')) {
