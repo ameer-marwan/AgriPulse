@@ -184,6 +184,7 @@ const state = {
   samples: read("fieldshift.samples", []),
   journal: read("fieldshift.journal", []),
   feedback: read("fieldshift.feedback", []),
+  observations: read("fieldshift.observations", []),
   plans: read("fieldshift.plans", []),
   weather: null,
   nasa: null,
@@ -415,10 +416,11 @@ function init() {
     <section class="simple-stage" data-simple-stage="1"><article class="panel simple-card"><span class="eyebrow">STEP 1 / LOCATION</span><h2>Where is your farm?</h2><p>Choose your point so AgriPulse can request recent NASA POWER regional records.</p><div class="simple-empty-state" id="simple-empty-state"><span class="simple-empty-icon" aria-hidden="true">⌖</span><div><strong>No field selected yet</strong><p>Start with a place name, coordinates, or your device location. The map and report will fill in after selection.</p></div><div class="simple-empty-actions"><button class="button" type="button" data-action="simple-geolocation">Use my location</button><button class="button secondary" type="button" data-action="simple-map-focus">Open map</button></div></div><div class="simple-location-readout" id="simple-location-readout">No farm selected yet.</div><div class="simple-location-context" id="simple-location-context"><span>◎ Region: waiting</span><span>¤ Currency: local input</span><span>☁ NASA POWER: waiting</span></div><div class="button-row"><button class="button" type="button" data-action="simple-geolocation">Use my location</button><button class="button secondary" type="button" data-action="simple-map-focus">Choose on map</button></div><div class="simple-or"><span>search by name or enter coordinates</span></div><form id="simple-place-search" class="simple-place-search"><label class="sr-only" for="simple-place-query">Place name or latitude, longitude</label><input id="simple-place-query" name="query" minlength="2" required placeholder="Search Riyadh, Cairo… or enter 24.7136, 46.6753"><button class="button secondary" type="submit">Search</button></form><p class="simple-place-hint">Search a listed city by name, or enter exact latitude and longitude.</p><div id="simple-place-results" class="simple-place-results" aria-live="polite"></div><div class="simple-step-actions"><span></span><button class="button" type="button" data-action="simple-next" data-next-step="2">Next <span aria-hidden="true">→</span></button></div></article></section>
     <section class="simple-stage" data-simple-stage="2" hidden><article class="panel simple-card"><span class="eyebrow">STEP 2 / SOIL, WATER &amp; LOCAL COSTS</span><h2>Tell us only what you know.</h2><p>These quick choices help AgriPulse explain the crop and water signals. Leave optional local values empty rather than using a generic estimate.</p><form id="simple-farm-form" class="simple-farm-form"><label>Water source<select name="waterSource"><option value="unknown">I don’t know yet</option><option value="rainfed">Rain-fed only</option><option value="irrigated">Irrigation available</option></select></label><label>Your priority<select name="objective"><option value="water">Use water wisely</option><option value="soil">Protect soil health</option><option value="risk">Prepare for changing weather</option></select></label><label>Soil pH <small>Optional</small><input name="soilPH" inputmode="decimal" min="0" max="14" placeholder="I don’t know"></label><label>Soil texture<select name="soilTexture"><option value="unknown">I don’t know</option><option value="light">Light</option><option value="medium">Medium</option><option value="heavy">Heavy</option><option value="organic">Organic</option></select></label><label class="span-two">Drainage<select name="drainage"><option value="unknown">I don’t know</option><option value="well">Well drained</option><option value="excessive">Very fast drainage</option></select></label><div class="simple-local-economics span-two"><span class="eyebrow">OPTIONAL · YOUR LOCAL VALUES</span><p>No market price is invented. Enter values in the report currency to calculate profit.</p><label>Expected yield (t/ha)<input name="localYield" type="number" min="0" step="0.1" placeholder="Leave empty"></label><label>Selling price per tonne<input name="localPrice" type="number" min="0" step="0.01" placeholder="Leave empty"></label><label>Cost per hectare<input name="localCost" type="number" min="0" step="0.01" placeholder="Leave empty"></label></div><div class="simple-step-actions span-two"><button class="button secondary" type="button" data-action="simple-back" data-back-step="1"><span aria-hidden="true">←</span> Back</button><button class="button" type="submit">Save &amp; continue <span aria-hidden="true">→</span></button></div></form></article></section>
     <section class="simple-stage" data-simple-stage="3" hidden><article class="panel simple-card simple-crops-card"><span class="eyebrow">STEP 3 / CROPS</span><h2>Which crops are you considering?</h2><p>Choose one or more crops. AgriPulse will compare their available soil conditions and include your primary crop in the report.</p><div class="simple-crop-tools"><label><span>⌕</span><input id="simple-crop-search" type="search" placeholder="Search crops"></label><div role="group" aria-label="Crop category"><button class="active" type="button" data-crop-filter="all">All</button><button type="button" data-crop-filter="grain">Grains</button><button type="button" data-crop-filter="vegetable">Vegetables</button><button type="button" data-crop-filter="other">Other</button></div></div><form id="simple-crops-form" class="simple-crop-checklist">${Object.entries(simpleCropEvidence).map(([id, crop]) => { const sticker = simpleCropStickers[id]; return '<label data-crop-card data-crop-name="' + crop.name.toLowerCase() + '" data-crop-category="' + sticker.category + '"><input type="checkbox" name="crops" value="' + id + '"><span class="simple-crop-sticker" aria-hidden="true">' + sticker.icon + '</span><span class="simple-crop-copy"><b>' + crop.name + '</b><small>' + sticker.category + '</small></span><i aria-hidden="true">✓</i></label>'; }).join('')}<div class="simple-step-actions"><button class="button secondary" type="button" data-action="simple-back" data-back-step="2"><span aria-hidden="true">←</span> Back</button><button class="button" type="submit">Generate my report <span aria-hidden="true">→</span></button></div></form></article></section>
-    <section class="simple-stage" data-simple-stage="4" hidden><header class="simple-results-heading"><div><span class="eyebrow">STEP 4 / YOUR REPORT</span><h2>Your farm, clearly explained.</h2><p id="simple-results-summary">Your location, crop choices, water context, and planning estimate appear here.</p></div><div class="button-row"><button class="button" type="button" data-action="simple-save">Export report</button><button class="button secondary" type="button" data-simple-step="1">Start again</button></div></header><div id="simple-report-hero"></div><div class="simple-results-grid" id="simple-results"></div><aside class="simple-results-note"><b>How to read your report</b><p>Weather and crop-condition signals are separated from planning estimates. Local currency follows the country you selected; confirm prices with your local buyer before acting.</p></aside></section>
+    <section class="simple-stage" data-simple-stage="4" hidden><header class="simple-results-heading"><div><span class="eyebrow">STEP 4 / YOUR REPORT</span><h2>Your farm, clearly explained.</h2><p id="simple-results-summary">Your location, crop choices, water context, and planning estimate appear here.</p></div><div class="button-row"><button class="button" type="button" data-action="simple-save">Export report</button><button class="button secondary" type="button" data-action="simple-offline">Save offline copy</button><button class="button secondary" type="button" data-action="simple-observation">Add field note</button><button class="button secondary" type="button" data-simple-step="1">Start again</button></div></header><div id="simple-report-hero"></div><div class="simple-results-grid" id="simple-results"></div><aside class="simple-results-note"><b>How to read your report</b><p>Weather and crop-condition signals are separated from planning estimates. Local currency follows the country you selected; confirm prices with your local buyer before acting.</p><small>Offline copy works without internet using values captured at export time. Refresh connected data before making a new decision.</small></aside></section>
     <dialog class="simple-export-dialog" id="simple-export-dialog"><header><div><span class="eyebrow">REPORT EXPORT</span><h2>Download your farm report</h2></div><button class="simple-tool-icon" type="button" data-action="close-simple-export" aria-label="Close">×</button></header><p>Choose the language and file type. Every format uses the same field data and planning assumptions.</p><form id="simple-export-form"><label>Report language<select name="language"><option value="en">English</option><option value="ar">العربية</option><option value="fr">Français</option><option value="es">Español</option><option value="de">Deutsch</option><option value="pt">Português</option><option value="tr">Türkçe</option><option value="ur">اردو</option><option value="hi">हिन्दी</option><option value="zh">中文</option></select></label><fieldset><legend>File type</legend><label class="simple-format-option"><input type="radio" name="format" value="html" checked><span><b>HTML</b><small>Designed report for browsers and printing</small></span></label><label class="simple-format-option"><input type="radio" name="format" value="jpg"><span><b>JPG image</b><small>Shareable report snapshot</small></span></label><label class="simple-format-option"><input type="radio" name="format" value="json"><span><b>JSON data</b><small>Structured field and evidence record</small></span></label><label class="simple-format-option"><input type="radio" name="format" value="csv"><span><b>CSV table</b><small>Weather and planning data for spreadsheets</small></span></label></fieldset><div class="simple-export-preview"><span>Ready to export</span><b id="simple-export-filename">AgriPulse-report.html</b></div><button class="button full" type="submit">Generate and download</button></form></dialog>
-    <aside class="simple-community"><div><span class="eyebrow">AGRIPULSE COMMUNITY</span><b>Help us build better field decisions.</b></div><div><button type="button" data-action="simple-explore">Explore maps & resources</button><button type="button" data-action="simple-feedback">Share feedback</button><button type="button" data-action="simple-about">Learn about us</button></div></aside>
+    <aside class="simple-community"><div><span class="eyebrow">AGRIPULSE COMMUNITY</span><b>Help us build better field decisions.</b></div><div><button type="button" data-action="simple-explore">Explore maps & resources</button><button type="button" data-action="simple-feedback">Share feedback</button><button type="button" data-action="simple-observation">Add field note</button><button type="button" data-action="simple-about">Learn about us</button></div></aside>
     <dialog class="simple-info-dialog" id="simple-feedback-dialog"><header><div><span class="eyebrow">YOUR FEEDBACK</span><h2>Help AgriPulse grow</h2></div><button class="simple-tool-icon" type="button" data-action="close-simple-dialog" aria-label="Close">×</button></header><p>Tell us what would make the guided farmer experience clearer or more useful.</p><form id="simple-feedback-form"><label>Rating<select name="rating"><option value="5">5 · Excellent</option><option value="4">4 · Good</option><option value="3">3 · Okay</option><option value="2">2 · Needs work</option><option value="1">1 · Poor</option></select></label><label>Comment<textarea name="comment" minlength="5" maxlength="600" required placeholder="Write your feedback"></textarea></label><button class="button" type="submit">Save feedback</button></form></dialog>
+    <dialog class="simple-info-dialog simple-observation-dialog" id="simple-observation-dialog"><header><div><span class="eyebrow">LOCAL FIELD NOTES</span><h2>Record what you see.</h2></div><button class="simple-tool-icon" type="button" data-action="close-simple-dialog" aria-label="Close">×</button></header><p>Local observations strengthen the report. They stay in this browser until you export or clear them.</p><form id="simple-observation-form"><label>Date<input type="date" name="date" required></label><label>What did you observe?<select name="category"><option value="weather">Weather</option><option value="soil">Soil</option><option value="water">Water</option><option value="crop">Crop</option><option value="pest">Pest or disease</option><option value="irrigation">Irrigation</option><option value="other">Other</option></select></label><label>Note<textarea name="note" minlength="3" maxlength="800" required placeholder="Example: topsoil dry at 5 cm after two hot days"></textarea></label><button class="button" type="submit">Save field note</button></form><div id="simple-observation-list" class="simple-observation-list"></div></dialog>
     <dialog class="simple-info-dialog simple-explore-dialog" id="simple-explore-dialog"><header><div><span class="eyebrow">EXPLORE AGRIPULSE</span><h2>Keep learning from your farm.</h2></div><button class="simple-tool-icon" type="button" data-action="close-simple-dialog" aria-label="Close">×</button></header><p>Open trusted Earth-observation and agriculture resources in a new tab. Your Simple Farm progress stays here.</p><div class="simple-explore-grid"><a href="https://power.larc.nasa.gov/" target="_blank" rel="noopener"><span>☀</span><b>NASA POWER</b><small>Regional climate history and solar context</small><em>Open ↗</em></a><a href="https://worldview.earthdata.nasa.gov/" target="_blank" rel="noopener"><span>◉</span><b>NASA Worldview</b><small>Explore global satellite imagery</small><em>Open ↗</em></a><a href="https://www.earthdata.nasa.gov/data/instruments/smap" target="_blank" rel="noopener"><span>◒</span><b>NASA SMAP</b><small>Surface soil-moisture context</small><em>Open ↗</em></a><a href="https://gaez.fao.org/" target="_blank" rel="noopener"><span>❋</span><b>FAO GAEZ</b><small>Agro-ecological planning context</small><em>Open ↗</em></a><a href="https://www.fao.org/china/en/" target="_blank" rel="noopener"><span>田</span><b>China agriculture</b><small>FAO resources and country context</small><em>Open ↗</em></a><a href="https://www.mewa.gov.sa/en/Pages/default.aspx" target="_blank" rel="noopener"><span>⌂</span><b>Saudi agriculture</b><small>Ministry of Environment, Water &amp; Agriculture</small><em>Open ↗</em></a><a href="https://earth.google.com/web/" target="_blank" rel="noopener"><span>◎</span><b>Google Earth</b><small>Explore places and landscapes globally</small><em>Open ↗</em></a></div></dialog>
     <dialog class="simple-info-dialog" id="simple-about-dialog"><header><div><span class="eyebrow">ABOUT AGRIPULSE</span><h2>Built by students. Grounded in purpose.</h2></div><button class="simple-tool-icon" type="button" data-action="close-simple-dialog" aria-label="Close">×</button></header><div class="simple-about-profile"><img src="assets/dunia-alajial-logo.jpg" alt="Dunia Alajial International School logo"><div><b>Dunia Alajial International School</b><p>AgriPulse connects NASA and partner resources supplied for the challenge with farmer-entered local knowledge.</p></div></div><section class="simple-team"><span class="eyebrow">THE TECH TEAM</span><p>Designed and developed by students building practical, evidence-aware farming tools.</p><div class="simple-team-links"><a href="https://github.com/a7mdel5taeeb-eng" target="_blank" rel="noopener">Mr. Ahmed · GitHub ↗</a><a href="https://github.com/ameer-marwan" target="_blank" rel="noopener">Ameer · GitHub ↗</a><a href="https://github.com/mostafabass1" target="_blank" rel="noopener">Mostafa · GitHub ↗</a></div></section></dialog>
     <button class="simple-agri-guide-toggle" type="button" data-action="agri-guide" aria-expanded="false"><span>✦</span><b>Agri Toggle</b><small>Field tips</small></button><aside class="simple-agri-guide" id="simple-agri-guide" hidden><header><div><span class="eyebrow">AGRIPULSE FIELD GUIDE</span><h2>What would you like to understand?</h2></div><button type="button" data-action="agri-guide" aria-label="Close">×</button></header><p>No typing needed. Tap a topic or generate a land-aware tip using your selected field and current weather.</p><button class="simple-generate-tip" type="button" data-action="generate-land-tip"><span>✦</span><b>Generate a tip for this land</b><small>Weather · water · crops · next action</small></button><div class="simple-agri-tip-topics"><button type="button" data-agri-tip="weather"><span aria-hidden="true">☀</span> Weather</button><button type="button" data-agri-tip="soil"><span aria-hidden="true">◉</span> Soil</button><button type="button" data-agri-tip="water"><span aria-hidden="true">◒</span> Water</button><button type="button" data-agri-tip="crop"><span aria-hidden="true">❋</span> Crops</button><button type="button" data-agri-tip="profit"><span aria-hidden="true">↗</span> Profit</button></div><article id="simple-agri-tip"><span class="eyebrow">QUICK FIELD TIP</span><h3>Start with your land</h3><p>Choose a location and crop, then tap a topic to see a short, practical explanation.</p></article></aside>`;
@@ -1004,6 +1006,7 @@ function renderSimpleResults() {
     ${fact('Field details', farm.waterSource, farm.priority)}
     ${fact('Profit estimate', margin, economics.available ? t('Farmer-entered local values') : t('Local values required'))}
   </div>
+  <section class="simple-confidence-card"><div><span class="eyebrow">${e(t('EVIDENCE COMPLETENESS'))}</span><h3>${e(buildSimpleReportPayload().uncertainty.label)}</h3><p>${e(buildSimpleReportPayload().uncertainty.basis)}</p></div><div class="simple-confidence-meter" role="progressbar" aria-label="Evidence completeness" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${buildSimpleReportPayload().uncertainty.score}"><i style="width:${buildSimpleReportPayload().uncertainty.score}%"></i></div><small>${e(String(buildSimpleReportPayload().uncertainty.score))}% of the available evidence signals are present.</small></section>
   <section class="simple-report-readiness">
     <div><span class="eyebrow">${e(t('DECISION READINESS'))}</span><b>${e(evidence.connectedSignals + ' / ' + evidence.totalSignals + ' ' + t('signals connected'))}</b></div>
     <div>${evidence.signals.map(({ label, connected }) => '<span class="' + (connected ? 'connected' : '') + '"><i></i>' + e(label) + '</span>').join('')}</div>
@@ -1109,6 +1112,9 @@ function buildSimpleReportPayload(language = currentLanguage()) {
     ['Location', true], ['Weather context', weather.available], ['Crop choice', cropNames.length > 0],
     ['Local soil input', hasSoil], ['Local economics', Boolean(benchmark)],
   ];
+  const observations = Array.isArray(state.observations) ? state.observations : [];
+  const completeness = Math.round((signals.filter(([, connected]) => connected).length + (observations.length ? 1 : 0)) / 6 * 100);
+  const confidenceLabel = completeness >= 80 ? 'High evidence completeness' : completeness >= 55 ? 'Moderate evidence completeness' : 'Early evidence completeness';
   return {
     schemaVersion: 3,
     language,
@@ -1137,6 +1143,8 @@ function buildSimpleReportPayload(language = currentLanguage()) {
       estimatedSalesPerHa: benchmark ? benchmark.yield * benchmark.price : null,
       planningCostsPerHa: benchmark?.cost ?? null, planningMarginPerHa: margin,
     },
+    observations: observations.map(item => ({ date: item.date, category: item.category, note: item.note })),
+    uncertainty: { score: completeness, label: tr(confidenceLabel), basis: tr('Evidence completeness only; not a forecast-accuracy or yield guarantee.') },
     evidence: {
       signals: signals.map(([label, connected]) => ({ label: tr(label), connected })),
       connectedSignals: signals.filter(([, connected]) => connected).length,
@@ -1157,6 +1165,30 @@ function buildSimpleReportPayload(language = currentLanguage()) {
   };
 }
 
+function downloadSimpleOfflineReport() {
+  if (!hasLocation()) return toast(t('Choose your farm location first.'));
+  const payload = buildSimpleReportPayload(currentLanguage());
+  const name = simpleReportFilename('html').replace('AgriPulse-report-', 'AgriPulse-offline-');
+  download(name, buildSimpleReportHtml(payload), 'text/html;charset=utf-8');
+  toast('Offline report saved. It can be opened without internet.');
+}
+
+function renderSimpleObservations() {
+  const host = $('#simple-observation-list');
+  if (!host) return;
+  const items = Array.isArray(state.observations) ? state.observations : [];
+  host.innerHTML = items.length ? items.slice(0, 20).map(item => '<article class="simple-observation-row"><div><b>' + escapeHTML(item.category) + '</b><small>' + escapeHTML(item.date) + '</small></div><p>' + escapeHTML(item.note) + '</p><button type="button" data-observation-delete="' + escapeHTML(item.id) + '" aria-label="Delete field note">×</button></article>').join('') : '<p class="empty">No local observations yet. Add a note after checking the field.</p>';
+}
+
+function openSimpleObservationDialog() {
+  const dialog = $('#simple-observation-dialog');
+  if (!dialog) return;
+  const form = $('#simple-observation-form');
+  if (form && !form.elements.date.value) form.elements.date.value = today();
+  renderSimpleObservations();
+  dialog.showModal();
+}
+
 function reportPeriod(weather, locale) {
   if (!weather.period) return null;
   const format = new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeZone: 'UTC' });
@@ -1171,7 +1203,7 @@ function reportMeasure(value, unit, precision = 0) {
 }
 
 function buildSimpleReportHtml(payload) {
-  const { language, direction, location, farm, weather, economics, cropAssessment, evidence, nextActions } = payload;
+  const { language, direction, location, farm, weather, economics, cropAssessment, evidence, nextActions, uncertainty, observations = [] } = payload;
   const tr = value => tFor(language, value);
   const e = escapeHTML;
   const locale = reportLocales[language] || 'en-US';
@@ -1236,6 +1268,7 @@ ${detail('Cost per hectare', money(economics.planningCostsPerHa))}</dl></article
 </section>
 <section class="card"><h2>${e(heading)}</h2>
 ${rows ? '<div class="table-wrap"><table><thead><tr>' + headers + '</tr></thead><tbody>' + rows + '</tbody></table></div>' : '<p>' + e(missing) + '</p>'}</section>
+<section class="grid"><article class="card"><h2>${e(tr('Evidence completeness'))}</h2><p><b>${e(uncertainty?.label || tr('Early evidence completeness'))}</b> · ${e(String(uncertainty?.score ?? 0))}%</p><p>${e(uncertainty?.basis || tr('Evidence completeness only; not a forecast-accuracy or yield guarantee.'))}</p></article><article class="card"><h2>${e(tr('Local field notes'))}</h2>${observations.length ? '<ul class="crop-list">' + observations.map(item => '<li><b>' + e(item.date) + ' · ' + e(item.category) + '</b><small>' + e(item.note) + '</small></li>').join('') + '</ul>' : '<p>' + e(tr('No local observations yet.')) + '</p>'}</article></section>
 <section class="card"><h2>${e(tr('Evidence and limitations'))}</h2><ul class="limitations">${evidence.limitations.map(note => '<li>' + e(note) + '</li>').join('')}</ul></section>
 <footer>AgriPulse · ${e(tr('Generated from your selected land and inputs.'))}</footer>
 </main></body></html>`;
@@ -1503,6 +1536,8 @@ function bindEvents() {
       },
       "close-simple-settings": () => $('#simple-settings-dialog')?.close(),
       "simple-save": () => downloadSimpleReport(),
+      "simple-offline": () => downloadSimpleOfflineReport(),
+      "simple-observation": () => openSimpleObservationDialog(),
       "close-simple-export": () => $('#simple-export-dialog')?.close(),
       "simple-report-more": () => {
         const details = document.getElementById(action.getAttribute('aria-controls'));
@@ -1698,6 +1733,23 @@ function bindEvents() {
     form.closest('dialog')?.close();
     text('#simple-save-status', 'Feedback saved');
     toast('Feedback saved. Thank you.');
+  });
+  $('#simple-observation-form')?.addEventListener('submit', event => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    state.observations = [{ id: crypto.randomUUID(), date: form.elements.date.value || today(), category: form.elements.category.value, note: form.elements.note.value.trim() }, ...(state.observations || [])].slice(0, 50);
+    write('fieldshift.observations', state.observations);
+    form.reset(); form.elements.date.value = today();
+    renderSimpleObservations();
+    text('#simple-save-status', 'Field note saved');
+    toast('Field note saved.');
+  });
+  $('#simple-observation-list')?.addEventListener('click', event => {
+    const button = event.target.closest('[data-observation-delete]');
+    if (!button) return;
+    state.observations = (state.observations || []).filter(item => item.id !== button.dataset.observationDelete);
+    write('fieldshift.observations', state.observations);
+    renderSimpleObservations();
   });
   $$('[data-simple-step]').forEach(button => button.addEventListener('click', () => {
     const target = Number(button.dataset.simpleStep);
