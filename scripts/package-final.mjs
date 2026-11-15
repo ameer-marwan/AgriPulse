@@ -10,7 +10,7 @@ const dataUri=async(path,type)=>'data:'+type+';base64,'+(await readFile(resolve(
 const scriptSafe=s=>s.replace(/<\/script/gi,'<\\/script');
 let html=await read('dist/index.html');
 const logo=await dataUri('dist/assets/logo-new.png','image/png');
-let css=(await Promise.all(['dist/vendor/maplibre-gl.css','dist/styles.css','dist/planning.css','dist/scenes.css','dist/i18n.css','dist/intro.css','dist/intro-real.css','dist/accounts.css','dist/field-controls.css','dist/polish.css'].map(read))).join('\n');
+let css=(await Promise.all(['dist/vendor/maplibre-gl.css','dist/styles.css','dist/planning.css','dist/scenes.css','dist/i18n.css','dist/intro.css','dist/intro-real.css','dist/accounts.css','dist/field-controls.css','dist/polish.css','dist/weather-motion.css'].map(read))).join('\n');
 // Package only the reviewed local visuals used by the site.
 const illustrationNames=[
   'explore-china','explore-ksa','explore-netherlands','explore-kenya','explore-brazil',

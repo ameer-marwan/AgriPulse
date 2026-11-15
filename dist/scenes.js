@@ -26,7 +26,7 @@ export function initScenes({ getState }) {
   const atmosphere = document.createElement('div');
   atmosphere.className = 'weather-atmosphere';
   atmosphere.setAttribute('aria-hidden', 'true');
-  atmosphere.innerHTML = '<div class="scene-orb"></div><div class="scene-cloud cloud-one"></div><div class="scene-cloud cloud-two"></div><div class="scene-particles"></div>';
+  atmosphere.innerHTML = '<div class="scene-orb"></div><div class="scene-cloud cloud-one"></div><div class="scene-cloud cloud-two"></div><div class="scene-particles"></div><div class="scene-heat"></div>';
   weather.querySelector('.weather-feature').prepend(atmosphere);
   for (const name of ['water', 'soil']) {
     const caption = document.createElement('span');

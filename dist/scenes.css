@@ -3,8 +3,8 @@
 /* These are visual atmosphere only, never a data layer or field observation. */
 #view-weather{--scene-image:url('assets/intro-farmland.jpg');--scene-tint:#547787}
 #view-water{--scene-image:url('assets/irrigation-water.jpg')}
-#view-soil{--scene-image:url('assets/field-landscape.jpg')}
-#view-crops{--scene-image:url('assets/field-landscape.jpg')}
+#view-soil{--scene-image:url('assets/intro-soil.jpg')}
+#view-crops{--scene-image:url('assets/intro-farmland.jpg')}
 #view-feedback{--scene-image:url('assets/intro-plant.jpg')}
 .section-scene{position:absolute;inset:12px 0 auto;height:780px;z-index:-1;overflow:hidden;border-radius:20px;pointer-events:none;opacity:.22;background-image:linear-gradient(180deg,var(--bg) 0%,transparent 24%,var(--bg) 93%),linear-gradient(90deg,var(--bg),transparent 50%,var(--bg)),var(--scene-image);background-position:center;background-size:cover;mask-image:linear-gradient(#000 0%,#000 50%,transparent 100%)}
 #view-water>.section-scene{height:740px;opacity:.17;background-position:center 40%}

@@ -865,6 +865,8 @@ const simpleStepCounterCopy = {
 };
 function syncSimpleToolbar(language = state.preferences.language) {
   const words = simpleToolbarCopy[language] || simpleToolbarCopy.en;
+  const advancedOption = $('#simple-farmer-mode option[value="advanced"]');
+  if (advancedOption) advancedOption.textContent = t('Advanced farmer · full controls');
   $('#simple-language') && ($('#simple-language').value = language);
   $('#simple-settings-language') && ($('#simple-settings-language').value = language);
   $('#simple-appearance') && ($('#simple-appearance').value = state.preferences.theme);
@@ -986,6 +988,7 @@ function renderSimpleResults() {
   const et0Text = number(weather.sevenDay.referenceEt0Mm) ? rain(weather.sevenDay.referenceEt0Mm) : t('Not available');
   reportHero.innerHTML = `<article class="simple-weather-report simple-weather-${scene}">
     <div class="simple-weather-shade"></div>
+    <div class="simple-weather-atmosphere" aria-hidden="true"><i class="simple-scene-sun"></i><i class="simple-scene-cloud simple-cloud-one"></i><i class="simple-scene-cloud simple-cloud-two"></i><i class="simple-scene-particles"></i><i class="simple-scene-heat"></i></div>
     <div class="simple-weather-main">
       <span class="eyebrow">${e(t(live ? 'CURRENT MODEL FORECAST' : historical ? 'RECENT NASA POWER HISTORY' : 'WEATHER UNAVAILABLE'))}</span>
       <h2>${e(location.name)}</h2>
@@ -1045,7 +1048,7 @@ function renderSimpleResults() {
   host.innerHTML = [
     simpleCard('Crop profiles', 'screening', cropBody, t('Profile screening only; confirm with local evidence.')),
     simpleCard('Water context', number(weather.sevenDay.rainMm) ? 'screening' : 'unavailable', t('7-day rain') + ': ' + rainText, evidence.limitations[1]),
-    simpleCard('Planting window', 'unavailable', t('A local planting window needs seasonal crop and climate evidence.'), t('Review historical climate in Complex farmer mode.')),
+    simpleCard('Planting window', 'unavailable', t('A local planting window needs seasonal crop and climate evidence.'), t('Review historical climate in Advanced farmer mode.')),
     simpleCard('Profit planning estimate', economics.available ? 'calculated' : 'unavailable', profitBody, economics.source),
     simpleCard('Farm risks', weather.available ? 'screening' : 'unavailable', riskBody, evidence.limitations[0]),
   ].join('');
