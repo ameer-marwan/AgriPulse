@@ -73,3 +73,53 @@ body.simple-farmer.light .simple-farmer-view{background:#f5faf4!important;color:
   font: 11px/1.65 'DM Sans', sans-serif;
   text-align: center; overflow-wrap: anywhere;
 }
+
+/* Final visual pass: restore photographic surfaces after legacy flat-theme rules.
+   Motion is purely decorative; it does not represent live weather or satellite data. */
+body.simple-farmer.light{
+  background:linear-gradient(125deg,#dff3f4e8,#f5fbf3e6),url('assets/intro-farmland.jpg') center/cover fixed!important;
+}
+body.simple-farmer.light .simple-farmer-view{
+  background:linear-gradient(180deg,#f5fbf4dc 0%,#eff7f0db 48%,#e5f1e8e8 100%),url('assets/intro-farmland.jpg') center/cover fixed!important;
+  background-blend-mode:screen!important;
+}
+body.simple-farmer:not(.light){
+  background:radial-gradient(ellipse at 50% -15%,#1f6257b5,transparent 54%),linear-gradient(155deg,#051711e8,#091a20f2),url('assets/earth-texture.jpg') center/cover fixed!important;
+}
+body.simple-farmer:not(.light) .simple-farmer-view{
+  background:linear-gradient(180deg,#061610e6,#0b2119ed 52%,#061710ed),url('assets/field-landscape.jpg') center/cover fixed!important;
+  background-blend-mode:multiply!important;
+}
+body.simple-farmer .simple-farmer-view:before{
+  z-index:0!important;
+  opacity:.62!important;
+}
+body.simple-farmer .simple-farmer-view>*{position:relative;z-index:1}
+body.simple-farmer .simple-farmer-view>dialog{position:fixed}
+/* The water area has a photographic irrigation scene with a low-cost rippling light layer. */
+#view-water>.section-scene,#view-water>.page-heading{
+  background-image:linear-gradient(90deg,#06252bdc,#06333a94 48%,#09221a48),url('assets/irrigation-water.jpg')!important;
+  background-size:112% 112%!important;
+  animation:water-drift 18s ease-in-out infinite alternate!important;
+}
+#view-water>.section-scene:after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(173deg,transparent 0 13px,#d7ffff16 14px 16px,transparent 17px 30px);
+  mix-blend-mode:screen;animation:water-shimmer 9s linear infinite;
+}
+@keyframes water-shimmer{from{transform:translateX(-4%)}to{transform:translateX(4%)}}
+@media(prefers-reduced-motion:reduce){
+  #view-water>.section-scene,#view-water>.page-heading{animation:none!important}
+  #view-water>.section-scene:after{animation:none}
+}
+
+/* Photograph-first fallback for the whole advanced workspace and guided report. */
+body.advanced-farmer{--workspace-art:url('assets/field-landscape.jpg')}
+body.advanced-farmer[data-route=weather]{--workspace-art:url('assets/intro-farmland.jpg')}
+body.advanced-farmer[data-route=soil]{--workspace-art:url('assets/intro-soil.jpg')}
+body.advanced-farmer[data-route=water]{--workspace-art:url('assets/irrigation-water.jpg')}
+body.advanced-farmer[data-route=crops],body.advanced-farmer[data-route=profit]{--workspace-art:url('assets/intro-farmland.jpg')}
+body.advanced-farmer[data-route=explore],body.advanced-farmer[data-route=reports],body.advanced-farmer[data-route=settings],body.advanced-farmer[data-route=about]{--workspace-art:url('assets/field-landscape.jpg')}
+#view-analytics:before{background-image:linear-gradient(var(--bg) 0 140px,transparent 420px),linear-gradient(90deg,var(--bg) 0%,transparent 42%,var(--bg) 100%),url('assets/field-landscape.jpg')!important}
+.simple-weather-clear,.simple-weather-clouds{background-image:url('assets/intro-farmland.jpg')!important}
+.simple-weather-storm{background-image:linear-gradient(#0a2639aa,#152534b8),url('assets/intro-farmland.jpg')!important}

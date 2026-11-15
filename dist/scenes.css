@@ -1,10 +1,11 @@
 /* Atmospheric imagery stays inside its own workspace section. */
 #view-weather,#view-water,#view-soil,#view-crops,#view-feedback{position:relative;isolation:isolate}
-#view-weather{--scene-image:url('assets/sky-clouds.svg');--scene-tint:#547787}
-#view-water{--scene-image:url('assets/sea.svg')}
-#view-soil{--scene-image:url('assets/forest.svg')}
-#view-crops{--scene-image:url('assets/field-landscape.svg')}
-#view-feedback{--scene-image:url('assets/intro-plant.svg')}
+/* These are visual atmosphere only, never a data layer or field observation. */
+#view-weather{--scene-image:url('assets/intro-farmland.jpg');--scene-tint:#547787}
+#view-water{--scene-image:url('assets/irrigation-water.jpg')}
+#view-soil{--scene-image:url('assets/field-landscape.jpg')}
+#view-crops{--scene-image:url('assets/field-landscape.jpg')}
+#view-feedback{--scene-image:url('assets/intro-plant.jpg')}
 .section-scene{position:absolute;inset:12px 0 auto;height:780px;z-index:-1;overflow:hidden;border-radius:20px;pointer-events:none;opacity:.22;background-image:linear-gradient(180deg,var(--bg) 0%,transparent 24%,var(--bg) 93%),linear-gradient(90deg,var(--bg),transparent 50%,var(--bg)),var(--scene-image);background-position:center;background-size:cover;mask-image:linear-gradient(#000 0%,#000 50%,transparent 100%)}
 #view-water>.section-scene{height:740px;opacity:.17;background-position:center 40%}
 #view-soil>.section-scene{height:790px;opacity:.16;background-position:center 34%}
@@ -53,19 +54,19 @@
 #view-weather[data-weather-scene=partly] .weather-atmosphere .scene-cloud{opacity:.55}
 #view-weather[data-weather-scene=cloudy] .weather-atmosphere .scene-cloud{opacity:.68}
 #view-weather[data-weather-scene=fog] .weather-atmosphere .scene-cloud{opacity:.5;width:440px;filter:blur(13px)}
-#view-weather[data-weather-scene=clear]{--scene-image:url('assets/sky-clear.svg')}
+#view-weather[data-weather-scene=clear]{--scene-image:url('assets/intro-farmland.jpg')}
 #view-weather[data-weather-scene=clear] .weather-feature{background-image:linear-gradient(90deg,#10303bec,#183b48ba 40%,#155b7845 100%),var(--scene-image)}
 #view-weather[data-weather-scene=clear] .weather-feature:after{opacity:.95}
-#view-weather[data-weather-scene=partly]{--scene-image:url('assets/sky-clouds.svg')}
+#view-weather[data-weather-scene=partly]{--scene-image:url('assets/intro-farmland.jpg')}
 #view-weather[data-weather-scene=partly] .weather-feature:after{opacity:.68;filter:blur(1px);top:22px;right:25%}
-#view-weather[data-weather-scene=cloudy]{--scene-image:url('assets/sky-clouds.svg')}
+#view-weather[data-weather-scene=cloudy]{--scene-image:url('assets/intro-farmland.jpg')}
 #view-weather[data-weather-scene=cloudy] .weather-feature{background-position:center 57%}
-#view-weather[data-weather-scene=fog]{--scene-image:url('assets/sky-clouds.svg')}
+#view-weather[data-weather-scene=fog]{--scene-image:url('assets/intro-farmland.jpg')}
 #view-weather[data-weather-scene=fog] .weather-feature:before{background:linear-gradient(0deg,#deebed27,transparent 80%),repeating-linear-gradient(178deg,transparent 0 40px,#d4e3e925 45px 54px,transparent 65px 100px);filter:blur(4px)}
-#view-weather[data-weather-scene=rain],#view-weather[data-weather-scene=storm]{--scene-image:url('assets/sky-storm.svg')}
+#view-weather[data-weather-scene=rain],#view-weather[data-weather-scene=storm]{--scene-image:url('assets/intro-farmland.jpg')}
 #view-weather[data-weather-scene=rain] .weather-feature:before,#view-weather[data-weather-scene=storm] .weather-feature:before{inset:-30px;opacity:.6;background-image:repeating-linear-gradient(108deg,transparent 0 35px,#c5e6ed59 36px,#c5e6ed00 37px,transparent 38px 84px);background-size:145px 160px;animation:scene-rainfall 1.3s linear infinite}
 #view-weather[data-weather-scene=storm] .weather-feature{background-image:linear-gradient(90deg,#0d2030f0,#152736ce 42%,#1c29456e 100%),var(--scene-image)}
-#view-weather[data-weather-scene=snow]{--scene-image:url('assets/sky-clouds.svg')}
+#view-weather[data-weather-scene=snow]{--scene-image:url('assets/intro-farmland.jpg')}
 #view-weather[data-weather-scene=snow] .weather-feature:before{opacity:.65;background-image:radial-gradient(circle,#edf7fa 1.5px,transparent 2px),radial-gradient(circle,#e4f0f5 1px,transparent 2px);background-size:83px 91px,117px 129px;background-position:0 0,38px 27px;animation:scene-snowfall 12s linear infinite}
 #view-weather[data-weather-scene=night]{--scene-image:none}
 #view-weather[data-weather-scene=night] .weather-feature{background-image:radial-gradient(ellipse at 78% 10%,#3d497d66,transparent 70%),linear-gradient(110deg,#0c2031,#172537 55%,#202c4c)}
