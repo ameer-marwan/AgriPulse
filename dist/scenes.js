@@ -8,7 +8,11 @@ export function weatherScene(current) {
   if ([45, 48].includes(code)) return 'fog';
   if (code === 3) return 'cloudy';
   if ([0, 1, 2].includes(code) && current.isDay === false) return 'night';
-  if ([0, 1, 2].includes(code) && Number(current.temperature) >= 34) return 'hot';
+  // The Simple report uses report-safe aliases while the Advanced workspace
+  // retains the provider shape. Accept both so one live condition always
+  // creates the same visual scene in both modes.
+  const temperature = current.temperature ?? current.temperatureC;
+  if ([0, 1, 2].includes(code) && Number(temperature) >= 34) return 'hot';
   if (code === 0 || code === 1) return 'clear';
   if (code === 2) return 'partly';
   return 'unknown';

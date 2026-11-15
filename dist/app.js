@@ -1092,7 +1092,7 @@ function simpleReportWeather(weather, tr) {
     timezone: weather?.timezone ?? null,
     current: current ? {
       temperatureC: current.temperature, humidityPercent: current.humidity, windKmh: current.wind,
-      time: current.time ?? null, weatherCode: current.weatherCode, surfaceSoilMoisture: current.soilMoisture,
+      time: current.time ?? null, weatherCode: current.weatherCode, isDay: current.isDay, surfaceSoilMoisture: current.soilMoisture,
     } : null,
     sevenDay: {
       rainMm, referenceEt0Mm,
