@@ -10,6 +10,7 @@ const dataUri=async(path,type)=>'data:'+type+';base64,'+(await readFile(resolve(
 const scriptSafe=s=>s.replace(/<\/script/gi,'<\\/script');
 let html=await read('dist/index.html');
 const logo=await dataUri('dist/assets/logo-new.png','image/png');
+const schoolLogo=await dataUri('dist/assets/dunia-alajial-logo.jpg','image/jpeg');
 let css=(await Promise.all(['dist/vendor/maplibre-gl.css','dist/styles.css','dist/planning.css','dist/scenes.css','dist/i18n.css','dist/intro.css','dist/intro-real.css','dist/accounts.css','dist/field-controls.css','dist/polish.css','dist/weather-motion.css'].map(read))).join('\n');
 // Package only the reviewed local visuals used by the site.
 const illustrationNames=[
@@ -53,7 +54,7 @@ for (const [name,data] of weatherVisuals) {
 html=html.replace(/<link rel="stylesheet" href="[^"]+"\s*\/?>/g,'')
   .replace('</head>',()=>'<style>'+css.replace(/<\/style/gi,'<\\/style')+'</style></head>');
 html=html.replaceAll('assets/logo-new.png',logo);
-html=html.replaceAll('assets/dunia-alajial-logo.jpg',await dataUri('dist/assets/dunia-alajial-logo.jpg','image/jpeg'));
+html=html.replaceAll('assets/dunia-alajial-logo.jpg',schoolLogo);
 let js='(async()=>{\nconst __fieldshiftModules = {};\n';
 for(const name of ['storage','accounts','data','geo','planning','scenes','i18n','growth','intro']){
   let code=await read('dist/'+name+'.js');
@@ -73,6 +74,7 @@ html=html.replace('<script src="vendor/maplibre-gl.js"></script>',()=>'<script>'
 html=html.replace('<script type="module" src="app.js"></script>',()=>'<script>'+scriptSafe(js)+'</script>');
 // Runtime-created intro and explorer markup is embedded in the JS string.
 html=html.replaceAll('assets/logo-new.png',logo);
+html=html.replaceAll('assets/dunia-alajial-logo.jpg',schoolLogo);
 for (const [name,data] of inlinedArt) {
   html=html.replaceAll('assets/'+name+'.svg',data);
 }
