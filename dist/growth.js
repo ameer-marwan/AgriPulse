@@ -29,10 +29,10 @@ export function createPlantGrowth(canvas, scene) {
       drawLayer(layers.right,[.488,.60],right*.88+right*right*.12,right,-.36*(1-right)+Math.sin(seconds*.9+.7)*.008,stemX,stem,fade*Math.min(1,right*8));
     }
     // Finish on the untouched photograph so every dew drop and leaf edge stays crisp.
-    if(t>3.9){context.save();context.globalAlpha=smooth(3.9,4.3,t)*fade;context.drawImage(layers.original,0,0,width,height);context.restore();}
+    if(t>3.9){context.save();context.globalAlpha=.78*smooth(3.9,4.3,t)*fade;context.drawImage(layers.original,0,0,width,height);context.restore();}
     canvas.dataset.growth=String(Math.min(stem,left,right));
   }
-  const ready=context?Promise.all([load('assets/intro-plant.svg'),load('assets/intro-soil.svg')]).then(([plant,soil])=>{
+  const ready=context?Promise.all([load('assets/intro-plant.jpg'),load('assets/intro-soil.jpg')]).then(([plant,soil])=>{
     if(disposed)return false;
     width=canvas.width=1280;height=canvas.height=Math.round(width*plant.naturalHeight/plant.naturalWidth);
     const photo=document.createElement('canvas');photo.width=width;photo.height=height;

@@ -75,7 +75,7 @@ function createEarthRenderer(canvas, fallback) {
       canvas.classList.add('texture-ready');
     } catch { /* The CSS globe remains animated if a browser blocks canvas pixels. */ }
   };
-  image.src = 'assets/earth-texture.svg';
+  image.src = 'assets/earth-texture.jpg';
   return {
     draw(seconds) {
       if (!map || disposed) return;
@@ -125,7 +125,7 @@ export function initIntro({ language = 'en' } = {}) {
     <div class="ap-plant-scene" aria-hidden="true">
       <div class="ap-plant-glow"></div>
       <canvas class="ap-plant-canvas"></canvas>
-      <img class="ap-plant-photo" src="assets/intro-plant.svg" alt="" decoding="async" fetchpriority="high">
+      <img class="ap-plant-photo" src="assets/intro-plant.jpg" alt="" decoding="async" fetchpriority="high">
       <div class="ap-macro-light"></div>
       <div class="ap-plant-particle ap-particle-one"></div><div class="ap-plant-particle ap-particle-two"></div><div class="ap-plant-particle ap-particle-three"></div>
       <span class="ap-plant-note">EARTH OBSERVATIONS → NEW POSSIBILITIES</span>

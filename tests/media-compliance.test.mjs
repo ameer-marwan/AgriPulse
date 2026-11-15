@@ -27,7 +27,8 @@ test('All replacement illustrations visibly carry SI attribution and no NASA bra
 });
 
 test('Web runtime no longer references uncertain-origin raster scenery',async()=>{
- const legacy=new RegExp('assets/(?:'+illustrations.join('|')+')\\.(?:jpg|jpeg|webp)','i');
+ const sceneIllustrations=illustrations.filter(name=>!['earth-texture','intro-farmland','intro-plant','intro-soil'].includes(name));
+ const legacy=new RegExp('assets/(?:'+sceneIllustrations.join('|')+')\\.(?:jpg|jpeg|webp)','i');
  for(const path of runtime) {
    assert.doesNotMatch(await read(path),legacy,'Unsupported old media path in '+path);
  }

@@ -25,6 +25,13 @@ for (const name of illustrationNames) {
 for (const [name,data] of inlinedArt) {
   css=css.replaceAll("assets/"+name+".svg",data);
 }
+const introRasters = new Map([
+  ['earth-texture', await dataUri('dist/assets/earth-texture.jpg','image/jpeg')],
+  ['intro-farmland', await dataUri('dist/assets/intro-farmland.jpg','image/jpeg')],
+  ['intro-plant', await dataUri('dist/assets/intro-plant.jpg','image/jpeg')],
+  ['intro-soil', await dataUri('dist/assets/intro-soil.jpg','image/jpeg')]
+]);
+css=css.replaceAll('assets/intro-farmland.jpg',introRasters.get('intro-farmland'));
 html=html.replace(/<link rel="stylesheet" href="[^"]+"\s*\/?>/g,'')
   .replace('</head>',()=>'<style>'+css.replace(/<\/style/gi,'<\\/style')+'</style></head>');
 html=html.replaceAll('assets/logo-new.png',logo);
@@ -50,6 +57,9 @@ html=html.replace('<script type="module" src="app.js"></script>',()=>'<script>'+
 html=html.replaceAll('assets/logo-new.png',logo);
 for (const [name,data] of inlinedArt) {
   html=html.replaceAll('assets/'+name+'.svg',data);
+}
+for (const [name,data] of introRasters) {
+  html=html.replaceAll('assets/'+name+'.jpg',data);
 }
 if(html.includes('assets/logo-new.png')||/assets\/[\w-]+\.(?:webp|jpg|png|svg)/i.test(html) &&
    !html.includes('assets/dunia-alajial-logo.jpg') && !html.includes('assets/logo-new.png')) {

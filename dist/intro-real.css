@@ -18,7 +18,7 @@
 .agripulse-intro.ap-diving .ap-earth-stage{animation:ap-earth-dive 1.5s cubic-bezier(.68,.02,.86,.3) forwards}
 .ap-earth-canvas{position:absolute;width:100%;height:100%;inset:0;opacity:0;transform:rotate(-15deg);filter:drop-shadow(0 0 5px #77c7ff66)}
 .ap-earth-canvas.texture-ready{opacity:1}
-.ap-earth-fallback{position:absolute;inset:1%;border-radius:50%;overflow:hidden;background:#124968 url('assets/earth-texture.svg') 50% center/auto 100%;box-shadow:inset -65px -8px 80px #000d,inset 7px 2px 11px #98d8ff55;animation:ap-fallback-rotation 12s linear infinite;transform:rotate(-15deg)}
+.ap-earth-fallback{position:absolute;inset:1%;border-radius:50%;overflow:hidden;background:#124968 url('assets/earth-texture.jpg') 50% center/auto 100%;box-shadow:inset -65px -8px 80px #000d,inset 7px 2px 11px #98d8ff55;animation:ap-fallback-rotation 12s linear infinite;transform:rotate(-15deg)}
 .ap-earth-fallback[hidden]{display:none}
 .ap-atmosphere{position:absolute;inset:0;border-radius:50%;box-shadow:0 0 14px 1px #5baffb6e,0 0 75px 14px #5baffb20;opacity:.8}
 .ap-atmosphere:after{content:'';position:absolute;inset:-15%;border-radius:50%;background:radial-gradient(circle,transparent 50%,#2784ba13 56%,transparent 70%)}
@@ -35,7 +35,7 @@
 .ap-orbit-caption p{font-size:clamp(13px,1.2vw,16px);letter-spacing:-.15px;color:#e3ecf1;margin:10px 0 0}
 .ap-diving .ap-orbit-caption{opacity:0;transform:translateY(12px)}
 
-.ap-landscape{position:absolute;z-index:2;inset:-5%;opacity:0;background:linear-gradient(90deg,#07140eee 0,#07170cd4 34%,#0b210b69 74%,#06150e6b),linear-gradient(0deg,#05110ee3,transparent 65%),url('assets/intro-farmland.svg') center 58%/cover no-repeat;transform:scale(1.5);will-change:transform,opacity;transition:filter 1.7s ease}
+.ap-landscape{position:absolute;z-index:2;inset:-5%;opacity:0;background:linear-gradient(90deg,#07140eee 0,#07170cd4 34%,#0b210b69 74%,#06150e6b),linear-gradient(0deg,#05110ee3,transparent 65%),url('assets/intro-farmland.jpg') center 58%/cover no-repeat;transform:scale(1.5);will-change:transform,opacity;transition:filter 1.7s ease}
 .ap-land .ap-landscape{animation:ap-land-approach 2.4s cubic-bezier(.15,.6,.24,1) forwards}
 .ap-land .ap-space{opacity:0}
 .ap-growing .ap-landscape{filter:brightness(.52) saturate(.7)}
