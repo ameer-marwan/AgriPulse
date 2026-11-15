@@ -36,12 +36,19 @@ for (const [name,data] of introRasters) {
   css=css.replaceAll('assets/'+name+'.jpg',data);
 }
 const weatherVisuals = new Map([
-  ['weather-clouds', await dataUri('dist/assets/weather-clouds.png','image/png')],
-  ['weather-rain', await dataUri('dist/assets/weather-rain.png','image/png')],
-  ['weather-night', await dataUri('dist/assets/weather-night.png','image/png')]
+  ['weather-clouds', await dataUri('dist/assets/weather-clouds.jpg','image/jpeg')],
+  ['weather-rain', await dataUri('dist/assets/weather-rain.jpg','image/jpeg')],
+  ['weather-night', await dataUri('dist/assets/weather-night.jpg','image/jpeg')],
+  ['weather-snow', await dataUri('dist/assets/weather-snow.jpg','image/jpeg')],
+  ['weather-hot', await dataUri('dist/assets/weather-hot.jpg','image/jpeg')],
+  ['explore-china-real', await dataUri('dist/assets/explore-china-real.jpg','image/jpeg')],
+  ['explore-ksa-real', await dataUri('dist/assets/explore-ksa-real.jpg','image/jpeg')],
+  ['explore-netherlands-real', await dataUri('dist/assets/explore-netherlands-real.jpg','image/jpeg')],
+  ['explore-kenya-real', await dataUri('dist/assets/explore-kenya-real.jpg','image/jpeg')],
+  ['explore-brazil-real', await dataUri('dist/assets/explore-brazil-real.jpg','image/jpeg')]
 ]);
 for (const [name,data] of weatherVisuals) {
-  css=css.replaceAll('assets/'+name+'.png',data);
+  css=css.replaceAll('assets/'+name+'.jpg',data);
 }
 html=html.replace(/<link rel="stylesheet" href="[^"]+"\s*\/?>/g,'')
   .replace('</head>',()=>'<style>'+css.replace(/<\/style/gi,'<\\/style')+'</style></head>');
@@ -73,7 +80,7 @@ for (const [name,data] of introRasters) {
   html=html.replaceAll('assets/'+name+'.jpg',data);
 }
 for (const [name,data] of weatherVisuals) {
-  html=html.replaceAll('assets/'+name+'.png',data);
+  html=html.replaceAll('assets/'+name+'.jpg',data);
 }
 if(html.includes('assets/logo-new.png')||/assets\/[\w-]+\.(?:webp|jpg|png|svg)/i.test(html) &&
    !html.includes('assets/dunia-alajial-logo.jpg') && !html.includes('assets/logo-new.png')) {

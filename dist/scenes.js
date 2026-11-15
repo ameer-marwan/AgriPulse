@@ -8,6 +8,7 @@ export function weatherScene(current) {
   if ([45, 48].includes(code)) return 'fog';
   if (code === 3) return 'cloudy';
   if ([0, 1, 2].includes(code) && current.isDay === false) return 'night';
+  if ([0, 1, 2].includes(code) && Number(current.temperature) >= 34) return 'hot';
   if (code === 0 || code === 1) return 'clear';
   if (code === 2) return 'partly';
   return 'unknown';
@@ -37,13 +38,13 @@ export function initScenes({ getState }) {
     const current = getState().weather?.current;
     const scene = weatherScene(current);
     weather.dataset.weatherScene = scene;
-    weather.classList.remove('weather-clear','weather-partly','weather-cloudy','weather-rain','weather-storm','weather-fog','weather-snow','weather-night','weather-unknown');
+    weather.classList.remove('weather-clear','weather-partly','weather-cloudy','weather-rain','weather-storm','weather-fog','weather-snow','weather-night','weather-hot','weather-unknown');
     weather.classList.add('weather-' + scene);
     atmosphere.dataset.weatherScene = scene;
     // Scene descriptions come from the existing conditions text, so decoration
     // stays silent for assistive technology and never substitutes for evidence.
     const glyph = document.querySelector('.weather-glyph');
-    if (glyph) glyph.textContent = ({ clear:'☀', partly:'☁', cloudy:'☁', fog:'≋', rain:'☂', snow:'❄', storm:'ϟ', night:'☾', unknown:'◌' })[scene];
+    if (glyph) glyph.textContent = ({ clear:'☀', partly:'☁', cloudy:'☁', fog:'≋', rain:'☂', snow:'❄', storm:'ϟ', night:'☾', hot:'☀', unknown:'◌' })[scene];
   };
   window.addEventListener('fieldshift:updated', update);
   update();

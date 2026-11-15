@@ -123,6 +123,11 @@ body.advanced-farmer[data-route=explore],body.advanced-farmer[data-route=reports
 #view-analytics:before{background-image:linear-gradient(var(--bg) 0 140px,transparent 420px),linear-gradient(90deg,var(--bg) 0%,transparent 42%,var(--bg) 100%),url('assets/field-landscape.jpg')!important}
 .simple-weather-clear,.simple-weather-clouds{background-image:url('assets/intro-farmland.jpg')!important}
 .simple-weather-storm{background-image:linear-gradient(#0a2639aa,#152534b8),url('assets/intro-farmland.jpg')!important}
+.simple-weather-partly,.simple-weather-cloudy,.simple-weather-fog{background-image:url('assets/weather-clouds.jpg')!important}
+.simple-weather-rain,.simple-weather-storm{background-image:linear-gradient(#0a2639aa,#152534b8),url('assets/weather-rain.jpg')!important}
+.simple-weather-snow{background-image:url('assets/weather-snow.jpg')!important}
+.simple-weather-night{background-image:linear-gradient(#07182ce0,#102743a8),url('assets/weather-night.jpg')!important}
+.simple-weather-hot{background-image:linear-gradient(#4d2414cc,#7a371a8c),url('assets/weather-hot.jpg')!important}
 
 /* Explore uses photographic agricultural scenes; country labels describe the learning story, not the photo location. */
 .explore-world-hero{background-image:linear-gradient(90deg,#071c13f1 0%,#10291cd5 45%,#16291c5c 100%),url('assets/intro-farmland.jpg')!important}
