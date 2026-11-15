@@ -6,4 +6,8 @@
 
 /* The overview globe uses the real Earth texture, not the earlier abstract SVG.
    Dragging or using arrow keys still shifts the selected visible longitude. */
-.agri-earth{background-image:linear-gradient(90deg,transparent 35%,#000a 92%),url('assets/earth-texture.jpg');background-repeat:no-repeat;background-size:auto 100%;background-position:50% 50%;animation:agri-earth-float 5s ease-in-out infinite;box-shadow:inset -32px -22px 45px #00111dcc,inset 17px 12px 28px #b7fbff24,0 0 18px #28b9dc66,0 0 65px #1696bb3d}
+.agri-earth{width:220px;height:220px;background-image:url('assets/earth-texture.jpg');background-repeat:no-repeat;background-size:auto 108%;background-position:50% 50%;animation:agri-earth-float 5s ease-in-out infinite;box-shadow:inset -18px -12px 24px #ffffff1f,inset -52px -26px 60px #020711db,0 0 10px #87dfff9e,0 0 40px #1fafd950}
+.agri-earth:before{background:radial-gradient(circle at 31% 22%,#fff9 0 1.5%,#d9f5ff30 13%,transparent 34%),radial-gradient(circle at 39% 35%,transparent 37%,#06132358 61%,#020710d9 100%);box-shadow:inset -17px -8px 28px #000b}
+.agri-earth:after{border-color:#beeaff9c;box-shadow:inset 0 0 19px #a8ebff45,0 0 12px #4fd3ff86,0 0 30px #1fafd94c}
+.agri-earth-rings{width:255px;height:255px;opacity:.72}
+@media(max-width:1200px){.agri-earth{width:185px;height:185px}.agri-earth-rings{width:220px;height:220px}}
