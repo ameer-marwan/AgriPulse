@@ -11,8 +11,7 @@ const scriptSafe=s=>s.replace(/<\/script/gi,'<\\/script');
 let html=await read('dist/index.html');
 const logo=await dataUri('dist/assets/logo-new.png','image/png');
 let css=(await Promise.all(['dist/vendor/maplibre-gl.css','dist/styles.css','dist/planning.css','dist/scenes.css','dist/i18n.css','dist/intro.css','dist/intro-real.css','dist/accounts.css','dist/field-controls.css','dist/polish.css'].map(read))).join('\n');
-// Only original, visibly SI-watermarked SVG illustrations are packaged as field scenes.
-// The previous unverified JPG/WEBP landscape assets are no longer served or bundled.
+// Package only the reviewed local visuals used by the site.
 const illustrationNames=[
   'explore-china','explore-ksa','explore-netherlands','explore-kenya','explore-brazil',
   'field-landscape','intro-farmland','intro-plant','intro-soil','intro-space',
@@ -30,7 +29,8 @@ const introRasters = new Map([
   ['earth-texture', await dataUri('dist/assets/earth-texture.jpg','image/jpeg')],
   ['intro-farmland', await dataUri('dist/assets/intro-farmland.jpg','image/jpeg')],
   ['intro-plant', await dataUri('dist/assets/intro-plant.jpg','image/jpeg')],
-  ['intro-soil', await dataUri('dist/assets/intro-soil.jpg','image/jpeg')]
+  ['intro-soil', await dataUri('dist/assets/intro-soil.jpg','image/jpeg')],
+  ['irrigation-water', await dataUri('dist/assets/irrigation-water.jpg','image/jpeg')]
 ]);
 for (const [name,data] of introRasters) {
   css=css.replaceAll('assets/'+name+'.jpg',data);
