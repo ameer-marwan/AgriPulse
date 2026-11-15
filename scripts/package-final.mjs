@@ -26,12 +26,15 @@ for (const [name,data] of inlinedArt) {
   css=css.replaceAll("assets/"+name+".svg",data);
 }
 const introRasters = new Map([
+  ['field-landscape', await dataUri('dist/assets/field-landscape.jpg','image/jpeg')],
   ['earth-texture', await dataUri('dist/assets/earth-texture.jpg','image/jpeg')],
   ['intro-farmland', await dataUri('dist/assets/intro-farmland.jpg','image/jpeg')],
   ['intro-plant', await dataUri('dist/assets/intro-plant.jpg','image/jpeg')],
   ['intro-soil', await dataUri('dist/assets/intro-soil.jpg','image/jpeg')]
 ]);
-css=css.replaceAll('assets/intro-farmland.jpg',introRasters.get('intro-farmland'));
+for (const [name,data] of introRasters) {
+  css=css.replaceAll('assets/'+name+'.jpg',data);
+}
 html=html.replace(/<link rel="stylesheet" href="[^"]+"\s*\/?>/g,'')
   .replace('</head>',()=>'<style>'+css.replace(/<\/style/gi,'<\\/style')+'</style></head>');
 html=html.replaceAll('assets/logo-new.png',logo);
